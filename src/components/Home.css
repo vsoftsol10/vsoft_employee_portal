@@ -1,0 +1,70 @@
+/* Reset default margin and padding for body */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0; /* Optional: background color for contrast */
+  }
+  
+  /* Style for the card link to remove default styling */
+  .card-link {
+    text-decoration: none; /* Remove default link styling */
+  }
+  
+  /* Style for the card */
+  .card {
+    min-height: 280px;
+    width: 320px;
+    margin: 1rem;
+    position: relative; /* Position relative for title positioning */
+    overflow: hidden; /* Hide overflow for smooth transitions */
+    transition: transform 0.3s ease; /* Smooth zoom effect */
+  }
+  
+  /* Zoom out effect on hover and move the card up */
+  .card:hover {
+    transform: scale(0.9) translateY(-10px); /* Move up more and scale down */
+  }
+  
+  /* Ensure the card image fits its container */
+  .card img {
+    width: 100%;
+    height: auto;
+  }
+  
+  /* Container for cards */
+  .cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Center cards horizontally */
+    align-items: center; /* Center cards vertically if needed */
+    gap: 1rem; /* Space between cards */
+  }
+  
+  /* Style for the card content container */
+  .card-content {
+    position: absolute; /* Position absolute within the card */
+    bottom: 0; /* Start from the bottom */
+    left: 50%;
+    transform: translateX(-50%) translateY(0); /* Center horizontally and start from bottom */
+    color: #fff; /* White color by default */
+    transition: transform 0.3s ease, color 0.3s ease, font-size 0.3s ease; /* Smooth transition */
+    text-align: center; /* Center text alignment */
+    font-size: 1.2rem; /* Default font size */
+  }
+  
+  /* Hide title for specific cards */
+  .hide-title {
+    display: none; /* Hide title */
+  }
+  
+  /* Change font color, move title, and increase font size on hover */
+  .card:hover .card-content {
+    transform: translate(-50%, -50%) scale(1.1); /* Move to middle and scale up */
+    color: #e6e6fa; /* Lavender color on hover */
+    font-size: 1.5rem; /* Increase font size on hover */
+  }
+  

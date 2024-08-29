@@ -1,0 +1,42 @@
+/* Leave.css */
+
+/* Style for the card container */
+.leave-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the cards horizontally */
+    justify-content: center; /* Center the cards vertically */
+    min-height: 100vh; /* Ensure the container takes full height of the viewport */
+    padding: 1rem; /* Add some padding */
+    background-color: #f0f0f0; /* Light background color for the page */
+  }
+  
+  /* Style for the card */
+  .card {
+    width: 100%; /* Ensure the card takes the full width of its container */
+    max-width: 600px; /* Maximum width of the card */
+    height: 50vh; /* Set the height to 50% of the viewport height */
+    margin: 1rem 0; /* Space above and below the card */
+    background-color: #e0e0e0; /* Grey background for the card */
+    padding: 1rem; /* Add padding inside the card */
+    border-radius: 8px; /* Optional: rounded corners for the card */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Optional: subtle shadow for the card */
+    transition: transform 0.3s ease; /* Smooth zoom effect */
+    display: flex; /* Use flex to center content inside the card */
+    flex-direction: column; /* Align items in a column */
+    justify-content: center; /* Center content vertically */
+  }
+  
+  /* Hover effect for the card */
+  .card:hover {
+    transform: scale(1.02); /* Slight zoom on hover */
+  }
+  
+  /* Style for the full-width section */
+  .full-width-section {
+    width: 100%;
+    padding: 1rem;
+    background-color: #eee; /* Light grey background */
+    text-align: center; /* Center text */
+  }
+  
