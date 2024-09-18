@@ -1,34 +1,36 @@
 {
-  "name": "my-app",
+  "name": "my-app",  // Decide if you want "my-app" or "tracker"
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@fortawesome/free-solid-svg-icons": "^6.6.0",
-    "@fortawesome/react-fontawesome": "^0.2.2",
-    "@mui/icons-material": "^6.0.2",
-    "@mui/material": "^6.0.2",
-    "@progress/kendo-react-buttons": "^8.3.0",
-    "@progress/kendo-react-indicators": "^8.3.0",
-    "@progress/kendo-react-layout": "^8.3.0",
-    "@progress/kendo-react-popup": "^8.3.0",
-    "@progress/kendo-svg-icons": "^3.1.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",  // Keep this if needed
+    "@fortawesome/react-fontawesome": "^0.2.2",     // Keep this if needed
+    "@mui/icons-material": "^5.16.7",               // Choose one version
+    "@mui/material": "^5.16.7",                      // Choose one version
+    "@mui/joy": "^5.0.0-beta.48",                    // Keep this if needed
+    "@progress/kendo-react-buttons": "^8.3.0",      // Keep this if needed
+    "@progress/kendo-react-indicators": "^8.3.0",   // Keep this if needed
+    "@progress/kendo-react-layout": "^8.3.0",       // Keep this if needed
+    "@progress/kendo-react-popup": "^8.3.0",        // Keep this if needed
+    "@progress/kendo-svg-icons": "^3.1.0",           // Keep this if needed
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.7.7",
-    "bcryptjs": "^2.4.3",
-    "file-saver": "^2.0.5",
-    "firebase": "^10.13.1",
-    "flowbite-react": "^0.10.1",
+    "axios": "^1.7.7",                             // Keep this if needed
+    "bcryptjs": "^2.4.3",                          // Keep this if needed
+    "file-saver": "^2.0.5",                        // Keep this if needed
+    "firebase": "^10.13.1",                        // Keep this if needed
+    "flowbite-react": "^0.10.1",                   // Keep this if needed
     "react": "^18.3.1",
     "react-calendar": "^5.0.0",
-    "react-datepicker": "^7.3.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0",
     "react-router-dom": "^6.26.1",
     "react-scripts": "5.0.1",
+    "react-slick": "^0.30.2",                      // Choose one version
+    "slick-carousel": "^1.8.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
