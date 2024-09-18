@@ -1,0 +1,207 @@
+@import url("https://fonts.googleapis.com/css?family=Lato:300,400,700");
+
+*,
+html {
+    padding: 0;
+    margin: 0;
+    font-family: "Lato", sans-serif;
+}
+
+.box-wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+    gap: 10px; /* Space between cards */
+    justify-content: center;
+    margin: 50px 0 0; /* Margin at the top */
+    margin-left: 250px; /* Margin for alignment */
+    background-color: #d082e659;
+}
+
+.shape-box {
+    position: relative;
+    z-index: 1;
+    max-width: 300px; /* Card width */
+    height: 220px; /* Card height */
+    box-shadow: 0 6px 30px 0 rgba(0, 0, 0, .12);
+    overflow: hidden;
+    width: 50%; /* Full width within its container */
+    margin: 0 auto; /* Center align cards */
+    text-align: center; /* Center text */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.shape-box_half {
+    overflow: hidden;
+    text-align: left;
+}
+
+.shape-box_half:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: skewY(53.5deg);
+    transform-origin: top left;
+    transition: transform .4s;
+    background: #fff;
+    z-index: 1;
+}
+
+.shape-box>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bg-black {
+    background-color: #000;
+}
+
+.shape-box_half figcaption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 20px 20px; /* Adjust padding */
+    transition: transform .4s;
+    transform: translateY(100%);
+    z-index: 3;
+}
+
+.shape-box_half figcaption .show-cont {
+    position: absolute;
+    bottom: calc(100% + 20px); /* Adjust bottom position */
+    left: 20px; /* Adjust left padding */
+    right: 20px; /* Adjust right padding */
+    transition: bottom .4s;
+}
+
+.card-no {
+    font-size: 24px; /* Font size */
+    color: #ffc107;
+    padding: 0;
+    margin: 5px 0; /* Margin */
+}
+
+.card-main-title {
+    margin-top: 4px; /* Margin */
+    font-weight: 700;
+    font-size: 18px; /* Font size */
+    text-transform: uppercase;
+    color: #292b2c;
+}
+
+.card-content {
+    color: #9f9f9f;
+    margin-top: 10px; /* Margin */
+    line-height: 20px; /* Line height */
+    font-size: 14px; /* Font size */
+}
+
+.check-in-btn, .leave-btn, .task-btn {
+    border: 2px solid #db3236;
+    font-size: 12px; /* Font size */
+    cursor: pointer;
+    padding: 8px 16px; /* Padding */
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 600;
+    position: relative;
+    transition: all 0.3s;
+    border-radius: 2px;
+    margin-top: 15px; /* Margin */
+    text-decoration: none;
+    color: #fff;
+    background: #db3236;
+}
+
+.check-in-btn {
+    background: #28a745; /* Green background for check-in */
+}
+
+.check-in-btn:hover {
+    background: #218838; /* Darker green for hover */
+}
+
+.leave-btn {
+    background: #007bff; /* Blue background for leave */
+}
+
+.leave-btn:hover {
+    background: #0056b3; /* Darker blue for hover */
+}
+
+.task-btn {
+    background: #dc3545; /* Red background for tasks */
+}
+
+.task-btn:hover {
+    background: #c82333; /* Darker red for hover */
+}
+
+.shape-box_half>.after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fdd744;
+    opacity: 0;
+    transition: opacity .4s;
+}
+
+/* On hover */
+.shape-box_half:hover:before {
+    transform: skewY(20deg);
+}
+
+.shape-box_half:hover figcaption {
+    transform: translateY(0);
+}
+
+.shape-box_half:hover figcaption .show-cont {
+    bottom: 100%;
+}
+
+.shape-box_half:hover>.after {
+    opacity: 1;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .box-wrapper {
+        margin-left: 0; /* Remove left margin for smaller screens */
+        grid-template-columns: repeat(2, 1fr); /* Keep 2 cards per row */
+        gap: 10px; /* Maintain reduced space */
+    }
+}
+
+@media (max-width: 992px) {
+    .box-wrapper {
+        grid-template-columns: repeat(2, 1fr); /* 2 cards per row on tablets */
+    }
+}
+
+@media (max-width: 768px) {
+    .box-wrapper {
+        grid-template-columns: 1fr; /* 1 card per row on mobile devices */
+    }
+
+    .shape-box {
+        max-width: 100%; /* Full width for cards on mobile devices */
+    }
+
+    .card-content, .card-main-title, .card-no {
+        font-size: 14px; /* Adjust font sizes */
+    }
+
+    .check-in-btn, .leave-btn, .task-btn {
+        font-size: 10px; /* Adjust button font size */
+        padding: 6px 12px; /* Adjust button padding */
+    }
+}

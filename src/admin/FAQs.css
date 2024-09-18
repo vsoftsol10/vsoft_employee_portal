@@ -1,0 +1,65 @@
+.faqs {
+  padding: 20px;
+  margin-left: 250px; /* Required left margin */
+  margin-top: 50px;   /* Required top margin */
+  margin-right: 10px; /* Optional right margin */
+  margin-bottom: 10px; /* Optional bottom margin */
+  box-sizing: border-box;
+  background-color: #f4f4f9; /* Light background color for contrast */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.faqs h1 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.faqs p {
+  font-size: 18px;
+  color: #666;
+  text-align: center;
+  line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+  .faqs {
+      margin-left: 100px; /* Reduce margin for smaller screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .faqs {
+      margin-left: 10px; /* Further reduce left margin for smaller screens */
+      margin-top: 20px; /* Reduce top margin for smaller screens */
+  }
+
+  .faqs h1 {
+      font-size: 24px; /* Smaller font size for headings */
+  }
+
+  .faqs p {
+      font-size: 16px; /* Smaller font size for paragraphs */
+  }
+}
+
+@media (max-width: 480px) {
+  .faqs {
+      margin-left: 0;
+      margin-right: 0;
+      margin-top: 10px; /* Further reduced top margin for mobile */
+  }
+
+  .faqs h1 {
+      font-size: 20px; /* Even smaller font size for mobile */
+  }
+
+  .faqs p {
+      font-size: 14px; /* Even smaller font size for mobile */
+  }
+}

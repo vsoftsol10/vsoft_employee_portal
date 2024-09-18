@@ -1,0 +1,99 @@
+/* FAQs.css */
+.faqs-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 100px); /* Adjust height to accommodate the top margin */
+  max-width: 800px;
+  margin: 100px auto 0; /* Center container with top margin */
+  font-family: 'Roboto', sans-serif; /* Updated to match chat design */
+}
+
+.chat-box {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 10px; /* Slightly more rounded corners */
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px; /* Increased padding for a spacious feel */
+  background-color: #f9f9f9; /* Softer background for messages */
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 12px; /* Slightly increased padding */
+  border-radius: 10px; /* Match the chat design */
+  max-width: 70%;
+  line-height: 1.4; /* Better line spacing */
+}
+
+.message.user {
+  background-color: #007bff; /* User message color */
+  color: white;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.message.admin {
+  background-color: #e0e0e0; /* Admin message color */
+  color: #333; /* Darker text for readability */
+  align-self: flex-start;
+}
+
+.chat-input {
+  display: flex;
+  padding: 12px;
+  background-color: white;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 12px; /* Adjust padding for comfort */
+  border: 1px solid #ddd;
+  border-radius: 25px; /* Rounded input field */
+  margin-right: 10px; /* Space between input and button */
+  font-size: 1rem; /* Consistent font size */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+}
+
+.chat-input button {
+  background-color: transparent; /* Transparent background */
+  color: #007bff; /* Color for the icon */
+  border: none; /* Remove border */
+  cursor: pointer;
+  font-size: 1.5rem; /* Adjust font size */
+  padding: 0; /* No padding */
+}
+
+.chat-input button:hover {
+  background-color: rgba(0, 123, 255, 0.1); /* Light hover effect */
+  border-radius: 50%; /* Rounded button on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .faqs-container {
+      height: calc(100vh - 80px); /* Adjust height for smaller screens */
+      margin: 80px auto 0; /* Adjust margin for smaller screens */
+  }
+
+  .message {
+      max-width: 90%; /* Allow messages to take more width */
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-input input {
+      padding: 10px; /* Adjust input padding */
+  }
+
+  .chat-input button {
+      font-size: 1.5rem; /* Increase icon size */
+  }
+}

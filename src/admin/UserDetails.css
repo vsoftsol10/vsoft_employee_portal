@@ -1,0 +1,26 @@
+/* User details page styles */
+.user-details {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .details-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 20px auto;
+  }
+  
+  .details-card h3 {
+    font-size: 1.5rem;
+    color: #007bff;
+  }
+  
+  .details-card p {
+    font-size: 1rem;
+    color: #555;
+  }
+  
