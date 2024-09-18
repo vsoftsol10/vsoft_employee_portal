@@ -59,7 +59,7 @@ const App = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loader"></div>;
   }
 
   const ProtectedRoute = ({ children, requiredRole }) => {

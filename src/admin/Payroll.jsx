@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { collection, addDoc, doc, Timestamp } from 'firebase/firestore'; // Add Timestamp here
-import { getAuth } from 'firebase/auth'; // Import Firebase Authentication
-import { firestore } from '../firebaseConfig'; // Firebase config
+import { getAuth } from 'firebase/auth';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage'; // Firebase Storage imports
+import { doc, collection, addDoc, Timestamp } from 'firebase/firestore'; // Firestore imports
+import { firestore, storage } from '../firebaseConfig'; // Import Firestore and Storage from your Firebase config
 import './Payroll.css'; // Import the CSS file for styling
 
 const Payroll = () => {
@@ -41,17 +42,24 @@ const Payroll = () => {
         alert('No user is logged in.');
         return;
       }
-      const documentId = user.uid; // Use the authenticated user's ID
+      const userId = user.uid; // Use the authenticated user's ID
 
-      // Uploading data to Firestore
+      // Uploading data to Firebase Storage
+      const storageRef = ref(storage, `payslips/${userId}/${pdfFile.name}`);
+      await uploadString(storageRef, base64File, 'data_url');
+
+      // Get the download URL of the uploaded file
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Uploading metadata to Firestore
       const payslipData = {
-        file: base64File, // Base64 encoded PDF file
+        fileURL: downloadURL, // URL to the file in Firebase Storage
         createdAt: Timestamp.now(), // Firestore timestamp
-        employeeId: documentId, // Use the authenticated user's ID
+        employeeId: userId, // Use the authenticated user's ID
       };
 
-      // Reference to Firestore collection (with odd number of segments)
-      const docRef = doc(firestore, 'payrollData', documentId); // Add document under 'payrollData'
+      // Reference to Firestore collection
+      const docRef = doc(firestore, 'payrollData', userId); // Add document under 'payrollData'
       const payslipsRef = collection(docRef, 'payslips'); // Subcollection 'payslips'
       await addDoc(payslipsRef, payslipData);
 
@@ -77,3 +85,4 @@ const Payroll = () => {
 };
 
 export default Payroll;
+

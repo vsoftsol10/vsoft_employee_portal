@@ -14,24 +14,36 @@
 }
 
 .calendar {
-  width: 100%; /* Make calendar take full width */
-  max-width: 900px; /* Keep the maximum width */
+  width: 100%;
+  max-width: 900px;
   padding: 10px;
-  background-color: #ffdb39e0;
+  background-color: #ffdb39d3;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(181, 65, 185, 0.658);
 }
 
-.event-manager {
-  margin-top: 20px;
-  text-align: center;
-  width: 100%; /* Full width */
-  max-width: 600px; /* Max width for better control */
+.day-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
-.datepicker, input[type="text"], button {
-  width: 100%; /* Make inputs take full width */
-  max-width: 300px; /* Maintain max width */
+.green-day {
+  background-color: #4caf50;
+  color: white;
+  border-radius: 50%;
+}
+
+.red-day {
+  background-color: #f44336;
+  color: white;
+  border-radius: 50%;
+}
+
+.day-content.red-day {
+  background-color: #f44336; /* For holidays */
 }
 
 /* Responsive Design */
@@ -75,7 +87,7 @@
 /* Specific styles for day states */
 .green-day {
   background-color: #4caf50;
-  color: white;
+  color: #ffffff;
   border-radius: 50%;
 }
 

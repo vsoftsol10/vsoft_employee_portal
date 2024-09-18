@@ -14,6 +14,7 @@ const Attendance = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [isToastOpen, setToastOpen] = useState(false);
   const [userId, setUserId] = useState('');
+  const [holidays, setHolidays] = useState([]); // State for holidays
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -56,7 +57,22 @@ const Attendance = () => {
     };
     fetchEvents();
   }, [userId]);
-  
+
+  useEffect(() => {
+    const fetchHolidays = async () => {
+      const db = getFirestore();
+      const querySnapshot = await getDocs(collection(db, 'holidays')); // Adjust path if needed
+      let holidayList = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const holidayDate = new Date(data.date.seconds * 1000).toLocaleDateString('en-GB'); // Adjust based on your date format
+        holidayList.push(holidayDate);
+      });
+      setHolidays(holidayList);
+    };
+    fetchHolidays();
+  }, []);
+
   const handleDateChange = (newDate) => {
     setDate(newDate);
   };
@@ -91,6 +107,7 @@ const Attendance = () => {
   const renderDayContent = ({ date }) => {
     const formattedDate = date.toLocaleDateString('en-GB'); // Format to local time zone
     const event = events.find((e) => e.date === formattedDate);
+    const isHoliday = holidays.includes(formattedDate); // Check if it's a holiday
 
     if (event) {
       const isOverTime = event.duration >= 8.5; // Adjusted condition
@@ -100,6 +117,15 @@ const Attendance = () => {
           title={`Duration: ${event.duration.toFixed(2)} hours`}
         >
           {isOverTime ? '✅' : '❌'}
+        </div>
+      );
+    } else if (isHoliday) {
+      return (
+        <div
+          className="day-content red-day"
+          title="Holiday"
+        >
+          🏆
         </div>
       );
     }

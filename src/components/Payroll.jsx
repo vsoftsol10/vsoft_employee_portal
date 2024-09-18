@@ -1,8 +1,8 @@
-// src/components/Payroll.jsx
 import React, { useState } from 'react';
-import { firestore, storage } from '../firebaseConfig'; // Import your Firebase services
+import { getAuth } from 'firebase/auth';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { saveAs } from 'file-saver'; // Make sure file-saver is installed
+import { storage } from '../firebaseConfig'; // Import your Firebase services
 
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June', 
@@ -25,17 +25,35 @@ const Payroll = () => {
 
   const handleDownload = async () => {
     try {
-      const uid = '<USER_ID>'; // Replace with actual user ID
-      const filePath = `payrollData/${uid}/payslips/${selectedMonth}-${selectedYear}.pdf`;
+      const auth = getAuth();
+      const user = auth.currentUser;
+  
+      if (!user) {
+        alert('User not authenticated');
+        return;
+      }
+  
+      const uid = user.uid;
+      const filePath = `payslips/${uid}/Price-List.pdf`;
       const fileRef = ref(storage, filePath);
   
+      // Log URL for debugging
       const url = await getDownloadURL(fileRef);
+      console.log('File URL:', url);
+  
+      // Fetch the file
       const response = await fetch(url);
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      // Convert response to Blob and download
       const blob = await response.blob();
-      saveAs(blob, `${selectedMonth}-${selectedYear}-payslip.pdf`);
+      saveAs(blob, 'Price-List.pdf');
     } catch (error) {
       console.error('Error fetching document:', error);
-      alert('Error fetching document');
+      alert(`Error fetching document: ${error.message}`);
     }
   };
   
