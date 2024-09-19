@@ -1,0 +1,95 @@
+/* TasksAndGroups.css */
+.tasks-groups-container {
+  margin-left: 250px;
+  padding: 20px;
+}
+
+.create-group-btn, .create-task-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.create-group-btn:hover, .create-task-btn:hover {
+  background-color: #0056b3;
+}
+
+.group-form, .task-form {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.group-form h2, .task-form h4 {
+  margin-top: 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input[type="text"], .form-group input[type="date"], .form-group textarea, .form-group select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}
+
+.form-group textarea {
+  height: 80px;
+  resize: vertical;
+}
+
+.reviews {
+  display: flex;
+  align-items: center;
+}
+
+.star {
+  font-size: 20px;
+  color: gold;
+}
+
+.star.filled {
+  color: orange;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table, th, td {
+  border: 1px solid #dee2e6;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+  .tasks-groups-container {
+    margin-left: 0;
+  }
+
+  .form-group input[type="text"], .form-group input[type="date"], .form-group textarea, .form-group select {
+    width: calc(100% - 20px);
+  }
+}

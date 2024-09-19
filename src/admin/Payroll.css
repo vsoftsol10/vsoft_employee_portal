@@ -1,138 +1,51 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
-
-.payroll {
+.payroll-page {
     padding: 20px;
-    font-family: "Roboto", sans-serif;
-    margin-left: 250px; /* Margin left for alignment */
-    margin-top: 50px; /* Margin top for spacing */
-    background-color:  #872d8fd5;/* Light background color for the entire page */
-}
-
-.payslip-list,
-.salary-breakdown,
-.year-to-date-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #d082e6;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .payroll-form {
+    width: 100%;
+    max-width: 600px;
+    background-color: #ffdb39;
     border-radius: 10px;
     padding: 20px;
-    background-color: #ffffff;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.payslip-list:hover,
-.salary-breakdown:hover,
-.year-to-date-summary:hover {
-    transform: scale(1.02);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-h2 {
-    margin-top: 0;
-    color: #333;
-    font-size: 1.75rem; /* Larger font size for headings */
-    border-bottom: 3px solid #872d8fd5;; /* Bottom border for emphasis */
-    padding-bottom: 10px;
-    font-weight: 600; /* Bold headings */
-}
-
-.payslip-list ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.payslip-list li {
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.125rem;
-    color: #555;
-}
-
-.payslip-list button {
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.payslip-list button:hover {
-    background-color: #218838;
-    transform: scale(1.05);
-}
-
-.salary-breakdown table,
-.year-to-date-summary table {
+    box-shadow: 0 4px 10px rgba(181, 65, 185, 0.658);
+  }
+  
+  .payroll-form div {
+    margin-bottom: 15px;
+  }
+  
+  .payroll-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .payroll-form input,
+  .payroll-form select {
     width: 100%;
-    border-collapse: collapse;
-}
-
-.salary-breakdown td,
-.year-to-date-summary td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: right;
-    font-size: 1.125rem; /* Larger font size for better readability */
-}
-
-.salary-breakdown tr:nth-child(even),
-.year-to-date-summary tr:nth-child(even) {
-    background-color: #f9f9f9; /* Slightly different background for even rows */
-}
-
-.salary-breakdown td:first-child,
-.year-to-date-summary td:first-child {
-    font-weight: 500;
-    text-align: left; /* Align labels to the left */
-}
-
-.salary-breakdown td:last-child,
-.year-to-date-summary td:last-child {
-    text-align: right; /* Align values to the right */
-    color: #333; /* Darker color for better readability */
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .payroll {
-        margin-left: 20px; /* Reduced margin left for smaller screens */
-    }
-}
-
-@media (max-width: 768px) {
-    .payroll {
-        margin-left: 10px; /* Further reduced margin left */
-        margin-top: 20px; /* Reduced margin top */
-    }
-
-    .payslip-list button {
-        padding: 8px 16px; /* Adjust button size */
-        font-size: 0.875rem; /* Smaller font size for smaller screens */
-    }
-
-    .salary-breakdown td,
-    .year-to-date-summary td {
-        font-size: 0.875rem; /* Smaller font size for smaller screens */
-        padding: 8px; /* Adjust padding */
-    }
-}
-.payroll td {
-  position: relative;
-}
-
-.rupee-symbol {
-  position: absolute;
-  left: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 16px;
-}
-
-input[type="text"] {
-  padding-left: 20px; /* To make space for the rupee symbol */
-}
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .payroll-form button {
+    padding: 10px 20px;
+    background-color: #4caf50; /* Stylish button color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .payroll-form button:hover {
+    background-color: #45a049;
+  }
+  

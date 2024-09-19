@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 import './ChangePassword.css'; // Import CSS file for styling
 
 const ChangePassword = () => {
@@ -8,21 +10,31 @@ const ChangePassword = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
-    
-    // Basic validation logic
+
     if (newPassword !== confirmPassword) {
       setErrorMessage('New password and confirm password do not match.');
       setSuccessMessage('');
       return;
     }
 
-    // Logic to change the password (API call or Firebase authentication)
-    // For example, call your backend or authentication system here.
+    if (auth.currentUser) {
+      const credential = EmailAuthProvider.credential(
+        auth.currentUser.email,
+        oldPassword
+      );
 
-    setSuccessMessage('Password successfully changed!');
-    setErrorMessage('');
+      try {
+        await reauthenticateWithCredential(auth.currentUser, credential);
+        await updatePassword(auth.currentUser, newPassword);
+        setSuccessMessage('Password successfully changed!');
+        setErrorMessage('');
+      } catch (error) {
+        setErrorMessage('Error changing password. Check your old password.');
+        console.error('Password change error:', error);
+      }
+    }
   };
 
   return (

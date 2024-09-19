@@ -1,0 +1,133 @@
+/* Leavetracker.css */
+.leavetracker-container {
+  margin-left: 250px;
+  padding: 20px;
+  max-width: 100%;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.tabs button.active {
+  background-color: #0056b3;
+}
+
+.content {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.neon-button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 0 8px #28a745, 0 0 15px #28a745;
+  transition: 0.3s;
+}
+
+.neon-button:hover {
+  background-color: #218838;
+  box-shadow: 0 0 10px #218838, 0 0 20px #218838;
+}
+
+.neon-button.reject {
+  background-color: #dc3545;
+  box-shadow: 0 0 8px #dc3545, 0 0 15px #dc3545;
+}
+
+.neon-button.reject:hover {
+  background-color: #c82333;
+  box-shadow: 0 0 10px #c82333, 0 0 20px #c82333;
+}
+
+.request-details {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.leave-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.leave-rule {
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.leave-rule h3 {
+  margin-bottom: 10px;
+}
+
+.leave-rule input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .leavetracker-container {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .request-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}

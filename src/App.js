@@ -4,11 +4,11 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebaseConfig'; // Import Firebase config
 
 // User components
-import Sidebar from './components/Sidebar';
+import UserSidebar from './components/Sidebar'; // User Sidebar
 import Login from './components/Login';
 import Register from './components/Register';
 import UserDashboard from './components/Dashboard';
-import Attendance from './components/Attendance';
+import UserAttendance from './components/Attendance'; // Renamed to UserAttendance
 import LeaveTracker from './components/LeaveTracker';
 import UserPayroll from './components/Payroll';
 import Tasks from './components/Tasks';
@@ -21,16 +21,16 @@ import Profile from './components/Profile';
 import ChangePassword from './components/ChangePassword';
 
 // Admin components
+import AdminSidebar from './admin/AdminSidebar'; // Admin Sidebar
 import AdminDashboard from './admin/Dashboard';
-import AdminTeams from './admin/Teams';
-import AdminTasks from './admin/Tasks';
-import AdminTeamAssignment from './admin/TeamAssignment';
+import AdminTasksAndGroups from './admin/TasksAndGroups';
+import AdminFiles from './admin/Files'; // Import AdminFiles component
 import AdminReviews from './admin/Reviews';
 import AdminPayroll from './admin/Payroll';
 import AdminFAQs from './admin/FAQs';
-import AdminLeaveRequests from './admin/LeaveRequests';
+import AdminLeaveTracker from './admin/Leavetracker'; // Renamed to AdminLeaveTracker
 import Directory from './admin/Directory';
-import PersonDetails from './admin/PersonDetails';
+import AdminAttendance from './admin/Attendance'; // Renamed to AdminAttendance
 import UserDetails from './admin/UserDetails'; // UserDetails page for users
 import AddEmployee from './admin/AddEmployee'; // Import AddEmployee component
 
@@ -85,7 +85,7 @@ const App = () => {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <UserDashboard />
               </ProtectedRoute>
             }
@@ -94,8 +94,8 @@ const App = () => {
             path="/attendance"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
-                <Attendance />
+                <UserSidebar />
+                <UserAttendance />
               </ProtectedRoute>
             }
           />
@@ -103,7 +103,7 @@ const App = () => {
             path="/leave-tracker"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <LeaveTracker />
               </ProtectedRoute>
             }
@@ -112,7 +112,7 @@ const App = () => {
             path="/payroll"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <UserPayroll />
               </ProtectedRoute>
             }
@@ -121,7 +121,7 @@ const App = () => {
             path="/files"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <Files />
               </ProtectedRoute>
             }
@@ -130,7 +130,7 @@ const App = () => {
             path="/tasks"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <Tasks />
               </ProtectedRoute>
             }
@@ -139,7 +139,7 @@ const App = () => {
             path="/message"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <Message />
               </ProtectedRoute>
             }
@@ -148,7 +148,7 @@ const App = () => {
             path="/faqs"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <FAQs />
               </ProtectedRoute>
             }
@@ -157,7 +157,7 @@ const App = () => {
             path="/notification"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <Notification />
               </ProtectedRoute>
             }
@@ -166,7 +166,7 @@ const App = () => {
             path="/profile"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <Profile />
               </ProtectedRoute>
             }
@@ -175,7 +175,7 @@ const App = () => {
             path="/change-password"
             element={
               <ProtectedRoute>
-                <Sidebar role={userRole} />
+                <UserSidebar />
                 <ChangePassword />
               </ProtectedRoute>
             }
@@ -194,15 +194,8 @@ const App = () => {
             path="/admin/dashboard"
             element={
               <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
                 <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/teams"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminTeams />
               </ProtectedRoute>
             }
           />
@@ -210,15 +203,17 @@ const App = () => {
             path="/admin/tasks"
             element={
               <ProtectedRoute requiredRole="admin">
-                <AdminTasks />
+                <AdminSidebar />
+                <AdminTasksAndGroups />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/admin/team-assignment"
+            path="/admin/files"
             element={
               <ProtectedRoute requiredRole="admin">
-                <AdminTeamAssignment />
+                <AdminSidebar />
+                <AdminFiles />
               </ProtectedRoute>
             }
           />
@@ -226,6 +221,7 @@ const App = () => {
             path="/admin/reviews"
             element={
               <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
                 <AdminReviews />
               </ProtectedRoute>
             }
@@ -234,6 +230,7 @@ const App = () => {
             path="/admin/payroll"
             element={
               <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
                 <AdminPayroll />
               </ProtectedRoute>
             }
@@ -242,15 +239,17 @@ const App = () => {
             path="/admin/faqs"
             element={
               <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
                 <AdminFAQs />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/admin/leave-requests"
+            path="/admin/leavetracker"
             element={
               <ProtectedRoute requiredRole="admin">
-                <AdminLeaveRequests />
+                <AdminSidebar />
+                <AdminLeaveTracker />
               </ProtectedRoute>
             }
           />
@@ -258,15 +257,17 @@ const App = () => {
             path="/admin/directory"
             element={
               <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
                 <Directory />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/admin/person-details"
+            path="/admin/attendance"
             element={
               <ProtectedRoute requiredRole="admin">
-                <PersonDetails />
+                <AdminSidebar />
+                <AdminAttendance />
               </ProtectedRoute>
             }
           />
@@ -274,6 +275,7 @@ const App = () => {
             path="/admin/add-employee"
             element={
               <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
                 <AddEmployee />
               </ProtectedRoute>
             }

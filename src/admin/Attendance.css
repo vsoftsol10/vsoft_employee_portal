@@ -1,0 +1,107 @@
+.attendance-page {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(100% - 250px); /* Adjusting the width considering the sidebar */
+  margin-left: 250px;
+  background-color: #d082e659;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+}
+
+.employee-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+.employee-item button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.employee-item button:hover {
+  background-color: #0056b3;
+}
+
+.calendar {
+  width: 100%;
+  max-width: 900px;
+  padding: 10px;
+  background-color: #ffdb39d3;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(181, 65, 185, 0.658);
+}
+
+.event-manager {
+  margin-top: 20px;
+}
+
+.event-manager input,
+.event-manager button {
+  margin: 10px 0;
+}
+
+.calculate-payroll-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4caf50; /* Stylish button color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.calculate-payroll-button:hover {
+  background-color: #45a049;
+}
+
+.day-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.green-day {
+  background-color: #4caf50;
+  color: white;
+  border-radius: 50%;
+}
+
+.red-day {
+  background-color: #f44336;
+  color: white;
+  border-radius: 50%;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .attendance-page {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+
+  .calendar, .event-manager {
+    width: 100%;
+  }
+}

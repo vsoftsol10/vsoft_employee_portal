@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './LeaveTracker.css'; // Import the CSS file for styling
 import { firestore, auth } from '../firebaseConfig'; // Adjust the path to your firebaseConfig file
-import { collection, addDoc, updateDoc, doc, getDoc, setDoc, getDocs } from 'firebase/firestore'; // Import getDocs
+import { collection, addDoc, updateDoc, doc, getDoc, setDoc, getDocs } from 'firebase/firestore'; // Import Firestore methods
 import { onAuthStateChanged } from 'firebase/auth';
 
 const LeaveTracker = () => {
@@ -16,14 +16,12 @@ const LeaveTracker = () => {
   // Function to initialize the leave balance in Firestore for a user
   const initializeLeaveBalance = async (uid) => {
     try {
-      const userDoc = doc(firestore, 'users', uid);
+      const userDoc = doc(firestore, 'oftenusers', uid);
       const docSnap = await getDoc(userDoc);
       
       if (!docSnap.exists()) {
         // If the user document does not exist, set leave balance to 5
-        await setDoc(userDoc, {
-          leaveBalance: 5 // Initial leave balance
-        });
+        await setDoc(userDoc, { leaveBalance: 5 }); // Initial leave balance
         setLeaveBalance(5); // Set balance in state as well
       } else {
         // If the user document exists, fetch and set the leave balance
@@ -41,7 +39,7 @@ const LeaveTracker = () => {
         // Initialize or fetch leave balance for the current user
         await initializeLeaveBalance(user.uid);
         // Fetch leave requests for the current user
-        const leaveCollection = collection(firestore, 'users', user.uid, 'leaveRequests');
+        const leaveCollection = collection(firestore, 'oftenusers', user.uid, 'leaveformrequests');
         const leaveSnapshot = await getDocs(leaveCollection);
         setLeaveRequests(leaveSnapshot.docs.map((doc) => doc.data()));
       } else {
@@ -62,8 +60,18 @@ const LeaveTracker = () => {
         return;
       }
 
+      if (new Date(startDate) > new Date(endDate)) {
+        alert('End date cannot be before start date.');
+        return;
+      }
+
+      if (leaveType === '' || reason === '') {
+        alert('Please fill all the fields.');
+        return;
+      }
+
       // Add the leave request to Firestore
-      await addDoc(collection(firestore, 'users', uid, 'leaveRequests'), {
+      await addDoc(collection(firestore, 'oftenusers', uid, 'leaveformrequests'), {
         type: leaveType,
         start: startDate,
         end: endDate,
@@ -73,7 +81,7 @@ const LeaveTracker = () => {
       });
 
       // Update leave balance in Firestore
-      const leaveDoc = doc(firestore, 'users', uid);
+      const leaveDoc = doc(firestore, 'oftenusers', uid);
       await updateDoc(leaveDoc, {
         leaveBalance: leaveBalance - leaveDays
       });

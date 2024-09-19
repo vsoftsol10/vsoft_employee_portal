@@ -1,0 +1,86 @@
+/* Files.css */
+.files-page {
+  font-family: Arial, sans-serif;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.tab, .tab-active {
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background-color: #f5f5f5;
+  margin-right: 5px;
+}
+
+.tab-active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.official-docs, .employee-docs, .employee-files {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.add-docs {
+  margin-bottom: 20px;
+}
+
+.add-docs-btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-doc-form {
+  display: none;
+  margin-top: 10px;
+}
+
+.add-doc-form input {
+  margin-right: 10px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.upload-btn {
+  padding: 8px 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.doc-list, .file-list {
+  margin-top: 20px;
+}
+
+.doc-item, .file-item {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.download-btn {
+  padding: 8px 16px;
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}

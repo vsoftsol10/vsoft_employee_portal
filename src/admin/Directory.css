@@ -1,51 +1,117 @@
-.directory {
-    margin-left: 250px;
-    margin-top: 50px;
-    padding: 20px;
-    background-color: #f8f9fa;
+/* Directory.css */
+.directory-container {
+  margin-left: 250px;
+  padding: 20px;
+  max-width: 100%;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.tabs button.active {
+  background-color: #0056b3;
+}
+
+.content {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.employee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.employee-form input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.employee-form button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+}
+
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.employee-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.view-details {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.status {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.status.present {
+  color: #28a745;
+  border: 2px solid #28a745;
+  box-shadow: 0px 0px 8px #28a745;
+}
+
+.status.absent {
+  color: #dc3545;
+  border: 2px solid #dc3545;
+  box-shadow: 0px 0px 8px #dc3545;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .directory-container {
+    margin-left: 0;
+    padding: 10px;
   }
-  
-  .directory h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 28px;
+
+  .employee-card {
+    flex-direction: column;
+    gap: 10px;
   }
-  
-  .user-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  
-  .user-card {
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    flex: 1 1 calc(25% - 20px); /* 4 cards per row */
-    text-align: center;
-  }
-  
-  .user-card p {
-    font-size: 18px;
-    margin: 10px 0;
-  }
-  
-  .user-card a {
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  
-  @media (max-width: 768px) {
-    .user-card {
-      flex: 1 1 calc(50% - 20px); /* 2 cards per row on smaller screens */
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .user-card {
-      flex: 1 1 100%; /* 1 card per row on mobile */
-    }
-  }
-  
+}

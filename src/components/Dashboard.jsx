@@ -3,7 +3,7 @@ import Header from './Header';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 import { firestore, auth } from '../firebaseConfig'; // Import Firestore and Auth instances
-import { collection, addDoc, Timestamp } from 'firebase/firestore'; // Firestore functions
+import { doc, setDoc, Timestamp, getDoc, collection, addDoc } from 'firebase/firestore';
 
 const Dashboard = () => {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
@@ -34,30 +34,65 @@ const Dashboard = () => {
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Function to log attendance (Check-in and Check-out)
+  // Log attendance in both rareusers and oftenusers collections
   const logAttendance = async (userId, type, checkInTimestamp = null) => {
     try {
-      const attendanceRef = collection(firestore, `users/${userId}/attendance`);
-      const timestamp = Timestamp.now();
-      const data = {
-        type: type,
-        timestamp: timestamp,
-      };
+      console.log(`Attempting to access user: ${userId}`);
+      const userRef = doc(firestore, `rareusers/${userId}`);
+      const userDoc = await getDoc(userRef);
 
-      if (type === 'check-out') {
-        data.checkInTime = checkInTimestamp;
-        data.checkOutTime = timestamp;
-        data.totalDuration = timer; // Track total time during check-out
+      if (!userDoc.exists()) {
+        console.error('User not found');
+        return;
       }
 
-      await addDoc(attendanceRef, data);
+      const userData = userDoc.data();
+      const currentTimestamp = Timestamp.now();
+      const formattedDuration = type === 'check-out' ? formatTime(timer) : null;
+
+      let updatedDashboard = { ...userData.dashboard };
+      let updatedAttendance = [...(userData.attendance?.events || [])];
+
+      if (type === 'check-in') {
+        updatedDashboard.checkIn = currentTimestamp;
+        setCheckInTime(currentTimestamp);
+        setIsCheckedIn(true);
+      } else if (type === 'check-out') {
+        updatedDashboard.checkOut = currentTimestamp;
+        updatedDashboard.duration = formattedDuration;
+        updatedAttendance.push({
+          date: currentTimestamp,
+          status: 'Present'
+        });
+        setIsCheckedIn(false);
+        setTimer(0);
+        setCheckInTime(null);
+      }
+
+      // Update rareusers collection
+      await setDoc(userRef, {
+        dashboard: updatedDashboard,
+        attendance: { events: updatedAttendance }
+      }, { merge: true });
+
+      // Create or update oftenusers collection
+      if (type === 'check-in') {
+        await addDoc(collection(firestore, `oftenusers/${userId}/checkins`), {
+          timestamp: currentTimestamp
+        });
+      } else if (type === 'check-out') {
+        await addDoc(collection(firestore, `oftenusers/${userId}/checkouts`), {
+          timestamp: currentTimestamp,
+          duration: formattedDuration
+        });
+      }
+
       console.log(`${type} recorded in Firestore`);
     } catch (error) {
-      console.error(`Error logging ${type}: `, error);
+      console.error(`Error logging ${type}: `, error.message);
     }
   };
 
-  // Handle check-in and check-out with authentication check
   const handleCheckInOut = async () => {
     const user = auth.currentUser;
 
@@ -71,19 +106,12 @@ const Dashboard = () => {
 
     try {
       if (!isCheckedIn) {
-        const checkInTimestamp = Timestamp.now();
-        setCheckInTime(checkInTimestamp);
         await logAttendance(userId, 'check-in');
-        setIsCheckedIn(true);
       } else {
         await logAttendance(userId, 'check-out', checkInTime);
-        setIsCheckedIn(false);
-        setTimer(0);
-        setCheckInTime(null);
       }
     } catch (error) {
-      console.error('Error processing check-in/check-out: ', error);
-      // Optionally show a user-friendly message on the UI
+      console.error('Error processing check-in/check-out: ', error.message);
     }
   };
 
@@ -175,3 +203,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
