@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
-import DatePicker from 'react-datepicker';
 import 'react-calendar/dist/Calendar.css';
-import 'react-datepicker/dist/react-datepicker.css';
 import './Attendance.css';
-import { getFirestore, collection, getDocs, setDoc, doc } from 'firebase/firestore'; // Firebase imports
-import { getAuth } from 'firebase/auth'; // Firebase authentication import
+import { getFirestore, collection, getDocs, setDoc } from 'firebase/firestore'; 
+import { getAuth } from 'firebase/auth'; 
 
 const Attendance = () => {
   const [date, setDate] = useState(new Date());
   const [events, setEvents] = useState([]);
-  const [eventTitle, setEventTitle] = useState('');
-  const [toastMessage, setToastMessage] = useState('');
-  const [isToastOpen, setToastOpen] = useState(false);
   const [userId, setUserId] = useState('');
-  const [holidays, setHolidays] = useState([]); // State for holidays
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -30,108 +24,90 @@ const Attendance = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       if (!userId) return;
-
+    
       const db = getFirestore();
       try {
-        const querySnapshot = await getDocs(collection(db, `oftenusers/${userId}/events`)); // Adjust path based on user ID
+        const checkInSnapshot = await getDocs(collection(db, `oftenusers/${userId}/checkins`));
+        const checkOutSnapshot = await getDocs(collection(db, `oftenusers/${userId}/checkouts`));
+        
         let eventList = [];
-        querySnapshot.forEach((doc) => {
+        let checkinMap = new Map();
+    
+        // Fetch and store check-in times
+        checkInSnapshot.forEach((doc) => {
           const data = doc.data();
-          if (data.checkInTime && data.checkOutTime) {
-            const checkInTime = new Date(data.checkInTime.seconds * 1000); 
-            const checkOutTime = new Date(data.checkOutTime.seconds * 1000);
-
-            const localDate = checkInTime.toLocaleDateString('en-GB');
-
-            const totalDuration = (checkOutTime - checkInTime) / (1000 * 60 * 60);
-
-            eventList.push({
-              id: doc.id,
-              date: localDate,
-              duration: totalDuration,
-            });
+          if (data.timestamp) {
+            const checkInTime = new Date(data.timestamp.seconds * 1000); 
+            const checkInDate = checkInTime.toLocaleDateString('en-GB');
+            checkinMap.set(checkInDate, checkInTime);
           }
         });
+    
+        const eventPromises = []; // Array to hold promises
+    
+        // Fetch checkout times, match them with check-ins, and calculate duration
+        checkOutSnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.timestamp) {
+            const checkOutTime = new Date(data.timestamp.seconds * 1000);
+            const checkOutDate = checkOutTime.toLocaleDateString('en-GB');
+    
+            if (checkinMap.has(checkOutDate)) {
+              const checkInTime = checkinMap.get(checkOutDate);
+              const totalDuration = (checkOutTime - checkInTime) / (1000 * 60 * 60); // in hours
+    
+              // Set a threshold for duration to consider a user present (e.g., 1 hour)
+              const durationThreshold = 1; // in hours
+              
+              // Determine if present based on duration
+              const isPresent = totalDuration >= durationThreshold;
+    
+              eventList.push({
+                id: doc.id,
+                date: checkOutDate,
+                duration: totalDuration,
+                isPresent,
+              });
+    
+              // Add to promises array for Firestore persistence
+              eventPromises.push(
+                setDoc(doc(db, `oftenusers/${userId}/events`, checkOutDate), {
+                  date: checkOutDate,
+                  duration: totalDuration,
+                  isPresent,
+                })
+              );
+            }
+          }
+        });
+    
+        // Wait for all Firestore writes to complete
+        await Promise.all(eventPromises);
+    
         setEvents(eventList);
       } catch (error) {
-        console.error("Error fetching events: ", error);
+        console.error('Error fetching events: ', error);
       }
     };
+    
     fetchEvents();
   }, [userId]);
-
-  useEffect(() => {
-    const fetchHolidays = async () => {
-      const db = getFirestore();
-      try {
-        const querySnapshot = await getDocs(collection(db, 'holidays')); // Adjust path if needed
-        let holidayList = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const holidayDate = new Date(data.date.seconds * 1000).toLocaleDateString('en-GB');
-          holidayList.push(holidayDate);
-        });
-        setHolidays(holidayList);
-      } catch (error) {
-        console.error("Error fetching holidays: ", error);
-      }
-    };
-    fetchHolidays();
-  }, []);
 
   const handleDateChange = (newDate) => {
     setDate(newDate);
   };
 
-  const handleAddEvent = async () => {
-    if (!userId) return;
-
-    const db = getFirestore();
-    try {
-      const formattedDate = date.toLocaleDateString('en-GB');
-      const checkInTime = new Date();
-      const checkOutTime = new Date(checkInTime.getTime() + 8 * 60 * 60 * 1000);
-
-      await setDoc(doc(db, `oftenusers/${userId}/events`, eventTitle), {
-        title: eventTitle,
-        checkInTime: { seconds: Math.floor(checkInTime.getTime() / 1000) }, // Store check-in time in Firestore timestamp format
-        checkOutTime: { seconds: Math.floor(checkOutTime.getTime() / 1000) }, // Store check-out time in Firestore timestamp format
-        date: formattedDate,
-      });
-      setToastMessage('Event added successfully');
-      setToastOpen(true);
-      setEvents([...events, { id: eventTitle, date: formattedDate, duration: 8 }]);
-    } catch (error) {
-      setToastMessage('Error adding event: ' + error.message);
-      setToastOpen(true);
-    }
-    setEventTitle('');
-  };
-
-  const handleToastClose = () => setToastOpen(false);
-
   const renderDayContent = ({ date }) => {
     const formattedDate = date.toLocaleDateString('en-GB');
     const event = events.find((e) => e.date === formattedDate);
-    const isHoliday = holidays.includes(formattedDate);
 
     if (event) {
-      const isOverTime = event.duration >= 8.5;
       return (
         <div
-          className={`day-content ${isOverTime ? 'green-day' : 'red-day'}`}
+          className={`day-content ${event.isPresent ? 'green-day' : 'red-day'}`}
           title={`Duration: ${event.duration.toFixed(2)} hours`}
         >
-          {isOverTime ? '✅' : '❌'}
-        </div>
-      );
-    } else if (isHoliday) {
-      return (
-        <div
-          className="day-content red-day"
-          title="Holiday"
-        >
-          🏆
+          {event.isPresent ? '✅ Present' : '❌ Absent'}
         </div>
       );
     }
@@ -147,22 +123,6 @@ const Attendance = () => {
         tileContent={({ date }) => renderDayContent({ date })}
         className="calendar"
       />
-      <div className="event-manager">
-        <h2>Add Event</h2>
-        <DatePicker
-          selected={date}
-          onChange={(date) => setDate(date)}
-          className="datepicker"
-        />
-        <input
-          type="text"
-          value={eventTitle}
-          onChange={(e) => setEventTitle(e.target.value)}
-          placeholder="Event Title"
-        />
-        <button onClick={handleAddEvent}>Add Event</button>
-      </div>
-      {isToastOpen && <div className="toast">{toastMessage}</div>}
     </div>
   );
 };

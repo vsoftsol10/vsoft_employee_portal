@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
-import { firestore, auth } from '../firebaseConfig'; // Import Firestore and Auth instances
-import { doc, setDoc, Timestamp, getDoc, collection, addDoc } from 'firebase/firestore';
+import { firestore, auth } from '../firebaseConfig'; // Import Firestore instance
+import { doc,addDoc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore'; // Import setDoc
 
 const Dashboard = () => {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [checkInTime, setCheckInTime] = useState(null);
+  const [sickLeave, setSickLeave] = useState(0);
+  const [casualLeave, setCasualLeave] = useState(0);
+  const [leaveWithoutPay, setLeaveWithoutPay] = useState(0);
+  const [pendingTasks, setPendingTasks] = useState(0);
+  const [upcomingDeadline, setUpcomingDeadline] = useState(null);
   const navigate = useNavigate();
 
   // Timer effect for the check-in/out functionality
@@ -24,6 +28,55 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, [isCheckedIn, timer]);
 
+  // Fetch leave balance (sickLeave, casualLeave, leaveWithoutPay), tasks, and deadline data on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = auth.currentUser;
+
+        if (!user) {
+          console.error('User not authenticated');
+          return;
+        }
+
+        // Fetch leave types (sickLeave, casualLeave, leaveWithoutPay) from leaveSettings/default
+        const leaveSettingsRef = doc(firestore, 'leaveSettings', 'default');
+        const leaveSettingsSnap = await getDoc(leaveSettingsRef);
+
+        if (leaveSettingsSnap.exists()) {
+          const leaveData = leaveSettingsSnap.data();
+          setSickLeave(leaveData.sickLeave || 0);
+          setCasualLeave(leaveData.casualLeave || 0);
+          setLeaveWithoutPay(leaveData.leaveWithoutPay || 0);
+        }
+
+        // Fetch tasks count from groups/id/tasks
+        const tasksCollectionRef = collection(firestore, `groups/${user.uid}/tasks`);
+        const tasksSnapshot = await getDocs(tasksCollectionRef);
+        setPendingTasks(tasksSnapshot.size); // Count the number of tasks
+
+        // Find task with the nearest deadline
+        let tasksWithDeadlines = [];
+        tasksSnapshot.forEach((doc) => {
+          const taskData = doc.data();
+          if (taskData.deadline) {
+            tasksWithDeadlines.push(taskData);
+          }
+        });
+
+        // Sort tasks by deadline and get the nearest one
+        tasksWithDeadlines.sort((a, b) => a.deadline.toMillis() - b.deadline.toMillis());
+        if (tasksWithDeadlines.length > 0) {
+          setUpcomingDeadline(tasksWithDeadlines[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching data: ', error.message);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   // Format the timer into hours, minutes, and seconds
   const formatTime = (time) => {
     const hours = Math.floor(time / 3600);
@@ -33,88 +86,67 @@ const Dashboard = () => {
       .toString()
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
-
-  // Log attendance in both rareusers and oftenusers collections
-  const logAttendance = async (userId, type, checkInTimestamp = null) => {
-    try {
-      console.log(`Attempting to access user: ${userId}`);
-      const userRef = doc(firestore, `rareusers/${userId}`);
-      const userDoc = await getDoc(userRef);
-
-      if (!userDoc.exists()) {
-        console.error('User not found');
-        return;
-      }
-
-      const userData = userDoc.data();
-      const currentTimestamp = Timestamp.now();
-      const formattedDuration = type === 'check-out' ? formatTime(timer) : null;
-
-      let updatedDashboard = { ...userData.dashboard };
-      let updatedAttendance = [...(userData.attendance?.events || [])];
-
-      if (type === 'check-in') {
-        updatedDashboard.checkIn = currentTimestamp;
-        setCheckInTime(currentTimestamp);
-        setIsCheckedIn(true);
-      } else if (type === 'check-out') {
-        updatedDashboard.checkOut = currentTimestamp;
-        updatedDashboard.duration = formattedDuration;
-        updatedAttendance.push({
-          date: currentTimestamp,
-          status: 'Present'
-        });
-        setIsCheckedIn(false);
-        setTimer(0);
-        setCheckInTime(null);
-      }
-
-      // Update rareusers collection
-      await setDoc(userRef, {
-        dashboard: updatedDashboard,
-        attendance: { events: updatedAttendance }
-      }, { merge: true });
-
-      // Create or update oftenusers collection
-      if (type === 'check-in') {
-        await addDoc(collection(firestore, `oftenusers/${userId}/checkins`), {
-          timestamp: currentTimestamp
-        });
-      } else if (type === 'check-out') {
-        await addDoc(collection(firestore, `oftenusers/${userId}/checkouts`), {
-          timestamp: currentTimestamp,
-          duration: formattedDuration
-        });
-      }
-
-      console.log(`${type} recorded in Firestore`);
-    } catch (error) {
-      console.error(`Error logging ${type}: `, error.message);
-    }
-  };
-
   const handleCheckInOut = async () => {
-    const user = auth.currentUser;
-
+    const user = auth.currentUser; // Get the current authenticated user
+  
     if (!user) {
       console.error('User not authenticated');
-      navigate('/login'); // Redirect to login if the user is not authenticated
       return;
     }
-
-    const userId = user.uid;
-
+  
     try {
+      const userRef = doc(firestore, 'oftenusers', user.uid); // Reference to the user's document in Firestore
+      const userSnap = await getDoc(userRef);
+  
+      // If user document doesn't exist, create it
+      if (!userSnap.exists()) {
+        await setDoc(userRef, { isCheckedIn: false, checkInTime: null });
+      }
+  
+      const userData = userSnap.data();
+  
       if (!isCheckedIn) {
-        await logAttendance(userId, 'check-in');
+        // Check In
+        await setDoc(userRef, {
+          isCheckedIn: true,
+          checkInTime: new Date(),
+        }, { merge: true }); // Merge with existing data
+        setIsCheckedIn(true);
+        setTimer(0); // Reset the timer when checking in
+  
+        // Store check-in data in oftenusers/uid/checkins
+        const checkinsRef = collection(userRef, 'checkins');
+        await addDoc(checkinsRef, {
+          checkInTime: new Date(),
+          // You can add more data here if needed
+        });
       } else {
-        await logAttendance(userId, 'check-out', checkInTime);
+        // Check Out
+        const checkInTime = userData.checkInTime?.toDate(); // Firestore stores date in Timestamp, so convert it back to Date object
+        const checkOutTime = new Date();
+  
+        const durationInSeconds = Math.floor((checkOutTime - checkInTime) / 1000);
+  
+        await setDoc(userRef, {
+          isCheckedIn: false,
+          checkOutTime,
+        }, { merge: true });
+  
+        // Store check-out data in oftenusers/uid/checkouts
+        const checkoutsRef = collection(userRef, 'checkouts');
+        await addDoc(checkoutsRef, {
+          checkOutTime,
+          totalDuration: durationInSeconds,
+          // You can add more data here if needed
+        });
+  
+        setIsCheckedIn(false);
+        setTimer(0); // Reset the timer after checking out
       }
     } catch (error) {
-      console.error('Error processing check-in/check-out: ', error.message);
+      console.error('Error checking in/out: ', error.message);
     }
   };
-
   return (
     <div>
       <Header />
@@ -152,11 +184,10 @@ const Dashboard = () => {
               <h3 className="card-no">02</h3>
               <h4 className="card-main-title">Leave Balance</h4>
             </div>
-            <p className="card-content">Leave Balance: 5 days</p>
-            <button
-              className="leave-btn"
-              onClick={() => navigate('/leavetracker')}
-            >
+            <p className="card-content">Sick Leave: {sickLeave} days</p>
+            <p className="card-content">Casual Leave: {casualLeave} days</p>
+            <p className="card-content">Leave Without Pay: {leaveWithoutPay} days</p>
+            <button className="leave-btn" onClick={() => navigate('/leave-tracker')}>
               Apply Leave
             </button>
           </figcaption>
@@ -173,7 +204,7 @@ const Dashboard = () => {
               <h3 className="card-no">03</h3>
               <h4 className="card-main-title">Tasks</h4>
             </div>
-            <p className="card-content">Pending Tasks: 3</p>
+            <p className="card-content">Pending Tasks: {pendingTasks}</p>
             <button className="task-btn" onClick={() => navigate('/tasks')}>
               See Tasks
             </button>
@@ -191,10 +222,11 @@ const Dashboard = () => {
               <h3 className="card-no">04</h3>
               <h4 className="card-main-title">Deadlines</h4>
             </div>
-            <p className="card-content">Upcoming Deadline: Project X (2 days left)</p>
-            <button className="task-btn" onClick={() => navigate('/tasks')}>
-              See Tasks
-            </button>
+            <p className="card-content">
+              {upcomingDeadline
+                ? `Upcoming Deadline: ${upcomingDeadline.name} (${upcomingDeadline.deadline.toDate().toLocaleDateString()})`
+                : 'No upcoming deadlines.'}
+            </p>
           </figcaption>
         </figure>
       </div>
@@ -203,4 +235,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

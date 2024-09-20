@@ -20,7 +20,7 @@ const Sidebar = () => {
     <>
       <div className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-logo">
-          <img src="/assets/logo1.png" alt="Logo" />
+          <img src="/assets/logo.png" alt="Logo" />
           <div className="sidebar-text">
             <h1>Vsoft</h1>
             <h2>Solutions</h2>

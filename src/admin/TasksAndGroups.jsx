@@ -1,5 +1,6 @@
-// TasksAndGroups.jsx
 import React, { useState } from 'react';
+import { firestore } from '../firebaseConfig'; // Adjust the import based on your structure
+import { collection, doc, setDoc } from 'firebase/firestore';
 import './TasksAndGroups.css';
 
 const TasksAndGroups = () => {
@@ -16,7 +17,7 @@ const TasksAndGroups = () => {
     initialSubmit: '',
     finalSubmit: '',
     status: 'on process',
-    reviews: 0
+    reviews: 0,
   });
 
   const handleCreateGroup = () => setShowForm(true);
@@ -37,8 +38,39 @@ const TasksAndGroups = () => {
       initialSubmit: '',
       finalSubmit: '',
       status: 'on process',
-      reviews: 0
+      reviews: 0,
     });
+  };
+
+  const handleSubmitGroup = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    try {
+      // Create a new group document
+      const groupRef = doc(collection(firestore, 'groups'));
+      await setDoc(groupRef, {
+        groupName,
+        projectName,
+        details,
+        planFile: planFile ? planFile.name : null, // Store the file name or handle file upload separately
+      });
+
+      // Create a sub-collection for tasks
+      const tasksRef = collection(groupRef, 'tasks');
+      for (const task of tasks) {
+        await setDoc(doc(tasksRef), task);
+      }
+
+      // Clear the form and tasks
+      setGroupName('');
+      setProjectName('');
+      setPlanFile(null);
+      setDetails('');
+      setTasks([]);
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error creating group: ', error);
+    }
   };
 
   return (
@@ -47,7 +79,7 @@ const TasksAndGroups = () => {
       {showForm && (
         <div className="group-form">
           <h2>Create New Group</h2>
-          <form>
+          <form onSubmit={handleSubmitGroup}>
             <div className="form-group">
               <label htmlFor="groupName">Group Name</label>
               <input
@@ -125,7 +157,7 @@ const TasksAndGroups = () => {
                   ))}
                 </tbody>
               </table>
-              <button className="create-task-btn" onClick={() => setShowForm(true)}>+ Create Task</button>
+              <button type="button" onClick={() => setShowForm(true)}>+ Create Task</button>
               {showForm && (
                 <div className="task-form">
                   <h4>Create New Task</h4>
@@ -204,6 +236,7 @@ const TasksAndGroups = () => {
                 </div>
               )}
             </div>
+            <button type="submit">Create Group</button>
           </form>
         </div>
       )}

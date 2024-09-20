@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { firestore, storage } from '../firebaseConfig'; // Adjust the import based on your structure
+import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { ref, uploadBytes } from 'firebase/storage';
 import './Files.css';
 
 const Files = () => {
   const [activeTab, setActiveTab] = useState('official');
   const [officialDocs, setOfficialDocs] = useState([]);
-  const [employeeDocs, setEmployeeDocs] = useState([{ id: 1, name: 'John Doe' }, { id: 2, name: 'Jane Smith' }]);
+  const [employeeDocs, setEmployeeDocs] = useState([]);
+  const [employeeFiles, setEmployeeFiles] = useState([]); // State for employee files
   const [newDoc, setNewDoc] = useState({ filename: '', purpose: '' });
+  const [file, setFile] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const handleTabChange = (tab) => {
@@ -17,31 +22,56 @@ const Files = () => {
     setNewDoc((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddDoc = () => {
-    if (newDoc.filename && newDoc.purpose) {
-      setOfficialDocs((prev) => [...prev, newDoc]);
-      setNewDoc({ filename: '', purpose: '' });
-    }
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
   };
 
-  const handleViewFiles = (employee) => {
-    setSelectedEmployee(employee);
+  const handleAddDoc = async () => {
+    // Your existing handleAddDoc function
   };
+
+  const handleViewFiles = async (employee) => {
+    setSelectedEmployee(employee);
+
+    // Fetch the employee's specific files
+    const filesSnapshot = await getDocs(collection(firestore, `employee_documents/${employee.id}/files`));
+    const files = filesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    setEmployeeFiles(files); // Set employee files state
+  };
+
+  useEffect(() => {
+    const fetchOfficialDocs = async () => {
+      const snapshot = await getDocs(collection(firestore, 'official_documents'));
+      const docs = await Promise.all(snapshot.docs.map(async (doc) => {
+        const filesSnapshot = await getDocs(collection(firestore, `official_documents/${doc.id}/files`));
+        const files = filesSnapshot.docs.map(fileDoc => ({ id: fileDoc.id, ...fileDoc.data() }));
+        return { id: doc.id, files };
+      }));
+      setOfficialDocs(docs);
+    };
+
+    const fetchEmployeeDocs = async () => {
+      const snapshot = await getDocs(collection(firestore, 'employee_documents'));
+      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setEmployeeDocs(docs);
+    };
+
+    if (activeTab === 'official') {
+      fetchOfficialDocs();
+    } else if (activeTab === 'employee') {
+      fetchEmployeeDocs();
+    }
+  }, [activeTab]);
 
   return (
     <div className="files-page" style={{ marginLeft: '250px' }}>
       <h1>Document Management</h1>
       <div className="tabs">
-        <button
-          className={activeTab === 'official' ? 'tab-active' : 'tab'}
-          onClick={() => handleTabChange('official')}
-        >
+        <button className={activeTab === 'official' ? 'tab-active' : 'tab'} onClick={() => handleTabChange('official')}>
           Official Documents
         </button>
-        <button
-          className={activeTab === 'employee' ? 'tab-active' : 'tab'}
-          onClick={() => handleTabChange('employee')}
-        >
+        <button className={activeTab === 'employee' ? 'tab-active' : 'tab'} onClick={() => handleTabChange('employee')}>
           Employee Documents
         </button>
       </div>
@@ -49,63 +79,38 @@ const Files = () => {
       {activeTab === 'official' && (
         <div className="official-docs">
           <h2>Official Documents</h2>
-          <div className="add-docs">
-            <button className="add-docs-btn" onClick={() => document.getElementById('add-doc-form').style.display = 'block'}>
-              + Add Docs
-            </button>
-            <div id="add-doc-form" className="add-doc-form">
-              <input
-                type="text"
-                name="filename"
-                value={newDoc.filename}
-                onChange={handleInputChange}
-                placeholder="Filename"
-              />
-              <input
-                type="text"
-                name="purpose"
-                value={newDoc.purpose}
-                onChange={handleInputChange}
-                placeholder="Purpose"
-              />
-              <button className="upload-btn" onClick={handleAddDoc}>Upload</button>
-            </div>
-          </div>
-          <div className="doc-list">
-            {officialDocs.length > 0 ? (
-              officialDocs.map((doc, index) => (
-                <div key={index} className="doc-item">
-                  <span>{doc.filename} - {doc.purpose}</span>
-                </div>
-              ))
-            ) : (
-              <p>No documents available.</p>
-            )}
-          </div>
+          {/* Your existing official documents UI */}
         </div>
       )}
 
       {activeTab === 'employee' && (
         <div className="employee-docs">
           <h2>Employee Documents</h2>
-          {employeeDocs.map((employee) => (
-            <div key={employee.id} className="employee-item">
-              <span>{employee.name}</span>
-              <button onClick={() => handleViewFiles(employee)}>View Files</button>
-            </div>
-          ))}
+          {employeeDocs.length > 0 ? (
+            employeeDocs.map((employee) => (
+              <div key={employee.id} className="employee-item">
+                <span>{employee.uid}</span> {/* Use the correct field for UID */}
+                <button onClick={() => handleViewFiles(employee)}>View Files</button>
+              </div>
+            ))
+          ) : (
+            <p>No employee documents available.</p>
+          )}
         </div>
       )}
 
-      {selectedEmployee && (
+      {selectedEmployee && employeeFiles.length > 0 && (
         <div className="employee-files">
-          <h2>Files for {selectedEmployee.name}</h2>
-          {/* Replace this section with the actual implementation of employee-specific file display */}
+          <h2>Files for {selectedEmployee.uid}</h2>
           <div className="file-list">
-            <div className="file-item">
-              <span>Example File Name</span>
-              <button className="download-btn">Download</button>
-            </div>
+            {employeeFiles.map(file => (
+              <div key={file.id} className="file-item">
+                <span>{file.name}</span> {/* Adjust as per your file structure */}
+                <a href={file.url} target="_blank" rel="noopener noreferrer" download>
+                  Download
+                </a>
+              </div>
+            ))}
           </div>
         </div>
       )}

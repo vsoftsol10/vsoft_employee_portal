@@ -37,41 +37,44 @@ const Directory = () => {
 
     // Basic validation
     if (!name || !email || !password || !role || !department) {
-      setError('All fields are required.');
-      return;
+        setError('All fields are required.');
+        return;
     }
 
     setLoading(true);
     setError('');
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+        // Step 1: Create the user in Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-      await setDoc(doc(firestore, 'employees', user.uid), {
-        name,
-        email,
-        role,
-        department,
-        profilePic: '',
-        employmentStatus: 'Active',
-        dateJoined: Timestamp.fromDate(new Date()),
-      });
+        // Step 2: Store employee details in Firestore
+        await setDoc(doc(firestore, 'employees', user.uid), {
+            name,
+            email,
+            role,
+            department,
+            profilePic: '',
+            employmentStatus: 'Active',
+            dateJoined: Timestamp.fromDate(new Date()),
+        });
 
-      alert('Employee added successfully');
-      setFormData({
-        name: '',
-        email: '',
-        role: '',
-        department: '',
-        password: '',
-      });
+        alert('Employee added successfully');
+        setFormData({
+            name: '',
+            email: '',
+            role: '',
+            department: '',
+            password: '',
+        });
     } catch (error) {
-      setError('Error adding employee.');
+        console.error('Error adding employee:', error.message);
+        setError('Error adding employee: ' + error.message);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   return (
     <div className="directory-container">

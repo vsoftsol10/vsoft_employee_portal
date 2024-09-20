@@ -1,43 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import './LeaveTracker.css'; // Import the CSS file for styling
 import { firestore, auth } from '../firebaseConfig'; // Adjust the path to your firebaseConfig file
-import { collection, addDoc, updateDoc, doc, getDoc, setDoc, getDocs } from 'firebase/firestore'; // Import Firestore methods
+import { collection, addDoc, getDocs } from 'firebase/firestore'; // Import Firestore methods
 import { onAuthStateChanged } from 'firebase/auth';
 
 const LeaveTracker = () => {
+  const [name, setName] = useState(''); // New state for name
   const [leaveType, setLeaveType] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
   const [leaveRequests, setLeaveRequests] = useState([]);
-  const [leaveBalance, setLeaveBalance] = useState(0); // Track leave balance
+  const [leaveBalance, setLeaveBalance] = useState({
+    casualLeave: 2,
+    sickLeave: 2,
+    leaveWithoutPay: 2,
+  });
   const [uid, setUid] = useState(null); // User ID
-
-  // Function to initialize the leave balance in Firestore for a user
-  const initializeLeaveBalance = async (uid) => {
-    try {
-      const userDoc = doc(firestore, 'oftenusers', uid);
-      const docSnap = await getDoc(userDoc);
-      
-      if (!docSnap.exists()) {
-        // If the user document does not exist, set leave balance to 5
-        await setDoc(userDoc, { leaveBalance: 5 }); // Initial leave balance
-        setLeaveBalance(5); // Set balance in state as well
-      } else {
-        // If the user document exists, fetch and set the leave balance
-        setLeaveBalance(docSnap.data().leaveBalance || 5); // Set to 5 if not found
-      }
-    } catch (error) {
-      console.error('Error initializing leave balance:', error.message);
-    }
-  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUid(user.uid);
-        // Initialize or fetch leave balance for the current user
-        await initializeLeaveBalance(user.uid);
         // Fetch leave requests for the current user
         const leaveCollection = collection(firestore, 'oftenusers', user.uid, 'leaveformrequests');
         const leaveSnapshot = await getDocs(leaveCollection);
@@ -55,8 +39,8 @@ const LeaveTracker = () => {
 
     try {
       const leaveDays = calculateLeaveDays(startDate, endDate);
-      if (leaveDays > leaveBalance) {
-        alert('You do not have enough leave balance.');
+      if (leaveDays > leaveBalance[leaveType]) {
+        alert('You do not have enough leave balance for this type.');
         return;
       }
 
@@ -65,13 +49,14 @@ const LeaveTracker = () => {
         return;
       }
 
-      if (leaveType === '' || reason === '') {
+      if (leaveType === '' || reason === '' || name === '') {
         alert('Please fill all the fields.');
         return;
       }
 
       // Add the leave request to Firestore
       await addDoc(collection(firestore, 'oftenusers', uid, 'leaveformrequests'), {
+        name, // Store the name
         type: leaveType,
         start: startDate,
         end: endDate,
@@ -80,14 +65,9 @@ const LeaveTracker = () => {
         createdAt: new Date() // Optional: store the creation time
       });
 
-      // Update leave balance in Firestore
-      const leaveDoc = doc(firestore, 'oftenusers', uid);
-      await updateDoc(leaveDoc, {
-        leaveBalance: leaveBalance - leaveDays
-      });
-
-      // Add the leave request to local state for immediate UI update
+      // Update local state for leave requests
       setLeaveRequests([...leaveRequests, {
+        name, // Add the name to the state
         type: leaveType,
         start: startDate,
         end: endDate,
@@ -95,14 +75,12 @@ const LeaveTracker = () => {
         status: 'pending'
       }]);
 
-      // Update local state for leave balance
-      setLeaveBalance(leaveBalance - leaveDays);
-
       // Clear form fields after submission
       setLeaveType('');
       setStartDate('');
       setEndDate('');
       setReason('');
+      setName(''); // Clear the name field
     } catch (error) {
       console.error('Error applying leave:', error.message);
     }
@@ -120,6 +98,15 @@ const LeaveTracker = () => {
     <div className="leave-tracker">
       <h2>Leave Tracker</h2>
       <form onSubmit={(e) => e.preventDefault()}>
+        <label>
+          Name:
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name"
+          />
+        </label>
         <label>
           Leave Type:
           <select
@@ -165,11 +152,18 @@ const LeaveTracker = () => {
       <ul>
         {leaveRequests.map((request, index) => (
           <li key={index}>
-            {request.type} | {request.start} to {request.end} | {request.reason} | {request.status}
+            {request.name} | {request.type} | {request.start} to {request.end} | {request.reason} | 
+            {request.status === 'pending' ? ' Pending' : 
+             request.status === 'accepted' ? ' Accepted' : ' Rejected'}
           </li>
         ))}
       </ul>
-      <h3>Leave Balance: {leaveBalance} days</h3>
+      <h3>Leave Balances:</h3>
+      <ul>
+        <li>Casual Leave: {leaveBalance.casualLeave}</li>
+        <li>Sick Leave: {leaveBalance.sickLeave}</li>
+        <li>Leave Without Pay: {leaveBalance.leaveWithoutPay}</li>
+      </ul>
     </div>
   );
 };
