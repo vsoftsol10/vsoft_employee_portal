@@ -1,0 +1,148 @@
+/* General styling for the Attendance page */
+.attendance-page {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    margin: 20px auto; /* Centers the component */
+    background-color: #dfd3e259;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0);
+    margin-top:50px;
+  }
+  
+  /* Calendar styles */
+  .calendar {
+    width: 100%;
+    max-width: 900px;
+    padding: 10px;
+    background-color: #57525217; /* White background for the calendar */
+    border-radius: 10px;
+    margin-left: 150px;
+    box-shadow: 0 4px 10px rgb(217, 214, 218);
+  }
+  
+  /* Calendar header styling */
+  .react-calendar__navigation button {
+    background-color: #000000; /* Black background for month navigation */
+    color: #ffffff;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px;
+  }
+  
+  /* Sundays styled with a violet background */
+  .react-calendar__month-view__days__day--weekend {
+    background-color: #4f227a; /* Violet background for Sundays */
+    color: white;
+  }
+  /* Sundays styled with a violet background */
+.react-calendar__month-view__days__day--sunday {
+  background-color: #8a2be2; /* Violet background for Sundays */
+  color: white;
+}
+
+/* Remove color for Saturdays (no background color for Saturdays) */
+.react-calendar__month-view__days__day--saturday {
+  background-color: transparent; /* Remove background for Saturdays */
+}
+
+  /* Stylish hover effect for the calendar's navigation buttons */
+  .react-calendar__navigation button:hover {
+    background-color: #333333;
+    color: #61dafb; /* Light blue on hover */
+  }
+  
+  /* Days with events styled with a yellow background */
+  .yellow-day {
+    background-color: #ffeb3b;
+    color: black;
+    border-radius: 50%;
+  }
+  
+  /* Styling for days with attendance status */
+  .green-day {
+    background-color: #4caf50; /* Green for present */
+    color: white;
+    border-radius: 50%;
+  }
+  
+  .red-day {
+    background-color: #f44336; /* Red for absent */
+    color: white;
+    border-radius: 50%;
+  }
+  
+  /* Default day content styling */
+  .day-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .attendance-page {
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+  
+    .calendar {
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .attendance-page {
+      margin: 20px;
+    }
+  
+    .calendar {
+      padding: 5px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .attendance-page {
+      margin: 10px;
+      margin-top: 50px;
+      margin-left: 10px;
+    }
+  
+    .calendar {
+      padding: 5px;
+      margin-left: 10px;
+    }
+  
+    .react-calendar__navigation button {
+      font-size: 14px;
+    }
+      /* Sundays styled with a violet background */
+  .react-calendar__month-view__days__day--weekend {
+    background-color: #4f227a; /* Violet background for Sundays */
+    color: white;
+  }
+  /* Sundays styled with a violet background */
+.react-calendar__month-view__days__day--sunday {
+  background-color: #8a2be2; /* Violet background for Sundays */
+  color: white;
+}
+
+/* Remove color for Saturdays (no background color for Saturdays) */
+.react-calendar__month-view__days__day--saturday {
+  background-color: transparent; /* Remove background for Saturdays */
+}
+
+  }
+  
+  /* Style Sundays with violet and add the yellow event background */
+  .react-calendar__tile--event {
+    background-color: #ffeb3b; /* Yellow for event days */
+  }
+  

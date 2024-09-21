@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import './Attendance.css';
+import './NonAttendance.css';
 import { getFirestore, collection, getDocs, setDoc } from 'firebase/firestore'; 
 import { getAuth } from 'firebase/auth'; 
 

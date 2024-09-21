@@ -1,0 +1,97 @@
+/* EmployeeDetails.css */
+
+/* Container for the employee details page */
+.employee-details-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+  }
+  
+  .employee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .employee-header h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .employee-info {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .employee-info h3 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #555;
+  }
+  
+  .employee-info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .employee-info-row p {
+    font-size: 16px;
+    color: #666;
+  }
+  
+  .employee-info-row p span {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Table for employee performance or tasks */
+  .employee-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .employee-table th, .employee-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .employee-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .employee-table td {
+    background-color: #fff;
+  }
+  
+  /* Styling for buttons */
+  .employee-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .employee-actions .btn {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .employee-actions .btn:hover {
+    background-color: #2980b9;
+  }

@@ -6,7 +6,7 @@
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   position: relative;
-  left: 300px; /* Adjusted left margin for larger screens */
+  left: 200px; /* Adjusted left margin for larger screens */
 }
 
 .profile-header {

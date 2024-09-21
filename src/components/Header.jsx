@@ -1,81 +1,97 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faUserCircle } from '@fortawesome/free-solid-svg-icons'; // Changed icon here
-import './Header.css'; // Ensure to have appropriate styles
+import React, { useState, useEffect } from 'react';
+import './Header.css';
+import { FiBell } from 'react-icons/fi';
+import { FaUserCircle } from 'react-icons/fa';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../firebaseConfig';
+import { firestore } from '../firebaseConfig';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
-  const [profileImage, setProfileImage] = useState('https://via.placeholder.com/40');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isNotificationOpen, setNotificationOpen] = useState(false);
+  const [isProfileOpen, setProfileOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const navigate = useNavigate();
-  const profileRef = useRef(null);
 
   useEffect(() => {
-    const storedImage = localStorage.getItem('profileImage');
-    if (storedImage) {
-      setProfileImage(storedImage);
-    }
-  }, []);
+    const fetchProfileImage = async () => {
+      try {
+        const userId = auth.currentUser.uid;
+        const userDocRef = doc(firestore, 'rareusers', userId);
+        const userDoc = await getDoc(userDocRef);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setDropdownOpen(false);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setProfileImage(userData.profileImage);
+        } else {
+          console.error("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching profile image:", error);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    fetchProfileImage();
   }, []);
 
-  const handleNotificationClick = () => {
-    navigate('/notification');
+  const toggleNotificationDropdown = () => {
+    setNotificationOpen(!isNotificationOpen);
+    setProfileOpen(false); // Close profile dropdown if open
   };
 
-  const handleProfileClick = () => {
-    setDropdownOpen(!dropdownOpen);
+  const toggleProfileDropdown = () => {
+    setProfileOpen(!isProfileOpen);
+    setNotificationOpen(false); // Close notification dropdown if open
   };
 
-  const handleProfileOptionClick = (path) => {
-    navigate(path);
-    setDropdownOpen(false);
+  const handleLogout = () => {
+    // Add your logout logic here, then navigate to login
+    auth.signOut();
+    navigate('/login'); // Redirect to login page
   };
 
   return (
-    <div className="header">
-      <div className="header-content">
-      
-          <div className="profile-container" ref={profileRef}>
-          <div className="header-right">
-          <FontAwesomeIcon
-            icon={faBell}
-            className="notification-icon"
-            onClick={handleNotificationClick}
-          />
-            <FontAwesomeIcon
-              icon={faUserCircle} // Updated icon here
-              className="profile-icon"
-              onClick={handleProfileClick}
-              size="2x" // Adjust size as needed
-            />
-            {dropdownOpen && (
-              <div className="profile-dropdown">
-                <button onClick={() => handleProfileOptionClick('/profile')}>
-                  My Profile
-                </button>
-                <button onClick={() => handleProfileOptionClick('/login')}>
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
+    <header className="header">
+   <div className="logo">
+  <a href="/">
+    <img src="/assets/logo.png" alt="Logo" className="logo-image" />
+  </a>
+</div>
+      <nav className="navigation">
+        <div className="icon" onClick={toggleNotificationDropdown}>
+          <FiBell className="notification-icon" />
+          {isNotificationOpen && (
+            <div className="dropdown notification-dropdown">
+              <ul>
+                <li>Notification 1</li>
+                <li>Notification 2</li>
+                <li>Notification 3</li>
+              </ul>
+              <div className="show-all">Show all</div>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+
+        <div className="icon" onClick={toggleProfileDropdown}>
+          {profileImage ? (
+            <img src={profileImage} alt="Profile" className="profile-image" />
+          ) : (
+            <FaUserCircle className="default-avatar" />
+          )}
+          {isProfileOpen && (
+            <div className="dropdown profile-dropdown">
+              <ul>
+                <li>
+                  <Link to="/profile">Profile</Link>
+                </li>
+                <li onClick={handleLogout}>Logout</li>
+              </ul>
+            </div>
+          )}
+        </div>
+      </nav>
+    </header>
   );
 };
 
 export default Header;
-

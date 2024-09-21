@@ -33,6 +33,7 @@ import Directory from './admin/Directory';
 import AdminAttendance from './admin/Attendance'; // Renamed to AdminAttendance
 import UserDetails from './admin/UserDetails'; // UserDetails page for users
 import AddEmployee from './admin/AddEmployee'; // Import AddEmployee component
+import EmployeeDetails from './admin/EmployeeDetails'; // Import EmployeeDetails component
 
 import './App.css';
 
@@ -277,6 +278,15 @@ const App = () => {
               <ProtectedRoute requiredRole="admin">
                 <AdminSidebar />
                 <AddEmployee />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/employee-details/:employeeId"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
+                <EmployeeDetails />
               </ProtectedRoute>
             }
           />
