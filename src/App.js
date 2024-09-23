@@ -34,7 +34,8 @@ import AdminAttendance from './admin/Attendance'; // Renamed to AdminAttendance
 import UserDetails from './admin/UserDetails'; // UserDetails page for users
 import AddEmployee from './admin/AddEmployee'; // Import AddEmployee component
 import EmployeeDetails from './admin/EmployeeDetails'; // Import EmployeeDetails component
-
+import EmployeeDocs from './admin/EmployeeDocs'; 
+import PayrollUpload from './admin/PayrollUpload';
 import './App.css';
 
 const App = () => {
@@ -218,6 +219,21 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+<Route
+  path="/employee/:employeeId"
+  element={
+    <ProtectedRoute>
+      <EmployeeDocs />
+    </ProtectedRoute>
+  }
+/>
+
+
+
+
+
+
+
           <Route
             path="/admin/reviews"
             element={
@@ -228,7 +244,7 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/payroll"
+            path="/admin/adminpayroll"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminSidebar />
@@ -290,6 +306,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+        <Route path="/admin/payrollupload" element={<PayrollUpload />} />
 
           {/* Redirect any unknown route to login */}
           <Route path="*" element={<Navigate to="/login" />} />

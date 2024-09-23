@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCalendarAlt, faClipboardList, faTasks, faUsers, faFolder, faBars
-} from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faClipboardList, faTasks, faUsers, faFolder, faBars, faDollarSign } from '@fortawesome/free-solid-svg-icons';
 import './AdminSidebar.css'; // Import the CSS for styling
 
 const AdminSidebar = () => {
@@ -57,6 +55,12 @@ const AdminSidebar = () => {
             <Link to="/admin/files" onClick={closeSidebar}>
               <FontAwesomeIcon icon={faFolder} />
               <span>Files</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/admin/payrollupload" onClick={closeSidebar}>
+              <FontAwesomeIcon icon={faDollarSign} />
+              <span>Payroll</span>
             </Link>
           </li>
         </ul>

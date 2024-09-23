@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { firestore, storage } from '../firebaseConfig'; // Adjust the import based on your structure
-import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { ref, uploadBytes } from 'firebase/storage';
+import { firestore, storage } from '../firebaseConfig';
+import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Link } from 'react-router-dom';
 import './Files.css';
 
 const Files = () => {
   const [activeTab, setActiveTab] = useState('official');
+  const [uploadTab, setUploadTab] = useState('yetToUpload');
   const [officialDocs, setOfficialDocs] = useState([]);
-  const [employeeDocs, setEmployeeDocs] = useState([]);
-  const [employeeFiles, setEmployeeFiles] = useState([]); // State for employee files
   const [newDoc, setNewDoc] = useState({ filename: '', purpose: '' });
   const [file, setFile] = useState(null);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [employees, setEmployees] = useState([]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+  };
+
+  const handleUploadTabChange = (tab) => {
+    setUploadTab(tab);
   };
 
   const handleInputChange = (e) => {
@@ -27,42 +31,60 @@ const Files = () => {
   };
 
   const handleAddDoc = async () => {
-    // Your existing handleAddDoc function
+    if (!file) {
+      alert('Please select a file to upload');
+      return;
+    }
+
+    try {
+      const storageRef = ref(storage, `official_docs/${newDoc.filename}`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      await addDoc(collection(firestore, 'official_documents'), {
+        filename: newDoc.filename,
+        purpose: newDoc.purpose,
+        downloadURL: downloadURL,
+        uploadedAt: new Date(),
+      });
+
+      alert('Document uploaded successfully');
+      setNewDoc({ filename: '', purpose: '' });
+      setFile(null);
+      fetchOfficialDocs();
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert('Error uploading document: ' + error.message);
+    }
   };
 
-  const handleViewFiles = async (employee) => {
-    setSelectedEmployee(employee);
+  const fetchOfficialDocs = async () => {
+    const snapshot = await getDocs(collection(firestore, 'official_documents'));
+    const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setOfficialDocs(docs);
+  };
 
-    // Fetch the employee's specific files
-    const filesSnapshot = await getDocs(collection(firestore, `employee_documents/${employee.id}/files`));
-    const files = filesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    setEmployeeFiles(files); // Set employee files state
+  const fetchEmployees = async () => {
+    const snapshot = await getDocs(collection(firestore, 'employees'));
+    const employeeList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setEmployees(employeeList);
+  };
+
+  const handleDeleteDoc = async (docId) => {
+    try {
+      await deleteDoc(doc(firestore, 'official_documents', docId));
+      alert('Document deleted successfully');
+      fetchOfficialDocs();
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Error deleting document: ' + error.message);
+    }
   };
 
   useEffect(() => {
-    const fetchOfficialDocs = async () => {
-      const snapshot = await getDocs(collection(firestore, 'official_documents'));
-      const docs = await Promise.all(snapshot.docs.map(async (doc) => {
-        const filesSnapshot = await getDocs(collection(firestore, `official_documents/${doc.id}/files`));
-        const files = filesSnapshot.docs.map(fileDoc => ({ id: fileDoc.id, ...fileDoc.data() }));
-        return { id: doc.id, files };
-      }));
-      setOfficialDocs(docs);
-    };
-
-    const fetchEmployeeDocs = async () => {
-      const snapshot = await getDocs(collection(firestore, 'employee_documents'));
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setEmployeeDocs(docs);
-    };
-
-    if (activeTab === 'official') {
-      fetchOfficialDocs();
-    } else if (activeTab === 'employee') {
-      fetchEmployeeDocs();
-    }
-  }, [activeTab]);
+    fetchOfficialDocs();
+    fetchEmployees();
+  }, []);
 
   return (
     <div className="files-page" style={{ marginLeft: '250px' }}>
@@ -79,39 +101,69 @@ const Files = () => {
       {activeTab === 'official' && (
         <div className="official-docs">
           <h2>Official Documents</h2>
-          {/* Your existing official documents UI */}
+          <div className="upload-tabs">
+            <button className={uploadTab === 'yetToUpload' ? 'tab-active' : 'tab'} onClick={() => handleUploadTabChange('yetToUpload')}>
+              Yet to Upload
+            </button>
+            <button className={uploadTab === 'alreadyUploaded' ? 'tab-active' : 'tab'} onClick={() => handleUploadTabChange('alreadyUploaded')}>
+              Already Uploaded
+            </button>
+          </div>
+
+          {uploadTab === 'alreadyUploaded' && (
+            <div>
+              <h3>Already Uploaded</h3>
+              {officialDocs.length > 0 ? (
+                officialDocs.map((doc) => (
+                  <div key={doc.id} className="file-item">
+                    <span>{doc.filename}</span>
+                    <button onClick={() => handleDeleteDoc(doc.id)}>Delete</button>
+                    <a href={doc.downloadURL} target="_blank" rel="noopener noreferrer">Download</a>
+                  </div>
+                ))
+              ) : (
+                <p>No official documents uploaded.</p>
+              )}
+            </div>
+          )}
+
+          {uploadTab === 'yetToUpload' && (
+            <div>
+              <h3>Yet to Upload</h3>
+              <input
+                type="text"
+                name="filename"
+                placeholder="Document Name"
+                value={newDoc.filename}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="purpose"
+                placeholder="Purpose"
+                value={newDoc.purpose}
+                onChange={handleInputChange}
+              />
+              <input type="file" onChange={handleFileChange} />
+              <button onClick={handleAddDoc}>Upload</button>
+            </div>
+          )}
         </div>
       )}
 
       {activeTab === 'employee' && (
         <div className="employee-docs">
           <h2>Employee Documents</h2>
-          {employeeDocs.length > 0 ? (
-            employeeDocs.map((employee) => (
+          {employees.length > 0 ? (
+            employees.map(employee => (
               <div key={employee.id} className="employee-item">
-                <span>{employee.uid}</span> {/* Use the correct field for UID */}
-                <button onClick={() => handleViewFiles(employee)}>View Files</button>
+                <span>{employee.uid || employee.name}</span> {/* Adjust as needed */}
+                <Link to={`/employee/${employee.id}`} className="view-docs-button">View Docs</Link>
               </div>
             ))
           ) : (
-            <p>No employee documents available.</p>
+            <p>No employees found.</p>
           )}
-        </div>
-      )}
-
-      {selectedEmployee && employeeFiles.length > 0 && (
-        <div className="employee-files">
-          <h2>Files for {selectedEmployee.uid}</h2>
-          <div className="file-list">
-            {employeeFiles.map(file => (
-              <div key={file.id} className="file-item">
-                <span>{file.name}</span> {/* Adjust as per your file structure */}
-                <a href={file.url} target="_blank" rel="noopener noreferrer" download>
-                  Download
-                </a>
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>

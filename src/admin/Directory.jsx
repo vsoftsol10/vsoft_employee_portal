@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { auth, firestore } from '../firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { setDoc, doc, Timestamp, getDocs, collection } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import './Directory.css'; // Import the CSS
+import { useNavigate } from 'react-router-dom';
+import './Directory.css';
 
 const Directory = () => {
   const [activeTab, setActiveTab] = useState('addEmployee');
@@ -14,10 +14,18 @@ const Directory = () => {
     role: '',
     department: '',
     password: '',
+    aadhar: '',
+    fatherName: '',
+    motherName: '',
+    dob: '',
+    address: '',
+    emergencyContact: '',
+    checkInTime: '',
+    checkOutTime: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -34,46 +42,49 @@ const Directory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, email, password, role, department } = formData;
-
-    if (!name || !email || !password || !role || !department) {
+    const {
+      name, email, password, role, department, aadhar, fatherName, motherName, dob, address, emergencyContact, checkInTime, checkOutTime
+    } = formData;
+  
+    if (!name || !email || !password || !role || !department || !aadhar || !fatherName || !motherName || !dob || !address || !emergencyContact || !checkInTime || !checkOutTime) {
       setError('All fields are required.');
       return;
     }
-
+  
     setLoading(true);
     setError('');
+  
+ try {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      await setDoc(doc(firestore, 'employees', user.uid), {
-        name,
-        email,
-        role,
-        department,
-        profilePic: '',
-        employmentStatus: 'Active',
-        dateJoined: Timestamp.fromDate(new Date()),
-      });
-
-      alert('Employee added successfully');
-      setFormData({
-        name: '',
-        email: '',
-        role: '',
-        department: '',
-        password: '',
-      });
-    } catch (error) {
-      console.error('Error adding employee:', error.message);
-      setError('Error adding employee: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
+  // Save employee details to Firestore
+  await setDoc(doc(firestore, `employees/${user.uid}`), {
+    name,
+    email,
+    role,
+    department,
+    aadhar,
+    fatherName,
+    motherName,
+    dob,
+    address,
+    emergencyContact,
+    checkInTime,
+    checkOutTime,
+    employmentStatus: 'Active',
+    dateJoined: Timestamp.fromDate(new Date()),
+  });
+} catch (error) {
+  if (error.code === 'auth/email-already-in-use') {
+    setError('This email address is already in use. Please use a different email.');
+  } else {
+    console.error('Error adding employee:', error.message);
+    setError('Error adding employee: ' + error.message);
+  }
+}
   };
-
+  
   return (
     <div className="directory-container">
       <div className="tabs">
@@ -93,6 +104,14 @@ const Directory = () => {
             <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
             <input name="role" placeholder="Role" value={formData.role} onChange={handleChange} required />
             <input name="department" placeholder="Department" value={formData.department} onChange={handleChange} required />
+            <input name="aadhar" placeholder="Aadhar Number" value={formData.aadhar} onChange={handleChange} required />
+            <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} required />
+            <input name="motherName" placeholder="Mother's Name" value={formData.motherName} onChange={handleChange} required />
+            <input name="dob" type="date" placeholder="Date of Birth" value={formData.dob} onChange={handleChange} required />
+            <input name="address" placeholder="Address" value={formData.address} onChange={handleChange} required />
+            <input name="emergencyContact" placeholder="Emergency Contact" value={formData.emergencyContact} onChange={handleChange} required />
+            <input name="checkInTime" type="time" placeholder="Check-In Time" value={formData.checkInTime} onChange={handleChange} required />
+            <input name="checkOutTime" type="time" placeholder="Check-Out Time" value={formData.checkOutTime} onChange={handleChange} required />
             <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Employee'}</button>
             {error && <p className="error">{error}</p>}
           </form>

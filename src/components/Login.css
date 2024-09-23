@@ -7,7 +7,7 @@
 }
 
 body {
-  background-color: #f4f4f4;
+  background-color: hsla(0, 3%, 39%, 0.062);
 }
 
 .login-page {
@@ -22,7 +22,7 @@ body {
   display: flex;
   width: 100%;
   max-width: 1200px;
-  background-color: #ffffff;
+  background-color: hsla(296, 41%, 35%, 0.247);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -48,7 +48,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: #ffffff;
+  background-color: hsla(296, 41%, 35%, 0.247);;
   position: relative;
 }
 
@@ -118,6 +118,35 @@ button:hover {
 .links p:hover {
   text-decoration: underline;
 }
+/* Add to your existing CSS */
+
+/* Tab styles */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  cursor: pointer;
+  background-color: #007bff; /* User Login tab color */
+  color: white;
+  font-size: 16px;
+  border-radius: 5px 5px 0 0;
+  transition: background-color 0.3s;
+}
+
+.tab:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+
+.tab.active {
+  background-color: #6f42c1; /* Admin Login tab color */
+}
+
 
 /* Responsive */
 @media screen and (max-width: 768px) {
