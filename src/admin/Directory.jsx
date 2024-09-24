@@ -20,6 +20,7 @@ const Directory = () => {
     dob: '',
     address: '',
     emergencyContact: '',
+    mobile: '', // Added mobile number field
     checkInTime: '',
     checkOutTime: '',
   });
@@ -43,10 +44,11 @@ const Directory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const {
-      name, email, password, role, department, aadhar, fatherName, motherName, dob, address, emergencyContact, checkInTime, checkOutTime
+      name, email, password, role, department, aadhar, fatherName, motherName, dob, address, emergencyContact, mobile, checkInTime, checkOutTime
     } = formData;
   
-    if (!name || !email || !password || !role || !department || !aadhar || !fatherName || !motherName || !dob || !address || !emergencyContact || !checkInTime || !checkOutTime) {
+    // Ensure all fields are filled
+    if (!name || !email || !password || !role || !department || !aadhar || !fatherName || !motherName || !dob || !address || !emergencyContact || !mobile || !checkInTime || !checkOutTime) {
       setError('All fields are required.');
       return;
     }
@@ -54,35 +56,56 @@ const Directory = () => {
     setLoading(true);
     setError('');
   
- try {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-  // Save employee details to Firestore
-  await setDoc(doc(firestore, `employees/${user.uid}`), {
-    name,
-    email,
-    role,
-    department,
-    aadhar,
-    fatherName,
-    motherName,
-    dob,
-    address,
-    emergencyContact,
-    checkInTime,
-    checkOutTime,
-    employmentStatus: 'Active',
-    dateJoined: Timestamp.fromDate(new Date()),
-  });
-} catch (error) {
-  if (error.code === 'auth/email-already-in-use') {
-    setError('This email address is already in use. Please use a different email.');
-  } else {
-    console.error('Error adding employee:', error.message);
-    setError('Error adding employee: ' + error.message);
-  }
-}
+      // Save employee details to Firestore
+      await setDoc(doc(firestore, `employees/${user.uid}`), {
+        name,
+        email,
+        role,
+        department,
+        aadhar,
+        fatherName,
+        motherName,
+        dob,
+        address,
+        emergencyContact,
+        mobile, // Include mobile number in Firestore
+        checkInTime,
+        checkOutTime,
+        employmentStatus: 'Active',
+        dateJoined: Timestamp.fromDate(new Date()),
+      });
+
+      // Reset form after successful submission
+      setFormData({
+        name: '',
+        email: '',
+        role: '',
+        department: '',
+        password: '',
+        aadhar: '',
+        fatherName: '',
+        motherName: '',
+        dob: '',
+        address: '',
+        emergencyContact: '',
+        mobile: '',
+        checkInTime: '',
+        checkOutTime: '',
+      });
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        setError('This email address is already in use. Please use a different email.');
+      } else {
+        console.error('Error adding employee:', error.message);
+        setError('Error adding employee: ' + error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
@@ -110,6 +133,7 @@ const Directory = () => {
             <input name="dob" type="date" placeholder="Date of Birth" value={formData.dob} onChange={handleChange} required />
             <input name="address" placeholder="Address" value={formData.address} onChange={handleChange} required />
             <input name="emergencyContact" placeholder="Emergency Contact" value={formData.emergencyContact} onChange={handleChange} required />
+            <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} required /> {/* Added mobile number input */}
             <input name="checkInTime" type="time" placeholder="Check-In Time" value={formData.checkInTime} onChange={handleChange} required />
             <input name="checkOutTime" type="time" placeholder="Check-Out Time" value={formData.checkOutTime} onChange={handleChange} required />
             <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Employee'}</button>
@@ -138,3 +162,4 @@ const Directory = () => {
 };
 
 export default Directory;
+

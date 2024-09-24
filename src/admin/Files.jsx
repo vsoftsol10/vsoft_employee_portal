@@ -12,6 +12,7 @@ const Files = () => {
   const [newDoc, setNewDoc] = useState({ filename: '', purpose: '' });
   const [file, setFile] = useState(null);
   const [employees, setEmployees] = useState([]);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -67,7 +68,14 @@ const Files = () => {
   const fetchEmployees = async () => {
     const snapshot = await getDocs(collection(firestore, 'employees'));
     const employeeList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setEmployees(employeeList);
+
+    const employeesWithDocs = await Promise.all(employeeList.map(async (employee) => {
+      const filesSnapshot = await getDocs(collection(firestore, `employeefiles/${employee.id}/files`));
+      const files = filesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return { ...employee, files: files || [] };
+    }));
+
+    setEmployees(employeesWithDocs);
   };
 
   const handleDeleteDoc = async (docId) => {
@@ -79,6 +87,10 @@ const Files = () => {
       console.error('Error deleting document:', error);
       alert('Error deleting document: ' + error.message);
     }
+  };
+
+  const handleViewDocs = (employeeId) => {
+    setSelectedEmployeeId(employeeId === selectedEmployeeId ? null : employeeId); // Toggle view
   };
 
   useEffect(() => {
@@ -157,8 +169,24 @@ const Files = () => {
           {employees.length > 0 ? (
             employees.map(employee => (
               <div key={employee.id} className="employee-item">
-                <span>{employee.uid || employee.name}</span> {/* Adjust as needed */}
-                <Link to={`/employee/${employee.id}`} className="view-docs-button">View Docs</Link>
+                <span>{employee.name}</span>
+                <button onClick={() => handleViewDocs(employee.id)}>
+                  {selectedEmployeeId === employee.id ? 'Hide Docs' : 'View Docs'}
+                </button>
+                {selectedEmployeeId === employee.id && (
+                  <div>
+                    {employee.files && employee.files.length > 0 ? (
+                      employee.files.map(file => (
+                        <div key={file.id} className="file-item">
+                          <span>{file.name}</span>
+                          <a href={file.url} target="_blank" rel="noopener noreferrer">View</a>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No documents found for this employee.</p>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           ) : (

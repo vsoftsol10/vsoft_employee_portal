@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, firestore, storage } from '../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
 const Profile = () => {
@@ -22,29 +23,37 @@ const Profile = () => {
     employmentStatus: ''
   });
   const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfileData = async () => {
       if (auth.currentUser) {
         const userRef = doc(firestore, `employees/${auth.currentUser.uid}`);
-        const userDoc = await getDoc(userRef);
-
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          
-          // Handling Firestore timestamp to readable date
-          const dateJoined = data.dateJoined?.toDate().toLocaleDateString() || 'N/A';
-
-          // Set profile data, including the formatted dateJoined
-          setProfile({ ...data, dateJoined });
-
-          // Fetch profile image if available
-          setProfileImage(data.profileImage || "https://via.placeholder.com/150");
-        } else {
-          console.error("No document found for this user.");
+        try {
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            const formatDate = (timestamp) => {
+              return timestamp && timestamp.toDate ? timestamp.toDate().toLocaleDateString() : 'N/A';
+            };
+            setProfile({
+              ...data,
+              dateJoined: formatDate(data.dateJoined),
+              dob: formatDate(data.dob)
+            });
+            setProfileImage(data.profileImage || "https://via.placeholder.com/150");
+          } else {
+            console.error("No document found for this user.");
+          }
+        } catch (error) {
+          console.error("Error fetching profile data:", error.message);
         }
+      } else {
+        console.error("User is not authenticated.");
       }
     };
+
     fetchProfileData();
   }, []);
 
@@ -71,26 +80,29 @@ const Profile = () => {
   const handleSave = async () => {
     if (auth.currentUser) {
       const userRef = doc(firestore, `employees/${auth.currentUser.uid}`);
-
+      setIsLoading(true);
       try {
-        // Handle image upload
         if (file) {
           const storageRef = ref(storage, `users/${auth.currentUser.uid}/profile.jpg`);
           await uploadBytes(storageRef, file);
           const imageUrl = await getDownloadURL(storageRef);
           profile.profileImage = imageUrl;
         }
-
-        // Save profile data in Firestore
         await updateDoc(userRef, profile);
         setIsEditing(false);
         console.log("Profile saved:", profile);
       } catch (error) {
         console.error("Error saving profile:", error.message);
+      } finally {
+        setIsLoading(false);
       }
     } else {
       console.error("User is not authenticated.");
     }
+  };
+
+  const handleChangePassword = () => {
+    navigate('/change-password');
   };
 
   return (
@@ -114,12 +126,7 @@ const Profile = () => {
           <div className="profile-detail">
             <label>Name:</label>
             {isEditing ? (
-              <input
-                type="text"
-                name="name"
-                value={profile.name}
-                onChange={handleChange}
-              />
+              <input type="text" name="name" value={profile.name} onChange={handleChange} />
             ) : (
               <p>{profile.name}</p>
             )}
@@ -131,12 +138,7 @@ const Profile = () => {
           <div className="profile-detail">
             <label>Emergency Contact:</label>
             {isEditing ? (
-              <input
-                type="text"
-                name="emergencyContact"
-                value={profile.emergencyContact}
-                onChange={handleChange}
-              />
+              <input type="text" name="emergencyContact" value={profile.emergencyContact} onChange={handleChange} />
             ) : (
               <p>{profile.emergencyContact}</p>
             )}
@@ -144,12 +146,7 @@ const Profile = () => {
           <div className="profile-detail">
             <label>Department:</label>
             {isEditing ? (
-              <input
-                type="text"
-                name="department"
-                value={profile.department}
-                onChange={handleChange}
-              />
+              <input type="text" name="department" value={profile.department} onChange={handleChange} />
             ) : (
               <p>{profile.department}</p>
             )}
@@ -157,12 +154,7 @@ const Profile = () => {
           <div className="profile-detail">
             <label>Date of Birth:</label>
             {isEditing ? (
-              <input
-                type="date"
-                name="dob"
-                value={profile.dob}
-                onChange={handleChange}
-              />
+              <input type="date" name="dob" value={profile.dob} onChange={handleChange} />
             ) : (
               <p>{profile.dob}</p>
             )}
@@ -170,12 +162,7 @@ const Profile = () => {
           <div className="profile-detail">
             <label>Father's Name:</label>
             {isEditing ? (
-              <input
-                type="text"
-                name="fatherName"
-                value={profile.fatherName}
-                onChange={handleChange}
-              />
+              <input type="text" name="fatherName" value={profile.fatherName} onChange={handleChange} />
             ) : (
               <p>{profile.fatherName}</p>
             )}
@@ -183,12 +170,7 @@ const Profile = () => {
           <div className="profile-detail">
             <label>Mother's Name:</label>
             {isEditing ? (
-              <input
-                type="text"
-                name="motherName"
-                value={profile.motherName}
-                onChange={handleChange}
-              />
+              <input type="text" name="motherName" value={profile.motherName} onChange={handleChange} />
             ) : (
               <p>{profile.motherName}</p>
             )}
@@ -196,67 +178,65 @@ const Profile = () => {
           <div className="profile-detail">
             <label>Role:</label>
             {isEditing ? (
-              <input
-                type="text"
-                name="role"
-                value={profile.role}
-                onChange={handleChange}
-              />
+              <input type="text" name="role" value={profile.role} onChange={handleChange} />
             ) : (
               <p>{profile.role}</p>
             )}
           </div>
           <div className="profile-detail">
-            <label>Check In Time:</label>
-            {isEditing ? (
-              <input
-                type="time"
-                name="checkInTime"
-                value={profile.checkInTime}
-                onChange={handleChange}
-              />
-            ) : (
-              <p>{profile.checkInTime}</p>
-            )}
-          </div>
-          <div className="profile-detail">
-            <label>Check Out Time:</label>
-            {isEditing ? (
-              <input
-                type="time"
-                name="checkOutTime"
-                value={profile.checkOutTime}
-                onChange={handleChange}
-              />
-            ) : (
-              <p>{profile.checkOutTime}</p>
-            )}
-          </div>
-          <div className="profile-detail">
-            <label>Date Joined:</label>
-            <p>{profile.dateJoined || "N/A"}</p>
-          </div>
+  <label>Check-In Time:</label>
+  {isEditing ? (
+    <input
+      type="time"
+      name="checkInTime"
+      value={profile.checkInTime}
+      onChange={handleChange}
+      disabled
+    />
+  ) : (
+    <p>{profile.checkInTime}</p>
+  )}
+</div>
+<div className="profile-detail">
+  <label>Check-Out Time:</label>
+  {isEditing ? (
+    <input
+      type="time"
+      name="checkOutTime"
+      value={profile.checkOutTime}
+      onChange={handleChange}
+      disabled
+    />
+  ) : (
+    <p>{profile.checkOutTime}</p>
+  )}
+</div>
+<div className="profile-detail">
+  <label>Date Joined:</label>
+  <p>{profile.dateJoined}</p>
+</div>
+
           <div className="profile-detail">
             <label>Employment Status:</label>
-            <p>{profile.employmentStatus}</p>
+            {isEditing ? (
+              <input type="text" name="employmentStatus" value={profile.employmentStatus} onChange={handleChange} />
+            ) : (
+              <p>{profile.employmentStatus}</p>
+            )}
           </div>
         </div>
-        <div className="profile-actions">
-          <button className="edit-btn" onClick={handleEdit} disabled={isEditing}>
-            {isEditing ? 'Cancel' : 'Edit Profile'}
-          </button>
-          {isEditing && (
-            <button className="save-btn" onClick={handleSave}>
-              Save Changes
-            </button>
-          )}
-          {!isEditing && (
-            <a href="/change-password" className="change-password-link">
-              Change Password
-            </a>
-          )}
-        </div>
       </div>
+      <button className="edit-btn" onClick={handleEdit}>
+        Edit Profile
+      </button>
+      <button className="change-password-btn" onClick={handleChangePassword}>
+        Change Password
+      </button>
+      {isEditing && (
+        <button className="save-btn" onClick={handleSave} disabled={isLoading}>
+          {isLoading ? 'Saving...' : 'Save Changes'}
+        </button>
+      )}
     </div>
   );
 };

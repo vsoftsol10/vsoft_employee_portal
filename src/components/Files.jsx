@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import './Files.css'; // Import the CSS file for styling
-import { firestore, storage, auth } from '../firebaseConfig'; // Adjust the path to your firebaseConfig file
-import { collection, addDoc, doc, setDoc, getDocs } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Import Storage methods
+import './Files.css';
+import { firestore, storage, auth } from '../firebaseConfig';
+import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const Files = () => {
   const [activeTab, setActiveTab] = useState('personal');
-  const [personalFiles, setPersonalFiles] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [organizationFiles, setOrganizationFiles] = useState([]);
   const [fileToUpload, setFileToUpload] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [uid, setUid] = useState(null); // For storing the authenticated user ID
+  const [uid, setUid] = useState(null);
 
-  // Handle tab change (Personal or Organization)
+  // Handle tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
@@ -24,31 +23,32 @@ const Files = () => {
     setFileToUpload(event.target.files[0]);
   };
 
+  // Handle file upload
   const handleUpload = async () => {
     if (fileToUpload && selectedCategory && uid) {
       try {
         const storageRef = ref(storage, `oftenusers/${uid}/${selectedCategory}/${fileToUpload.name}`);
-        console.log('Uploading to:', storageRef.fullPath);
         const snapshot = await uploadBytes(storageRef, fileToUpload);
         const downloadURL = await getDownloadURL(snapshot.ref);
 
-        const fileDoc = doc(collection(firestore, 'oftenusers', uid, 'files'));
-        await setDoc(fileDoc, {
+        // Create subcollection for each user
+        const fileDocRef = doc(collection(firestore, `employeefiles/${uid}/files`), fileToUpload.name);
+        await setDoc(fileDocRef, {
           name: fileToUpload.name,
-          category: selectedCategory,
           url: downloadURL,
           uploadedAt: new Date(),
+          category: selectedCategory,
         });
 
-        // Update the local state with the new file
-        setUploadedFiles([...uploadedFiles, {
-          id: fileDoc.id,
+        // Update local state with the new file
+        setUploadedFiles((prev) => [...prev, {
+          id: fileToUpload.name,
           name: fileToUpload.name,
-          category: selectedCategory,
           url: downloadURL,
+          category: selectedCategory,
         }]);
 
-        // Clear form fields after uploading
+        // Clear fields
         setFileToUpload(null);
         setSelectedCategory('');
         alert('File uploaded successfully!');
@@ -64,24 +64,24 @@ const Files = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUid(user.uid);  // Setting user id after successful login
+        setUid(user.uid);
         fetchUploadedFiles(user.uid);
       } else {
-        setUid(null);  // Handle user not authenticated
+        setUid(null);
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Fetch already uploaded files from Firestore
+  // Fetch uploaded files from Firestore
   const fetchUploadedFiles = async (userId) => {
-    const filesSnapshot = await getDocs(collection(firestore, 'oftenusers', userId, 'files'));
+    const filesSnapshot = await getDocs(collection(firestore, `employeefiles/${userId}/files`));
     const files = filesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setUploadedFiles(files);
   };
 
-  // Fetch organization files from Firestore
+  // Fetch organization files
   const fetchOrganizationFiles = async () => {
     const snapshot = await getDocs(collection(firestore, 'official_documents'));
     const files = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -111,59 +111,38 @@ const Files = () => {
         </button>
       </div>
 
-      {/* Personal Files Upload and Display */}
+      {/* Personal Files Section */}
       {activeTab === 'personal' && (
         <div className="personal-section">
-          <div className="personal-tabs">
-            <button
-              className={selectedCategory === 'uploaded' ? 'active' : ''}
-              onClick={() => setSelectedCategory('uploaded')}
-            >
-              Already Uploaded
-            </button>
-            <button
-              className={selectedCategory === 'yetToUpload' ? 'active' : ''}
-              onClick={() => setSelectedCategory('yetToUpload')}
-            >
-              Yet to Upload
-            </button>
+          <div className="category-selection">
+            <select onChange={(e) => setSelectedCategory(e.target.value)} value={selectedCategory}>
+              <option value="">Select Category</option>
+              <option value="Aadhar">Aadhar</option>
+              <option value="PAN Card">PAN Card</option>
+              <option value="License">License</option>
+              <option value="Bank Passbook">Bank Passbook</option>
+              <option value="Offer Letter">Offer Letter</option>
+              <option value="Resume">Resume</option>
+            </select>
           </div>
 
-          {/* Show Uploaded Files */}
-          {selectedCategory === 'uploaded' && (
-            <div className="file-list">
-              {uploadedFiles.map((file) => (
-                <div key={file.id} className="file-item">
-                  <span>{file.category}: {file.name}</span>
-                  <a href={file.url} target="_blank" rel="noopener noreferrer">View</a>
-                  <button>Delete</button>
-                </div>
-              ))}
-            </div>
-          )}
+          <input type="file" onChange={handleFileUpload} />
+          <button onClick={handleUpload}>Upload</button>
 
-          {/* Upload Section */}
-          {selectedCategory === 'yetToUpload' && (
-            <div className="upload-section">
-              <div className="category-selection">
-                <select onChange={(e) => setSelectedCategory(e.target.value)} value={selectedCategory}>
-                  <option value="">Select Category</option>
-                  <option value="Aadhar">Aadhar</option>
-                  <option value="PAN Card">PAN Card</option>
-                  <option value="License">License</option>
-                  <option value="Bank Passbook">Bank Passbook</option>
-                  <option value="Offer Letter">Offer Letter</option>
-                  <option value="Resume">Resume</option>
-                </select>
+          {/* Uploaded Files List */}
+          <div className="file-list">
+            {uploadedFiles.map((file) => (
+              <div key={file.id} className="file-item">
+                <span>{file.name}</span>
+                <a href={file.url} target="_blank" rel="noopener noreferrer">View</a>
+                <button>Delete</button>
               </div>
-              <input type="file" onChange={handleFileUpload} />
-              <button onClick={handleUpload}>Upload</button>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Organization Files Display */}
+      {/* Organization Files Section */}
       {activeTab === 'organization' && (
         <div className="organization-section">
           <h2>Organization Files</h2>

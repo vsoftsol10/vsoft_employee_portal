@@ -5,12 +5,15 @@
   max-width: 100%;
 }
 
+/* Tab button styles */
 .tabs {
   display: flex;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
   gap: 10px;
   margin-bottom: 20px;
 }
 
+/* Button styles */
 .tabs button {
   background-color: #007bff;
   color: white;
@@ -19,18 +22,22 @@
   cursor: pointer;
   border-radius: 5px;
   font-weight: bold;
+  flex: 1; /* Make buttons responsive */
 }
 
+/* Active tab styles */
 .tabs button.active {
   background-color: #0056b3;
 }
 
+/* Content area */
 .content {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 8px;
 }
 
+/* Employee form styling */
 .employee-form {
   display: flex;
   flex-direction: column;
@@ -44,6 +51,7 @@
   border-radius: 5px;
 }
 
+/* Submit button styling */
 .employee-form button {
   background-color: #28a745;
   color: white;
@@ -54,17 +62,20 @@
   font-size: 16px;
 }
 
+/* Error message styling */
 .error {
   color: red;
   font-size: 14px;
 }
 
+/* Employee list styling */
 .employee-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+/* Employee card styling */
 .employee-card {
   display: flex;
   justify-content: space-between;
@@ -76,6 +87,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* View details button styling */
 .view-details {
   background-color: #007bff;
   color: white;
@@ -85,18 +97,21 @@
   border-radius: 4px;
 }
 
+/* Status indicator styling */
 .status {
   font-weight: bold;
   padding: 5px 10px;
   border-radius: 4px;
 }
 
+/* Present status */
 .status.present {
   color: #28a745;
   border: 2px solid #28a745;
   box-shadow: 0px 0px 8px #28a745;
 }
 
+/* Absent status */
 .status.absent {
   color: #dc3545;
   border: 2px solid #dc3545;
@@ -110,8 +125,21 @@
     padding: 10px;
   }
 
+  .tabs {
+    flex-direction: column; /* Stack tabs vertically */
+  }
+
+  .tabs button {
+    width: 100%; /* Full width for buttons on small screens */
+  }
+
   .employee-card {
-    flex-direction: column;
+    flex-direction: column; /* Stack employee card content */
     gap: 10px;
+  }
+
+  .employee-form input,
+  .employee-form button {
+    width: 100%; /* Full width for inputs and buttons */
   }
 }

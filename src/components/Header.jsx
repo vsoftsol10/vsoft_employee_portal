@@ -60,6 +60,10 @@ const Header = () => {
     navigate('/login'); // Redirect to login page
   };
 
+  const handleShowAllNotifications = () => {
+    navigate('/notification'); // Navigate to notification page
+  };
+
   return (
     <header className="header">
       <div className="logo">
@@ -77,7 +81,9 @@ const Header = () => {
                 <li>Notification 2</li>
                 <li>Notification 3</li>
               </ul>
-              <div className="show-all">Show all</div>
+              <div className="show-all" onClick={handleShowAllNotifications}>
+                Show all
+              </div>
             </div>
           )}
         </div>
