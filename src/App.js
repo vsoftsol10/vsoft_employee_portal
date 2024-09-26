@@ -192,7 +192,8 @@ const App = () => {
           />
 
           {/* Protected Admin Routes */}
-          <Route
+              {/* Protected Admin Routes */}
+              <Route
             path="/admin/dashboard"
             element={
               <ProtectedRoute requiredRole="admin">
@@ -219,16 +220,14 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-<Route
-  path="/employee/:employeeId"
-  element={
-    <ProtectedRoute>
-      <EmployeeDocs />
-    </ProtectedRoute>
-  }
-/>
-
-
+          <Route
+            path="/employee/:employeeId"
+            element={
+              <ProtectedRoute>
+                <EmployeeDocs />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin/reviews"
             element={
@@ -301,7 +300,16 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-        <Route path="/admin/payrollupload" element={<PayrollUpload />} />
+          <Route
+            path="/admin/payrollupload"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
+                <PayrollUpload />
+              </ProtectedRoute>
+            }
+          />
+
 
           {/* Redirect any unknown route to login */}
           <Route path="*" element={<Navigate to="/login" />} />

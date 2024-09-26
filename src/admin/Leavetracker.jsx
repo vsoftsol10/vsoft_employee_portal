@@ -134,7 +134,7 @@ const Leavetracker = () => {
                     <div key={request.id} className="request-item">
                       <span>{request.name}</span>
                       <button onClick={() => handleRequestClick(request)} className="neon-button">
-                        See Requests
+                        See Request
                       </button>
                     </div>
                   ))
