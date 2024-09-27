@@ -7,7 +7,7 @@
 }
 
 body {
-  background-color: hsla(0, 3%, 39%, 0.062);
+  background-color: rgba(127, 59, 141, 0.452);
 }
 
 .login-page {
@@ -22,10 +22,11 @@ body {
   display: flex;
   width: 100%;
   max-width: 1200px;
-  background-color: hsla(296, 41%, 35%, 0.247);
+  background-color: rgba(230, 230, 230, 0);
+  backdrop-filter: blur(50px);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0);
 }
 
 .login-left {

@@ -1,22 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { firestore, auth } from '../firebaseConfig'; // Adjust the import based on your structure
-import { doc, getDocs, collection, updateDoc, getDoc } from 'firebase/firestore';
+import { firestore, auth } from '../firebaseConfig';
+import { doc, getDocs, collection, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 import './Leavetracker.css'; // Import CSS
 
 const Leavetracker = () => {
-  const [activeTab, setActiveTab] = useState('leaveRequests');
-  const [selectedRequest, setSelectedRequest] = useState(null); // To hold selected request
-  const [leaveRequests, setLeaveRequests] = useState([]); // To hold fetched leave requests
-  const [userUid, setUserUid] = useState(''); // To hold user UID
-  const [leaveDays, setLeaveDays] = useState({ sickLeave: 2, casualLeave: 2, leaveWithoutPay: 2 }); // Default values
+  const [activeTab, setActiveTab] = useState('latestRequests');
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [leaveRequests, setLeaveRequests] = useState([]);
+  const [userUid, setUserUid] = useState('');
+  const [leaveDays, setLeaveDays] = useState({ sickLeave: 0, casualLeave: 0, leaveWithoutPay: 0 });
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserUid(user.uid);
-        await fetchLeaveRequests(user.uid);
-        await fetchLeaveSettings(); // Fetch leave settings on user login
+        setLoading(true);
+        try {
+          await fetchLeaveRequests(user.uid);
+          await fetchEmployees();
+        } catch (e) {
+          setError('Failed to load data.');
+        } finally {
+          setLoading(false);
+        }
       }
     });
 
@@ -33,155 +46,181 @@ const Leavetracker = () => {
       }));
       setLeaveRequests(requests);
     } catch (error) {
-      console.error('Error fetching leave requests:', error);
+      setError('Failed to fetch leave requests.');
     }
   };
 
-  const fetchLeaveSettings = async () => {
+  const fetchEmployees = async () => {
     try {
-      const settingsDoc = doc(firestore, 'leaveSettings', 'default');
-      const settingsSnap = await getDoc(settingsDoc);
-      if (settingsSnap.exists()) {
-        setLeaveDays(settingsSnap.data());
-      }
+      const employeesCollection = collection(firestore, 'employees');
+      const employeeSnapshot = await getDocs(employeesCollection);
+      const employeeList = employeeSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setEmployees(employeeList);
     } catch (error) {
-      console.error('Error fetching leave settings:', error);
-    }
-  };
-
-  const handleRequestClick = (request) => {
-    setSelectedRequest(request);
-  };
-
-  const handleAccept = async () => {
-    if (!selectedRequest) return;
-    try {
-      const leaveDocRef = doc(firestore, 'oftenusers', userUid, 'leaveformrequests', selectedRequest.id);
-      await updateDoc(leaveDocRef, { status: 'accepted' });
-      alert('Leave Accepted');
-      setSelectedRequest(null);
-      await fetchLeaveRequests(userUid); // Refresh leave requests
-    } catch (error) {
-      console.error('Error accepting leave:', error);
-    }
-  };
-
-  const handleReject = async () => {
-    if (!selectedRequest) return;
-    try {
-      const leaveDocRef = doc(firestore, 'oftenusers', userUid, 'leaveformrequests', selectedRequest.id);
-      await updateDoc(leaveDocRef, { status: 'rejected' });
-      alert('Leave Rejected');
-      setSelectedRequest(null);
-      await fetchLeaveRequests(userUid); // Refresh leave requests
-    } catch (error) {
-      console.error('Error rejecting leave:', error);
+      setError('Failed to fetch employees.');
     }
   };
 
   const handleLeaveDaysChange = (e) => {
     const { name, value } = e.target;
-    setLeaveDays(prev => ({ ...prev, [name]: Number(value) })); // Convert value to a number
+    setLeaveDays(prev => ({ ...prev, [name]: Number(value) }));
   };
 
-  const saveLeaveSettings = async () => {
+  const saveLeaveRules = async (employeeUid) => {
+    const confirmSave = window.confirm("Are you sure you want to save the leave rules?");
+    if (!confirmSave) return;
+
     try {
-      const settingsDocRef = doc(firestore, 'leaveSettings', 'default');
-      await updateDoc(settingsDocRef, leaveDays);
-      alert('Leave settings updated successfully!');
+      const leaveDocRef = doc(firestore, 'leaverules', employeeUid);
+      await setDoc(leaveDocRef, leaveDays);
+      alert('Leave rules saved successfully!');
     } catch (error) {
-      console.error('Error updating leave settings:', error);
+      alert('Failed to save leave rules: ' + error.message);
     }
   };
+
+  const handleApplyRulesClick = (employee) => {
+    setSelectedEmployee(employee);
+    setLeaveDays({ sickLeave: 0, casualLeave: 0, leaveWithoutPay: 0 });
+  };
+
+  const handleRequestBack = () => {
+    setSelectedRequest(null); // Reset to show the request list
+  };
+
+  const latestRequests = leaveRequests.filter(request => request.status === 'pending');
+  const pastRequests = leaveRequests.filter(request => ['accepted', 'rejected'].includes(request.status));
 
   return (
     <div className="leavetracker-container">
       <div className="tabs">
-        <button
-          onClick={() => setActiveTab('leaveRequests')}
-          className={activeTab === 'leaveRequests' ? 'active' : ''}
-        >
-          Leave Requests
+        <button onClick={() => setActiveTab('latestRequests')} className={activeTab === 'latestRequests' ? 'active' : ''}>
+          Latest Requests
         </button>
-        <button
-          onClick={() => setActiveTab('leaveRules')}
-          className={activeTab === 'leaveRules' ? 'active' : ''}
-        >
+        <button onClick={() => setActiveTab('pastRequests')} className={activeTab === 'pastRequests' ? 'active' : ''}>
+          Past Requests
+        </button>
+        <button onClick={() => setActiveTab('leaveRules')} className={activeTab === 'leaveRules' ? 'active' : ''}>
           Leave Rules
         </button>
       </div>
 
-      <div className="content">
-        {activeTab === 'leaveRequests' && (
-          <>
-            {selectedRequest ? (
-              <div className="request-details">
-                <h3>{selectedRequest.name}'s Leave Request</h3>
-                <p><strong>Leave Type:</strong> {selectedRequest.type}</p>
-                <p><strong>Date From:</strong> {selectedRequest.start}</p>
-                <p><strong>Date To:</strong> {selectedRequest.end}</p>
-                <p><strong>Reason:</strong> {selectedRequest.reason}</p>
-                <p><strong>Status:</strong> {selectedRequest.status}</p>
-                <div className="action-buttons">
-                  <button onClick={handleAccept} className="neon-button accept">Accept</button>
-                  <button onClick={handleReject} className="neon-button reject">Reject</button>
-                </div>
-              </div>
-            ) : (
-              <div className="request-list">
-                {leaveRequests.length > 0 ? (
-                  leaveRequests.map((request) => (
-                    <div key={request.id} className="request-item">
-                      <span>{request.name}</span>
-                      <button onClick={() => handleRequestClick(request)} className="neon-button">
-                        See Request
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <p>No leave requests found.</p>
-                )}
-              </div>
-            )}
-          </>
-        )}
+      {loading ? (
+        <div className="loading-spinner">Loading...</div>
+      ) : (
+        <div className="content">
+          {error && <p className="error">{error}</p>}
 
-        {activeTab === 'leaveRules' && (
-          <div className="leave-rules">
-            <div className="leave-rule">
-              <h3>Sick Leave</h3>
-              <input 
-                type="number" 
-                name="sickLeave" 
-                value={leaveDays.sickLeave} 
-                onChange={handleLeaveDaysChange} 
-                placeholder="Set no. of days" 
-              />
+          {activeTab === 'latestRequests' && (
+            <>
+              {selectedRequest ? (
+                <div className="request-details">
+                  <h3>{selectedRequest.name}'s Leave Request</h3>
+                  <p><strong>Leave Type:</strong> {selectedRequest.type}</p>
+                  <p><strong>Date From:</strong> {selectedRequest.start}</p>
+                  <p><strong>Date To:</strong> {selectedRequest.end}</p>
+                  <p><strong>Reason:</strong> {selectedRequest.reason}</p>
+                  <p><strong>Status:</strong> {selectedRequest.status}</p>
+                  <button onClick={handleRequestBack} className="neon-button back-button">
+                    Back to Requests
+                  </button>
+                </div>
+              ) : (
+                <div className="request-list">
+                  {latestRequests.length > 0 ? (
+                    latestRequests.map((request) => (
+                      <div key={request.id} className="request-item">
+                        <span>{request.name}</span>
+                        <button onClick={() => setSelectedRequest(request)} className="neon-button">
+                          See Request
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No latest requests found.</p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === 'pastRequests' && (
+            <div className="request-list">
+              {pastRequests.length > 0 ? (
+                pastRequests.map((request) => (
+                  <div key={request.id} className="request-item">
+                    <span>{request.name}</span>
+                    <p><strong>Status:</strong> {request.status}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No past requests found.</p>
+              )}
             </div>
-            <div className="leave-rule">
-              <h3>Casual Leave</h3>
-              <input 
-                type="number" 
-                name="casualLeave" 
-                value={leaveDays.casualLeave} 
-                onChange={handleLeaveDaysChange} 
-                placeholder="Set no. of days" 
-              />
+          )}
+
+          {activeTab === 'leaveRules' && (
+            <div className="leave-rules">
+              <h2>Working Employees</h2>
+              {employees.length > 0 ? (
+                employees.map((employee) => (
+                  <div key={employee.id} className="employee-item">
+                    <p><strong>Name:</strong> {employee.name}</p>
+                    <p><strong>Position:</strong> {employee.position}</p>
+                    <button onClick={() => handleApplyRulesClick(employee)} className="neon-button">
+                      Apply Rules
+                    </button>
+
+                    {selectedEmployee && selectedEmployee.id === employee.id && (
+                      <div className="leave-rules-form">
+                        <h3>Apply Leave Rules for {selectedEmployee.name}</h3>
+                        <div className="leave-rule">
+                          <h4>Sick Leave</h4>
+                          <input
+                            type="number"
+                            name="sickLeave"
+                            value={leaveDays.sickLeave}
+                            onChange={handleLeaveDaysChange}
+                            placeholder="Set no. of days"
+                          />
+                        </div>
+                        <div className="leave-rule">
+                          <h4>Casual Leave</h4>
+                          <input
+                            type="number"
+                            name="casualLeave"
+                            value={leaveDays.casualLeave}
+                            onChange={handleLeaveDaysChange}
+                            placeholder="Set no. of days"
+                          />
+                        </div>
+                        <div className="leave-rule">
+                          <h4>Leave Without Pay</h4>
+                          <input
+                            type="number"
+                            name="leaveWithoutPay"
+                            value={leaveDays.leaveWithoutPay}
+                            onChange={handleLeaveDaysChange}
+                            placeholder="Set no. of days"
+                          />
+                        </div>
+                        <button onClick={() => saveLeaveRules(employee.id)} className="neon-button save-settings">
+                          Save Leave Rules
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p>No employees found.</p>
+              )}
             </div>
-            <div className="leave-rule">
-              <h3>Leave Without Pay</h3>
-              <input 
-                type="number" 
-                name="leaveWithoutPay" 
-                value={leaveDays.leaveWithoutPay} 
-                onChange={handleLeaveDaysChange} 
-                placeholder="Set no. of days" 
-              />
-            </div>
-            <button onClick={saveLeaveSettings} className="neon-button save">Save Settings</button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

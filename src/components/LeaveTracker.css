@@ -113,7 +113,28 @@ form button:hover {
 .status.rejected {
     color: #f44336; /* Red color for rejected status */
 }
-
+.tab-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+  
+  .tab-buttons button {
+    padding: 10px;
+    cursor: pointer;
+    background-color: lightgray;
+    border: none;
+  }
+  
+  .tab-buttons .active {
+    background-color: darkgray;
+    font-weight: bold;
+  }
+  
+  .tab-content {
+    padding: 20px;
+  }
+  
 /* Responsive Design */
 @media (max-width: 1200px) {
     .leave-tracker {
