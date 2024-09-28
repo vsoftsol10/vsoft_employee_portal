@@ -21,8 +21,13 @@ const Directory = () => {
     address: '',
     emergencyContact: '',
     mobile: '', // Added mobile number field
-    checkInTime: '',
-    checkOutTime: '',
+    checkInStarts: '',
+    checkInEnds: '',
+    checkOutStarts: '',
+    checkOutEnds: '',
+    sickLeave: '', // Sick leave
+    casualLeave: '', // Casual leave
+    leaveWithoutPay: '', // Leave without pay
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,11 +49,12 @@ const Directory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const {
-      name, email, password, role, department, aadhar, fatherName, motherName, dob, address, emergencyContact, mobile, checkInTime, checkOutTime
+      name, email, password, role, department, aadhar, fatherName, motherName, dob, address, emergencyContact, mobile, checkInStarts, checkInEnds, checkOutStarts, checkOutEnds,
+      sickLeave, casualLeave, leaveWithoutPay
     } = formData;
   
     // Ensure all fields are filled
-    if (!name || !email || !password || !role || !department || !aadhar || !fatherName || !motherName || !dob || !address || !emergencyContact || !mobile || !checkInTime || !checkOutTime) {
+    if (!name || !email || !password || !role || !department || !aadhar || !fatherName || !motherName || !dob || !address || !emergencyContact || !mobile || !checkInStarts || !checkInEnds || !checkOutStarts || !checkOutEnds || !sickLeave || !casualLeave || !leaveWithoutPay) {
       setError('All fields are required.');
       return;
     }
@@ -73,9 +79,14 @@ const Directory = () => {
         address,
         emergencyContact,
         mobile, // Include mobile number in Firestore
-        checkInTime,
-        checkOutTime,
+        checkInStarts,
+        checkInEnds,
+        checkOutStarts,
+        checkOutEnds,
         employmentStatus: 'Active',
+        sickLeave, // Include sick leave count
+        casualLeave, // Include casual leave count
+        leaveWithoutPay, // Include leave without pay count
         dateJoined: Timestamp.fromDate(new Date()),
       });
 
@@ -93,8 +104,13 @@ const Directory = () => {
         address: '',
         emergencyContact: '',
         mobile: '',
-        checkInTime: '',
-        checkOutTime: '',
+        checkInStarts: '',
+        checkInEnds: '',
+        checkOutStarts: '',
+        checkOutEnds: '',
+        sickLeave: '',
+        casualLeave: '',
+        leaveWithoutPay: '',
       });
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
@@ -134,8 +150,25 @@ const Directory = () => {
             <input name="address" placeholder="Address" value={formData.address} onChange={handleChange} required />
             <input name="emergencyContact" placeholder="Emergency Contact" value={formData.emergencyContact} onChange={handleChange} required />
             <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} required /> {/* Added mobile number input */}
-            <input name="checkInTime" type="time" placeholder="Check-In Time" value={formData.checkInTime} onChange={handleChange} required />
-            <input name="checkOutTime" type="time" placeholder="Check-Out Time" value={formData.checkOutTime} onChange={handleChange} required />
+            <label htmlFor="checkInStarts">Check-In Starts</label>
+            <input name="checkInStarts" type="time" placeholder="Check-In Starts" value={formData.checkInStarts} onChange={handleChange} required />
+            <label htmlFor="checkInEnds">Check-In Ends</label>
+            <input name="checkInEnds" type="time" placeholder="Check-In Ends" value={formData.checkInEnds} onChange={handleChange} required />
+            
+            <label htmlFor="checkOutStarts">Check-Out Starts</label>
+            <input name="checkOutStarts" type="time" placeholder="Check-Out Starts" value={formData.checkOutStarts} onChange={handleChange} required />
+            <label htmlFor="checkOutEnds">Check-Out Ends</label>
+            <input name="checkOutEnds" type="time" placeholder="Check-Out Ends" value={formData.checkOutEnds} onChange={handleChange} required />
+            
+            <label htmlFor="sickLeave">Sick Leave (Days)</label>
+            <input name="sickLeave" type="number" placeholder="Sick Leave Days" value={formData.sickLeave} onChange={handleChange} required />
+            
+            <label htmlFor="casualLeave">Casual Leave (Days)</label>
+            <input name="casualLeave" type="number" placeholder="Casual Leave Days" value={formData.casualLeave} onChange={handleChange} required />
+            
+            <label htmlFor="leaveWithoutPay">Leave Without Pay (Days)</label>
+            <input name="leaveWithoutPay" type="number" placeholder="Leave Without Pay Days" value={formData.leaveWithoutPay} onChange={handleChange} required />
+
             <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Employee'}</button>
             {error && <p className="error">{error}</p>}
           </form>

@@ -11,7 +11,7 @@
   background-color: #dfd3e259;
   border-radius: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  margin-top:50px;
+  margin-top: 50px;
 }
 
 /* Calendar styles */
@@ -21,61 +21,57 @@
   padding: 10px;
   background-color: #57525217; 
   border-radius: 10px;
-  margin-left: 150px;
   box-shadow: 0 4px 10px rgb(217, 214, 218);
 }
 
-/* Calendar header styling */
-.react-calendar__navigation button {
-  background-color: #000000; 
-  color: #ffffff;
-  font-weight: bold;
-  border-radius: 5px;
-  padding: 10px;
-  margin: 5px;
-}
-
-.react-calendar__month-view__days__day--weekend {
-  background-color: #4f227a;
-  color: white;
-}
-
-/* Sundays styled with a violet background */
-.react-calendar__month-view__days__day--sunday {
-background-color: #8a2be2;
-color: white;
-}
-
-/* Remove color for Saturdays */
-.react-calendar__month-view__days__day--saturday {
-background-color: transparent;
-}
-
-/* Stylish hover effect for the calendar's navigation buttons */
-.react-calendar__navigation button:hover {
-  background-color: #333333;
-  color: #61dafb; 
-}
-
-/* Styling for days with attendance status */
-.green-day {
-  background-color: #4caf50; /* Green for present */
-  color: white;
-  border-radius: 50%;
-}
-
-.red-day {
-  background-color: #f44336; /* Red for absent */
-  color: white;
-  border-radius: 50%;
-}
-
-.day-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Form styling */
+.attendance-form, .leave-form {
   width: 100%;
-  height: 100%;
+  max-width: 600px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
+}
+
+/* Styling for form inputs and labels */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-input, .leave-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.submit-btn, .enter-attendance-btn, .enter-leave-btn {
+  background-color: #4caf50; /* Green */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover, .enter-attendance-btn:hover, .enter-leave-btn:hover {
+  background-color: #45a049; /* Darker green */
+}
+
+/* Toast message styling */
+.toast {
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
 }
 
 /* Responsive Design */

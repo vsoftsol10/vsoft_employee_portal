@@ -16,11 +16,19 @@ const Profile = () => {
     dob: '',
     fatherName: '',
     motherName: '',
+    address: '', // New field for address
     role: '',
     checkInTime: '',
     checkOutTime: '',
     dateJoined: '',
-    employmentStatus: ''
+    employmentStatus: '',
+    checkInStarts: '',
+    checkInEnds: '',
+    checkOutStarts: '',
+    checkOutEnds: '',
+    sickLeave: '',
+    casualLeave: '',
+    leaveWithoutPay: ''
   });
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -144,22 +152,6 @@ const Profile = () => {
             )}
           </div>
           <div className="profile-detail">
-            <label>Department:</label>
-            {isEditing ? (
-              <input type="text" name="department" value={profile.department} onChange={handleChange} />
-            ) : (
-              <p>{profile.department}</p>
-            )}
-          </div>
-          <div className="profile-detail">
-            <label>Date of Birth:</label>
-            {isEditing ? (
-              <input type="date" name="dob" value={profile.dob} onChange={handleChange} />
-            ) : (
-              <p>{profile.dob}</p>
-            )}
-          </div>
-          <div className="profile-detail">
             <label>Father's Name:</label>
             {isEditing ? (
               <input type="text" name="fatherName" value={profile.fatherName} onChange={handleChange} />
@@ -176,53 +168,41 @@ const Profile = () => {
             )}
           </div>
           <div className="profile-detail">
-            <label>Role:</label>
+            <label>Address:</label>
             {isEditing ? (
-              <input type="text" name="role" value={profile.role} onChange={handleChange} />
+              <input type="text" name="address" value={profile.address} onChange={handleChange} />
             ) : (
-              <p>{profile.role}</p>
+              <p>{profile.address}</p>
             )}
           </div>
+          {/* Disabled Check-In/Out and Leave Fields */}
           <div className="profile-detail">
-  <label>Check-In Time:</label>
-  {isEditing ? (
-    <input
-      type="time"
-      name="checkInTime"
-      value={profile.checkInTime}
-      onChange={handleChange}
-      disabled
-    />
-  ) : (
-    <p>{profile.checkInTime}</p>
-  )}
-</div>
-<div className="profile-detail">
-  <label>Check-Out Time:</label>
-  {isEditing ? (
-    <input
-      type="time"
-      name="checkOutTime"
-      value={profile.checkOutTime}
-      onChange={handleChange}
-      disabled
-    />
-  ) : (
-    <p>{profile.checkOutTime}</p>
-  )}
-</div>
-<div className="profile-detail">
-  <label>Date Joined:</label>
-  <p>{profile.dateJoined}</p>
-</div>
-
+            <label>Check-In Starts:</label>
+            <p>{profile.checkInStarts}</p>
+          </div>
           <div className="profile-detail">
-            <label>Employment Status:</label>
-            {isEditing ? (
-              <input type="text" name="employmentStatus" value={profile.employmentStatus} onChange={handleChange} />
-            ) : (
-              <p>{profile.employmentStatus}</p>
-            )}
+            <label>Check-In Ends:</label>
+            <p>{profile.checkInEnds}</p>
+          </div>
+          <div className="profile-detail">
+            <label>Check-Out Starts:</label>
+            <p>{profile.checkOutStarts}</p>
+          </div>
+          <div className="profile-detail">
+            <label>Check-Out Ends:</label>
+            <p>{profile.checkOutEnds}</p>
+          </div>
+          <div className="profile-detail">
+            <label>Sick Leave:</label>
+            <p>{profile.sickLeave}</p>
+          </div>
+          <div className="profile-detail">
+            <label>Casual Leave:</label>
+            <p>{profile.casualLeave}</p>
+          </div>
+          <div className="profile-detail">
+            <label>Leave Without Pay:</label>
+            <p>{profile.leaveWithoutPay}</p>
           </div>
         </div>
       </div>

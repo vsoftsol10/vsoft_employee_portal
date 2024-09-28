@@ -1,120 +1,194 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
-import DatePicker from 'react-datepicker';
 import 'react-calendar/dist/Calendar.css';
-import 'react-datepicker/dist/react-datepicker.css';
 import './NonAttendance.css';
-import { getFirestore, collection, getDocs, setDoc, doc } from 'firebase/firestore'; // Firebase imports
+import { getFirestore, doc, getDoc, collection, addDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
-const Attendance = () => {
+const Attendance = ({ employeeData }) => {
   const [date, setDate] = useState(new Date());
-  const [events, setEvents] = useState([]);
-  const [eventTitle, setEventTitle] = useState('');
-  const [toastMessage, setToastMessage] = useState('');
+  const [checkInTime, setCheckInTime] = useState(null);
+  const [checkOutTime, setCheckOutTime] = useState(null);
+  const [attendanceHistory, setAttendanceHistory] = useState({});
   const [isToastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [isAttendanceFormOpen, setAttendanceFormOpen] = useState(false);
+  const [isLeaveFormOpen, setLeaveFormOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      const db = getFirestore();
-      const querySnapshot = await getDocs(collection(db, 'attendance')); // Assuming 'attendance' collection
-      let eventList = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.checkInTime && data.checkOutTime) {
-          // Convert Firestore timestamps to JavaScript Date objects
-          const checkInTime = new Date(data.checkInTime.seconds * 1000); 
-          const checkOutTime = new Date(data.checkOutTime.seconds * 1000);
+  const [attendanceForm, setAttendanceForm] = useState({
+    checkInStarts: '',
+    checkInEnds: '',
+    yourCheckIn: '',
+    checkOutStarts: '',
+    checkOutEnds: '',
+    yourCheckOut: ''
+  });
 
-          // Format the date to the local time zone (only the date part)
-          const localDate = checkInTime.toLocaleDateString('en-GB'); // Format for the correct date without time
+  const [leaveDescription, setLeaveDescription] = useState('');
 
-          const totalDuration = (checkOutTime - checkInTime) / (1000 * 60 * 60); // Total duration in hours
+  const db = getFirestore();
+  const auth = getAuth();
 
-          eventList.push({
-            id: doc.id,
-            date: localDate, // Store the formatted local date
-            duration: totalDuration,
-          });
-        }
-      });
-      setEvents(eventList);
-    };
-    fetchEvents();
-  }, []);
-  
-  const handleDateChange = (newDate) => {
-    setDate(newDate);
-  };
-
-  const handleAddEvent = async () => {
-    const db = getFirestore();
+  // Fetching attendance data from Firestore
+  const fetchAttendanceData = async (uid) => {
+    const timingsRef = doc(db, `employeetimings/${uid}`);
+    
     try {
-      const formattedDate = date.toLocaleDateString('en-GB'); // Format date before saving
-      const checkInTime = new Date(); // Capture check-in time as now
-      const checkOutTime = new Date(checkInTime.getTime() + 8 * 60 * 60 * 1000); // Example check-out time 8 hours later
+      const timingsSnapshot = await getDoc(timingsRef);
+      if (timingsSnapshot.exists()) {
+        const timingsData = timingsSnapshot.data();
+        
+        // Update attendance form with fetched data
+        setAttendanceForm((prevState) => ({
+          ...prevState,
+          checkInStarts: timingsData.checkInStarts || '',
+          checkInEnds: timingsData.checkInEnds || '',
+          checkOutStarts: timingsData.checkOutStarts || '',
+          checkOutEnds: timingsData.checkOutEnds || ''
+        }));
 
-      await setDoc(doc(db, 'attendance', eventTitle), {
-        title: eventTitle,
-        checkInTime: checkInTime, // Store check-in time in UTC
-        checkOutTime: checkOutTime, // Store check-out time in UTC
-        date: formattedDate, // Store formatted local date
-      });
-      setToastMessage('Event added successfully');
-      setToastOpen(true);
-      setEvents([...events, { id: eventTitle, date: formattedDate, duration: 8 }]);
+        setToastMessage('Attendance data loaded successfully');
+      } else {
+        setToastMessage('No attendance data found for this employee');
+      }
     } catch (error) {
-      setToastMessage('Error adding event: ' + error.message);
+      setToastMessage('Error fetching attendance: ' + error.message);
+    } finally {
       setToastOpen(true);
     }
-    setEventTitle('');
   };
-  
 
-  const handleToastClose = () => setToastOpen(false);
+  const getUserUID = () => {
+    const user = auth.currentUser;
+    return user ? user.uid : null;
+  };
 
-  const renderDayContent = ({ date }) => {
-    const formattedDate = date.toLocaleDateString('en-GB'); // Format to local time zone
-    const event = events.find((e) => e.date === formattedDate);
+  useEffect(() => {
+    const uid = getUserUID();
+    if (uid) {
+      fetchAttendanceData(uid);
+    } else {
+      setToastMessage('User not logged in');
+      setToastOpen(true);
+    }
+  }, [auth, db]);
 
-    if (event) {
-      const isOverTime = event.duration >= 8.5;
-      return (
-        <div
-          className={`day-content ${isOverTime ? 'green-day' : 'red-day'}`}
-          title={`Duration: ${event.duration.toFixed(2)} hours`}
-        >
-          {isOverTime ? '✅' : '❌'}
-        </div>
-      );
+  const handleAttendanceFormChange = (e) => {
+    const { name, value } = e.target;
+    setAttendanceForm((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleAttendanceSubmit = async () => {
+    const uid = getUserUID();
+    if (uid) {
+      try {
+        await addDoc(collection(db, `oftenusers/${uid}/checkins`), {
+          checkInTime: new Date(date.setHours(attendanceForm.yourCheckIn.split(':')[0], attendanceForm.yourCheckIn.split(':')[1])),
+          ...attendanceForm
+        });
+
+        // Mark attendance
+        setAttendanceHistory((prev) => ({
+          ...prev,
+          [date.toDateString()]: 'valid' // Mark valid attendance
+        }));
+
+        setToastMessage('Attendance submitted successfully!');
+      } catch (error) {
+        setToastMessage('Error submitting attendance: ' + error.message);
+      }
+    } else {
+      setToastMessage('User not logged in');
+    }
+    setAttendanceFormOpen(false);
+    setToastOpen(true);
+  };
+
+  const handleLeaveDescriptionChange = (e) => {
+    setLeaveDescription(e.target.value);
+  };
+
+  const handleLeaveSubmit = () => {
+    // Mark leave
+    setAttendanceHistory((prev) => ({
+      ...prev,
+      [date.toDateString()]: 'leave' // Mark leave
+    }));
+
+    console.log('Leave Submitted:', leaveDescription);
+    setLeaveFormOpen(false);
+  };
+
+  // Custom tile content rendering
+  const tileContent = ({ date }) => {
+    const dateString = date.toDateString();
+    if (attendanceHistory[dateString] === 'valid') {
+      return <div className="mark-attendance">&#10004; </div>; // Checkmark for valid attendance
+    } else if (attendanceHistory[dateString] === 'leave') {
+      return <div className="mark-leave">&#10008; </div>; // Cross mark for leave
     }
     return null;
   };
-  
+
   return (
     <div className="attendance-page">
       <h1>Attendance Calendar</h1>
-      <Calendar
-        onChange={handleDateChange}
-        value={date}
-        tileContent={({ date }) => renderDayContent({ date })}
-        className="calendar"
-      />
-      <div className="event-manager">
-        <h2>Add Event</h2>
-        <DatePicker
-          selected={date}
-          onChange={(date) => setDate(date)}
-          className="datepicker"
-        />
-        <input
-          type="text"
-          value={eventTitle}
-          onChange={(e) => setEventTitle(e.target.value)}
-          placeholder="Event Title"
-        />
-        <button onClick={handleAddEvent}>Add Event</button>
-      </div>
+      <Calendar onChange={setDate} value={date} tileContent={tileContent} className="calendar" />
+
+      <button onClick={() => setAttendanceFormOpen(!isAttendanceFormOpen)} className="enter-attendance-btn">
+        Enter Attendance
+      </button>
+      
+      {isAttendanceFormOpen && (
+        <div className="attendance-form">
+          <h3>Enter Attendance Details</h3>
+          {['checkInStarts', 'checkInEnds', 'yourCheckIn', 'checkOutStarts', 'checkOutEnds', 'yourCheckOut'].map((field) => (
+            <div key={field} className="form-group">
+              <label>{field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</label>
+              <input
+                type="time"
+                name={field}
+                value={attendanceForm[field]}
+                onChange={handleAttendanceFormChange}
+                className="form-input"
+              />
+            </div>
+          ))}
+          <button onClick={handleAttendanceSubmit} className="submit-btn">Submit</button>
+        </div>
+      )}
+
+      <button onClick={() => setLeaveFormOpen(!isLeaveFormOpen)} className="enter-leave-btn">
+        Enter Leave
+      </button>
+      
+      {isLeaveFormOpen && (
+        <div className="leave-form">
+          <h3>Enter Leave Description</h3>
+          <textarea
+            name="leaveDescription"
+            value={leaveDescription}
+            onChange={handleLeaveDescriptionChange}
+            placeholder="Describe the leave reason..."
+            className="leave-textarea"
+          />
+          <button onClick={handleLeaveSubmit} className="submit-btn">Submit</button>
+        </div>
+      )}
+
       {isToastOpen && <div className="toast">{toastMessage}</div>}
+      
+      <h3>Attendance History</h3>
+      <ul>
+        {Object.keys(attendanceHistory).map((key) => (
+          <li key={key}>
+            {key}: {attendanceHistory[key] === 'valid' ? 'Valid Attendance' : 'Leave'}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

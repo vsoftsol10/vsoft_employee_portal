@@ -2,17 +2,23 @@ import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
-import { firestore, auth } from '../firebaseConfig'; // Import Firestore instance
-import { doc,addDoc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore'; // Import setDoc
+import { firestore, auth } from '../firebaseConfig';
+import { doc, setDoc, Timestamp, getDoc } from 'firebase/firestore';
 
 const Dashboard = () => {
+  // Existing state
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [sickLeave, setSickLeave] = useState(0);
-  const [casualLeave, setCasualLeave] = useState(0);
-  const [leaveWithoutPay, setLeaveWithoutPay] = useState(0);
-  const [pendingTasks, setPendingTasks] = useState(0);
-  const [upcomingDeadline, setUpcomingDeadline] = useState(null);
+  const [checkInTime, setCheckInTime] = useState(null);
+  const [leaveBalance, setLeaveBalance] = useState(10); // Initial leave balance
+
+  // New state for leave and task-related information
+  const [sickLeave, setSickLeave] = useState(5); // Example sick leave balance
+  const [casualLeave, setCasualLeave] = useState(5); // Example casual leave balance
+  const [leaveWithoutPay, setLeaveWithoutPay] = useState(0); // Example leave without pay balance
+  const [pendingTasks, setPendingTasks] = useState(3); // Example pending tasks count
+  const [upcomingDeadline, setUpcomingDeadline] = useState(null); // Default as null
+
   const navigate = useNavigate();
 
   // Timer effect for the check-in/out functionality
@@ -28,55 +34,6 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, [isCheckedIn, timer]);
 
-  // Fetch leave balance (sickLeave, casualLeave, leaveWithoutPay), tasks, and deadline data on mount
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const user = auth.currentUser;
-
-        if (!user) {
-          console.error('User not authenticated');
-          return;
-        }
-
-        // Fetch leave types (sickLeave, casualLeave, leaveWithoutPay) from leaveSettings/default
-        const leaveSettingsRef = doc(firestore, 'leaveSettings', 'default');
-        const leaveSettingsSnap = await getDoc(leaveSettingsRef);
-
-        if (leaveSettingsSnap.exists()) {
-          const leaveData = leaveSettingsSnap.data();
-          setSickLeave(leaveData.sickLeave || 0);
-          setCasualLeave(leaveData.casualLeave || 0);
-          setLeaveWithoutPay(leaveData.leaveWithoutPay || 0);
-        }
-
-        // Fetch tasks count from groups/id/tasks
-        const tasksCollectionRef = collection(firestore, `groups/${user.uid}/tasks`);
-        const tasksSnapshot = await getDocs(tasksCollectionRef);
-        setPendingTasks(tasksSnapshot.size); // Count the number of tasks
-
-        // Find task with the nearest deadline
-        let tasksWithDeadlines = [];
-        tasksSnapshot.forEach((doc) => {
-          const taskData = doc.data();
-          if (taskData.deadline) {
-            tasksWithDeadlines.push(taskData);
-          }
-        });
-
-        // Sort tasks by deadline and get the nearest one
-        tasksWithDeadlines.sort((a, b) => a.deadline.toMillis() - b.deadline.toMillis());
-        if (tasksWithDeadlines.length > 0) {
-          setUpcomingDeadline(tasksWithDeadlines[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching data: ', error.message);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   // Format the timer into hours, minutes, and seconds
   const formatTime = (time) => {
     const hours = Math.floor(time / 3600);
@@ -86,67 +43,109 @@ const Dashboard = () => {
       .toString()
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
-  const handleCheckInOut = async () => {
-    const user = auth.currentUser; // Get the current authenticated user
-  
+
+  const logAttendance = async (type) => {
+    const user = auth.currentUser;
     if (!user) {
-      console.error('User not authenticated');
+      console.error('No user authenticated');
       return;
     }
-  
+    const userId = user.uid;
     try {
-      const userRef = doc(firestore, 'oftenusers', user.uid); // Reference to the user's document in Firestore
-      const userSnap = await getDoc(userRef);
-  
-      // If user document doesn't exist, create it
-      if (!userSnap.exists()) {
-        await setDoc(userRef, { isCheckedIn: false, checkInTime: null });
-      }
-  
-      const userData = userSnap.data();
-  
-      if (!isCheckedIn) {
-        // Check In
-        await setDoc(userRef, {
-          isCheckedIn: true,
-          checkInTime: new Date(),
-        }, { merge: true }); // Merge with existing data
-        setIsCheckedIn(true);
-        setTimer(0); // Reset the timer when checking in
-  
-        // Store check-in data in oftenusers/uid/checkins
-        const checkinsRef = collection(userRef, 'checkins');
-        await addDoc(checkinsRef, {
-          checkInTime: new Date(),
-          // You can add more data here if needed
-        });
-      } else {
-        // Check Out
-        const checkInTime = userData.checkInTime?.toDate(); // Firestore stores date in Timestamp, so convert it back to Date object
-        const checkOutTime = new Date();
-  
-        const durationInSeconds = Math.floor((checkOutTime - checkInTime) / 1000);
-  
-        await setDoc(userRef, {
-          isCheckedIn: false,
-          checkOutTime,
-        }, { merge: true });
-  
-        // Store check-out data in oftenusers/uid/checkouts
-        const checkoutsRef = collection(userRef, 'checkouts');
-        await addDoc(checkoutsRef, {
-          checkOutTime,
-          totalDuration: durationInSeconds,
-          // You can add more data here if needed
-        });
-  
-        setIsCheckedIn(false);
-        setTimer(0); // Reset the timer after checking out
-      }
+      await logAttendanceToFirestore(userId, type);
     } catch (error) {
-      console.error('Error checking in/out: ', error.message);
+      console.error('Error logging attendance:', error);
     }
   };
+
+  const handleCheckInOut = () => {
+    if (isCheckedIn) {
+      logAttendance('check-out');
+    } else {
+      logAttendance('check-in');
+    }
+  };
+
+  const logAttendanceToFirestore = async (userId, type) => {
+    try {
+      const userRef = doc(firestore, `rareusers/${userId}`);
+      const userDoc = await getDoc(userRef);
+  
+      const currentTimestamp = Timestamp.now();
+      const formattedDuration = type === 'check-out' ? formatTime(timer) : null;
+  
+      let updatedDashboard = {};
+      let updatedAttendance = [];
+  
+      if (userDoc.exists()) {
+        // If user document exists, get current data
+        const userData = userDoc.data();
+        updatedDashboard = { ...userData.dashboard };
+        updatedAttendance = [...(userData.attendance?.events || [])];
+      } else {
+        // If user document does not exist, create a new one
+        console.log('User not found, creating a new user document');
+        updatedDashboard = {
+          checkIn: currentTimestamp,
+          checkOut: null,
+          duration: null,
+        };
+        updatedAttendance = [];
+      }
+  
+      if (type === 'check-in') {
+        updatedDashboard.checkIn = currentTimestamp;
+        setCheckInTime(currentTimestamp);
+        setIsCheckedIn(true);
+      } else if (type === 'check-out') {
+        updatedDashboard.checkOut = currentTimestamp;
+        updatedDashboard.duration = formattedDuration;
+        updatedAttendance.push({
+          date: currentTimestamp,
+          status: 'Present',
+        });
+        setIsCheckedIn(false);
+        setTimer(0);
+        setCheckInTime(null);
+      }
+  
+      // Update or create the user document with new check-in/out data
+      await setDoc(
+        userRef,
+        {
+          dashboard: updatedDashboard,
+          attendance: { events: updatedAttendance },
+        },
+        { merge: true }
+      );
+  
+      const formattedDate = new Date().toISOString().split('T')[0];
+  
+      if (type === 'check-in') {
+        await setDoc(
+          doc(firestore, `oftenusers/${userId}/attendance/${formattedDate}`),
+          {
+            checkIn: currentTimestamp,
+          },
+          { merge: true }
+        );
+      } else if (type === 'check-out') {
+        await setDoc(
+          doc(firestore, `oftenusers/${userId}/attendance/${formattedDate}`),
+          {
+            checkOut: currentTimestamp,
+            duration: formattedDuration,
+          },
+          { merge: true }
+        );
+      }
+  
+      console.log(`${type} recorded in Firestore`);
+    } catch (error) {
+      console.error(`Error logging ${type}: `, error.message);
+    }
+  };
+  
   return (
     <div>
       <Header />
@@ -172,8 +171,6 @@ const Dashboard = () => {
             </button>
           </figcaption>
         </figure>
-
-        {/* Leave Balance Card */}
         <figure className="shape-box shape-box_half">
           <img
             src="https://www.shutterstock.com/image-photo/beautiful-panoramic-sea-sand-sky-260nw-2466899247.jpg"
@@ -193,7 +190,6 @@ const Dashboard = () => {
           </figcaption>
         </figure>
 
-        {/* Tasks Card */}
         <figure className="shape-box shape-box_half">
           <img
             src="https://images.unsplash.com/photo-1498075702571-ecb018f3752d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=757&q=80"
@@ -211,7 +207,6 @@ const Dashboard = () => {
           </figcaption>
         </figure>
 
-        {/* Deadlines Card */}
         <figure className="shape-box shape-box_half">
           <img
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpOzB1SFFwef_DrqNUQWwf_Z1Cqlxp_4QUjQ&s"
