@@ -27,14 +27,14 @@ import AdminTasksAndGroups from './admin/TasksAndGroups';
 import AdminFiles from './admin/Files'; // Import AdminFiles component
 import AdminReviews from './admin/Reviews';
 import AdminPayroll from './admin/Payroll';
-import AdminFAQs from './admin/FAQs';
+import CheckInOuts from './admin/CheckInOuts';
 import AdminLeaveTracker from './admin/Leavetracker'; // Renamed to AdminLeaveTracker
 import Directory from './admin/Directory';
 import AdminAttendance from './admin/Attendance'; // Renamed to AdminAttendance
-import UserDetails from './admin/UserDetails'; // UserDetails page for users
+
 import AddEmployee from './admin/AddEmployee'; // Import AddEmployee component
 import EmployeeDetails from './admin/EmployeeDetails'; // Import EmployeeDetails component
-import EmployeeDocs from './admin/EmployeeDocs'; 
+import EmployeeDocs from './admin/EmployeeDocs';
 import PayrollUpload from './admin/PayrollUpload';
 import './App.css';
 
@@ -182,18 +182,10 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/user/:userId"
-            element={
-              <ProtectedRoute>
-                <UserDetails />
-              </ProtectedRoute>
-            }
-          />
+       
 
           {/* Protected Admin Routes */}
-              {/* Protected Admin Routes */}
-              <Route
+          <Route
             path="/admin/dashboard"
             element={
               <ProtectedRoute requiredRole="admin">
@@ -202,6 +194,25 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+         <Route
+  path="/admin/checkinouts/:uid"
+  element={
+    <ProtectedRoute requiredRole="admin">
+      <AdminSidebar />
+      <CheckInOuts />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/admin/faqs"
+  element={
+    <ProtectedRoute requiredRole="admin">
+      <AdminSidebar />
+      <AdminDashboard /> {/* Or another component handling the FAQ section */}
+    </ProtectedRoute>
+  }
+/>
+
           <Route
             path="/admin/tasks"
             element={
@@ -238,7 +249,7 @@ const App = () => {
             }
           />
           <Route
-            path="/admin/adminpayroll"
+            path="/admin/payroll"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminSidebar />
@@ -246,15 +257,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin/faqs"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminSidebar />
-                <AdminFAQs />
-              </ProtectedRoute>
-            }
-          />
+     
           <Route
             path="/admin/leavetracker"
             element={
@@ -300,6 +303,8 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+         
+
           <Route
             path="/admin/payrollupload"
             element={
@@ -309,7 +314,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-
 
           {/* Redirect any unknown route to login */}
           <Route path="*" element={<Navigate to="/login" />} />

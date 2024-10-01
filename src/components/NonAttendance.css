@@ -28,37 +28,55 @@
 .attendance-form, .leave-form {
   width: 100%;
   max-width: 600px;
-  padding: 15px;
-  background-color: #fff;
+  padding: 20px; /* Increased padding for a better look */
+  background-color: #ffffff; /* White background */
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin: 20px 0;
+  transition: transform 0.2s; /* Add transition for hover effect */
+}
+
+.attendance-form:hover, .leave-form:hover {
+  transform: translateY(-5px); /* Lift effect on hover */
 }
 
 /* Styling for form inputs and labels */
-.form-group {
-  margin-bottom: 15px;
+.label {
+  font-weight: bold; /* Make labels bold */
+  margin-bottom: 8px;
+  display: block; /* Ensure labels are block elements */
 }
 
 .form-input, .leave-textarea {
   width: 100%;
-  padding: 10px;
+  padding: 12px; /* Increased padding for better usability */
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 1rem; /* Font size for inputs */
+  transition: border-color 0.3s; /* Transition for border color */
 }
 
+.form-input:focus, .leave-textarea:focus {
+  border-color: #4caf50; /* Change border color on focus */
+  outline: none; /* Remove outline */
+}
+
+/* Button styling */
 .submit-btn, .enter-attendance-btn, .enter-leave-btn {
+  width: 100%; /* Make buttons full width */
   background-color: #4caf50; /* Green */
   color: white;
-  padding: 10px 20px;
+  padding: 12px; /* Increased padding */
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  font-size: 1rem; /* Font size for buttons */
+  transition: background-color 0.3s, transform 0.2s; /* Added transform transition */
 }
 
 .submit-btn:hover, .enter-attendance-btn:hover, .enter-leave-btn:hover {
   background-color: #45a049; /* Darker green */
+  transform: translateY(-2px); /* Lift effect on hover */
 }
 
 /* Toast message styling */
@@ -84,6 +102,10 @@
   .calendar {
     max-width: 100%;
   }
+
+  .attendance-form, .leave-form {
+    padding: 15px; /* Adjust padding for medium screens */
+  }
 }
 
 @media (max-width: 768px) {
@@ -93,6 +115,10 @@
 
   .calendar {
     padding: 5px;
+  }
+
+  .attendance-form, .leave-form {
+    padding: 10px; /* Less padding for smaller screens */
   }
 }
 
@@ -110,5 +136,14 @@
 
   .react-calendar__navigation button {
     font-size: 14px;
+  }
+
+  .form-input, .leave-textarea {
+    font-size: 0.9rem; /* Smaller font size for mobile */
+  }
+
+  .submit-btn, .enter-attendance-btn, .enter-leave-btn {
+    padding: 10px 15px; /* Smaller button padding for mobile */
+    font-size: 0.9rem; /* Smaller font size for buttons */
   }
 }

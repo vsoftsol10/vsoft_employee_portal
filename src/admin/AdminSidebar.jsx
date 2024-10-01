@@ -27,6 +27,13 @@ const AdminSidebar = () => {
           </div>
         </div>
         <ul>
+          {/* New Dashboard Link */}
+          <li>
+            <Link to="/admin/dashboard" onClick={closeSidebar}>
+              <FontAwesomeIcon icon={faTasks} /> {/* You can choose a different icon if needed */}
+              <span>Dashboard</span>
+            </Link>
+          </li>
           <li>
             <Link to="/admin/directory" onClick={closeSidebar}>
               <FontAwesomeIcon icon={faUsers} />

@@ -6,53 +6,19 @@
   max-width: 800px;
   margin: 100px auto 0; /* Center container with top margin */
   font-family: 'Roboto', sans-serif; /* Updated to match chat design */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  border-radius: 10px; /* Slightly rounded corners */
+  overflow: hidden; /* Hide overflow for child elements */
+  background: #ffffff; /* White background for the container */
 }
 
-.chat-box {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  border: 1px solid #ddd;
-  border-radius: 10px; /* Slightly more rounded corners */
-  overflow: hidden;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 15px; /* Increased padding for a spacious feel */
-  background-color: #f9f9f9; /* Softer background for messages */
-}
-
-.message {
-  margin-bottom: 10px;
-  padding: 12px; /* Slightly increased padding */
-  border-radius: 10px; /* Match the chat design */
-  max-width: 70%;
-  line-height: 1.4; /* Better line spacing */
-}
-
-.message.user {
-  background-color: #007bff; /* User message color */
-  color: white;
-  align-self: flex-end;
-  text-align: right;
-}
-
-.message.admin {
-  background-color: #e0e0e0; /* Admin message color */
-  color: #333; /* Darker text for readability */
-  align-self: flex-start;
-}
-
-.chat-input {
+.description-input {
   display: flex;
   padding: 12px;
-  background-color: white;
-  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd; /* Separator line for input area */
 }
 
-.chat-input input {
+.description-input input {
   flex: 1;
   padding: 12px; /* Adjust padding for comfort */
   border: 1px solid #ddd;
@@ -60,40 +26,77 @@
   margin-right: 10px; /* Space between input and button */
   font-size: 1rem; /* Consistent font size */
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+  transition: border-color 0.3s ease; /* Smooth transition for border color */
 }
 
-.chat-input button {
-  background-color: transparent; /* Transparent background */
-  color: #007bff; /* Color for the icon */
+.description-input input:focus {
+  border-color: #007bff; /* Change border color on focus */
+  outline: none; /* Remove outline */
+}
+
+.description-input button {
+  background-color: #007bff; /* Primary button color */
+  color: white; /* White text for button */
   border: none; /* Remove border */
+  border-radius: 50%; /* Round button */
   cursor: pointer;
   font-size: 1.5rem; /* Adjust font size */
-  padding: 0; /* No padding */
+  padding: 10px; /* Padding for button */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
-.chat-input button:hover {
-  background-color: rgba(0, 123, 255, 0.1); /* Light hover effect */
-  border-radius: 50%; /* Rounded button on hover */
+.description-input button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Accordion Styles */
+.accordion-container {
+  flex: 1; /* Allow accordion to take remaining space */
+  overflow-y: auto; /* Enable scrolling if content overflows */
+  padding: 15px; /* Padding around the accordion */
+}
+
+.MuiAccordionSummary-root {
+  background-color: #f1f1f1; /* Light grey background for summary */
+  border-radius: 8px; /* Rounded corners for summary */
+  margin-bottom: 10px; /* Space between accordions */
+  transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.MuiAccordionSummary-root:hover {
+  background-color: #e0e0e0; /* Darker grey on hover */
+}
+
+.MuiAccordionDetails-root {
+  background-color: #fafafa; /* Slightly darker background for details */
+  padding: 15px; /* Padding inside details */
+  border-radius: 0 0 8px 8px; /* Rounded bottom corners */
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .faqs-container {
-      height: calc(100vh - 80px); /* Adjust height for smaller screens */
-      margin: 80px auto 0; /* Adjust margin for smaller screens */
+    height: calc(100vh - 80px); /* Adjust height for smaller screens */
+    margin: 80px auto 0; /* Adjust margin for smaller screens */
   }
 
-  .message {
-      max-width: 90%; /* Allow messages to take more width */
+  .description-input input {
+    padding: 10px; /* Adjust input padding */
+  }
+
+  .description-input button {
+    font-size: 1.5rem; /* Increase icon size */
+    padding: 8px; /* Reduce padding for smaller buttons */
   }
 }
 
 @media (max-width: 480px) {
-  .chat-input input {
-      padding: 10px; /* Adjust input padding */
+  .description-input input {
+    padding: 8px; /* Smaller padding for mobile */
   }
 
-  .chat-input button {
-      font-size: 1.5rem; /* Increase icon size */
+  .description-input button {
+    font-size: 1.3rem; /* Decrease icon size */
+    padding: 6px; /* Smaller padding for mobile */
   }
 }

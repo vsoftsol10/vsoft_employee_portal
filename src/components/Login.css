@@ -1,184 +1,96 @@
-/* General styles */
+:root {
+  --primary-color: #c8dc71;
+  --gradient-color: linear-gradient(180deg, #d2ff00 0%, #00d2ff 100%);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Arial', sans-serif;
 }
 
 body {
-  background-color: rgba(127, 59, 141, 0.452);
+  font-family: "Poppins", sans-serif;
 }
 
 .login-page {
+  background-image: url('/public/assets/background.webp'); /* Set your background image */
+  background-size: cover; /* Cover the entire page */
+  background-position: center; /* Center the image */
+  min-height: 100vh; /* Full height */
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 20px;
 }
 
+/* Login container */
 .login-container {
-  display: flex;
-  width: 100%;
-  max-width: 1200px;
-  background-color: rgba(230, 230, 230, 0);
-  backdrop-filter: blur(50px);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0);
-}
-
-.login-left {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-image {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 8px 0 0 8px;
-}
-
-.login-right {
-  flex: 1;
+  background-color: rgba(255, 255, 255, 0.192); /* Slightly transparent background */
   padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: hsla(296, 41%, 35%, 0.247);;
-  position: relative;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px; /* Max width for responsiveness */
+  text-align: center; /* Center align the text */
+  position: relative; /* To position the animated text */
 }
 
-.logo-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
+/* Logo styles */
 .logo {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #007bff; /* Optional: Add border color */
+  width: 60px; /* Set smaller logo width */
+  height: 60px; /* Set smaller logo height */
+  border-radius: 50%; /* Make the logo circular */
+  margin-bottom: 20px; /* Space between logo and text */
 }
 
-h2 {
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: #631963;
-  text-align: center;
+/* Animated text */
+.animated-text {
+  position: absolute;
+  right: 0; /* Adjust for positioning */
+  top: -8%; /* Adjust vertical position */
+  color: #ffffff;
+  background: -webkit-linear-gradient(25deg, #eee, #fcfafa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 1.5rem; /* Minimized font size */
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid;
+  animation: type 1.5s steps(90) 1.5s 1 normal both, cursor 1s step-end infinite;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-input {
-  padding: 15px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-button {
-  padding: 15px;
-  background: linear-gradient(135deg, #007bff, #0056b3); /* Gradient background */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold; /* Bold text */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
-}
-
-button:hover {
-  background: linear-gradient(135deg, #0056b3, #007bff); /* Reverse gradient on hover */
-  transform: scale(1.05); /* Slightly scale up */
-}
-
-.links {
-  margin-top: 10px;
-  text-align: center;
-}
-
-.links p {
-  cursor: pointer;
-  color: #007bff;
-  margin: 5px 0;
-}
-
-.links p:hover {
-  text-decoration: underline;
-}
-/* Add to your existing CSS */
-
-/* Tab styles */
-.tabs {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.tab {
-  flex: 1;
-  padding: 15px;
-  border: none;
-  cursor: pointer;
-  background-color: #007bff; /* User Login tab color */
-  color: white;
-  font-size: 16px;
-  border-radius: 5px 5px 0 0;
-  transition: background-color 0.3s;
-}
-
-.tab:hover {
-  background-color: #0056b3; /* Darker shade on hover */
-}
-
-.tab.active {
-  background-color: #6f42c1; /* Admin Login tab color */
-}
-
-
-/* Responsive */
-@media screen and (max-width: 768px) {
+/* Mobile styles */
+@media screen and (max-width: 480px) {
   .login-container {
-    flex-direction: column;
+    padding: 20px; /* Adjust padding for smaller screens */
   }
 
-  .login-left, .login-right {
+  .animated-text {
+    position: static; /* Make it static for mobile view */
+    font-size: 1rem; /* Further reduce font size */
+    margin-top: 20px; /* Space above the text */
+    text-align: center; /* Center align the text on mobile */
+  }
+
+  .logo {
+    width: 50px; /* Further minimize logo width for mobile */
+    height: 50px; /* Further minimize logo height for mobile */
+  }
+}
+
+/* Keyframes for animations */
+@keyframes type {
+  from {
+    width: 0;
+  }
+
+  to {
     width: 100%;
   }
-
-  .login-image {
-    height: 200px;
-  }
-
-  .login-right {
-    padding: 20px;
-  }
 }
 
-@media screen and (max-width: 480px) {
-  .login-right h2 {
-    font-size: 24px;
-  }
-
-  .login-image {
-    height: 150px;
-  }
-
-  input, button {
-    font-size: 14px;
-    padding: 12px;
+@keyframes cursor {
+  50% {
+    border-color: transparent;
   }
 }

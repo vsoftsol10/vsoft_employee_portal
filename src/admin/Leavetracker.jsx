@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { firestore, auth } from '../firebaseConfig';
-import { doc, getDocs, collection, setDoc } from 'firebase/firestore';
+import { doc, getDocs, collection, updateDoc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
 import './Leavetracker.css'; // Import CSS
 
 const Leavetracker = () => {
@@ -10,12 +9,8 @@ const Leavetracker = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [userUid, setUserUid] = useState('');
-  const [leaveDays, setLeaveDays] = useState({ sickLeave: 0, casualLeave: 0, leaveWithoutPay: 0 });
-  const [employees, setEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -24,7 +19,6 @@ const Leavetracker = () => {
         setLoading(true);
         try {
           await fetchLeaveRequests(user.uid);
-          await fetchEmployees();
         } catch (e) {
           setError('Failed to load data.');
         } finally {
@@ -38,7 +32,7 @@ const Leavetracker = () => {
 
   const fetchLeaveRequests = async (uid) => {
     try {
-      const leaveRequestsCollection = collection(firestore, 'oftenusers', uid, 'leaveformrequests');
+      const leaveRequestsCollection = collection(firestore, 'leaverules', uid, 'leaveformrequests');
       const leaveSnapshot = await getDocs(leaveRequestsCollection);
       const requests = leaveSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -50,45 +44,75 @@ const Leavetracker = () => {
     }
   };
 
-  const fetchEmployees = async () => {
-    try {
-      const employeesCollection = collection(firestore, 'employees');
-      const employeeSnapshot = await getDocs(employeesCollection);
-      const employeeList = employeeSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setEmployees(employeeList);
-    } catch (error) {
-      setError('Failed to fetch employees.');
-    }
+  const calculateLeaveDays = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate - startDate);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include both start and end dates
   };
 
-  const handleLeaveDaysChange = (e) => {
-    const { name, value } = e.target;
-    setLeaveDays(prev => ({ ...prev, [name]: Number(value) }));
-  };
-
-  const saveLeaveRules = async (employeeUid) => {
-    const confirmSave = window.confirm("Are you sure you want to save the leave rules?");
-    if (!confirmSave) return;
+  const handleRequestDecision = async (requestId, decision) => {
+    const confirmDecision = window.confirm(`Are you sure you want to ${decision} this request?`);
+    if (!confirmDecision) return;
 
     try {
-      const leaveDocRef = doc(firestore, 'leaverules', employeeUid);
-      await setDoc(leaveDocRef, leaveDays);
-      alert('Leave rules saved successfully!');
+      const requestDocRef = doc(firestore, 'leaverules', userUid, 'leaveformrequests', requestId);
+      const requestSnapshot = await getDoc(requestDocRef);
+
+      if (!requestSnapshot.exists()) {
+        alert('Leave request not found.');
+        return;
+      }
+
+      const requestData = requestSnapshot.data();
+      const leaveDaysCount = calculateLeaveDays(requestData.start, requestData.end); // Calculate leave days
+
+      // Update the request status
+      await updateDoc(requestDocRef, { status: decision });
+
+      const leaveBalanceRef = doc(firestore, 'leaverules', userUid);
+
+      // Convert current leave balances to numbers
+      let sickLeave = Number(requestData.sickLeave) || 0;
+      let casualLeave = Number(requestData.casualLeave) || 0;
+      let leaveWithoutPay = Number(requestData.leaveWithoutPay) || 0;
+
+      if (decision === 'rejected') {
+        // Add leave days back if rejected
+        if (requestData.type === 'Sick Leave') {
+          sickLeave += leaveDaysCount;
+        } else if (requestData.type === 'Casual Leave') {
+          casualLeave += leaveDaysCount;
+        } else if (requestData.type === 'Leave Without Pay') {
+          leaveWithoutPay += leaveDaysCount;
+        }
+        await updateDoc(leaveBalanceRef, {
+          sickLeave: sickLeave.toString(),
+          casualLeave: casualLeave.toString(),
+          leaveWithoutPay: leaveWithoutPay.toString()
+        });
+        alert(`Request has been rejected and ${leaveDaysCount} days added back to ${requestData.type}!`);
+      } else if (decision === 'accepted') {
+        // Subtract leave days if accepted
+        if (requestData.type === 'Sick Leave') {
+          sickLeave -= leaveDaysCount;
+        } else if (requestData.type === 'Casual Leave') {
+          casualLeave -= leaveDaysCount;
+        } else if (requestData.type === 'Leave Without Pay') {
+          leaveWithoutPay -= leaveDaysCount;
+        }
+        await updateDoc(leaveBalanceRef, {
+          sickLeave: sickLeave.toString(),
+          casualLeave: casualLeave.toString(),
+          leaveWithoutPay: leaveWithoutPay.toString()
+        });
+        alert(`Request has been accepted and ${leaveDaysCount} days deducted from ${requestData.type}!`);
+      }
+
+      fetchLeaveRequests(userUid); // Refresh the leave requests
     } catch (error) {
-      alert('Failed to save leave rules: ' + error.message);
+      alert('Failed to update request: ' + error.message);
     }
-  };
-
-  const handleApplyRulesClick = (employee) => {
-    setSelectedEmployee(employee);
-    setLeaveDays({ sickLeave: 0, casualLeave: 0, leaveWithoutPay: 0 });
-  };
-
-  const handleRequestBack = () => {
-    setSelectedRequest(null); // Reset to show the request list
   };
 
   const latestRequests = leaveRequests.filter(request => request.status === 'pending');
@@ -102,9 +126,6 @@ const Leavetracker = () => {
         </button>
         <button onClick={() => setActiveTab('pastRequests')} className={activeTab === 'pastRequests' ? 'active' : ''}>
           Past Requests
-        </button>
-        <button onClick={() => setActiveTab('leaveRules')} className={activeTab === 'leaveRules' ? 'active' : ''}>
-          Leave Rules
         </button>
       </div>
 
@@ -124,8 +145,14 @@ const Leavetracker = () => {
                   <p><strong>Date To:</strong> {selectedRequest.end}</p>
                   <p><strong>Reason:</strong> {selectedRequest.reason}</p>
                   <p><strong>Status:</strong> {selectedRequest.status}</p>
-                  <button onClick={handleRequestBack} className="neon-button back-button">
+                  <button onClick={() => setSelectedRequest(null)} className="neon-button back-button">
                     Back to Requests
+                  </button>
+                  <button onClick={() => handleRequestDecision(selectedRequest.id, 'accepted')} className="neon-button">
+                    Accept
+                  </button>
+                  <button onClick={() => handleRequestDecision(selectedRequest.id, 'rejected')} className="neon-button">
+                    Reject
                   </button>
                 </div>
               ) : (
@@ -158,64 +185,6 @@ const Leavetracker = () => {
                 ))
               ) : (
                 <p>No past requests found.</p>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'leaveRules' && (
-            <div className="leave-rules">
-              <h2>Working Employees</h2>
-              {employees.length > 0 ? (
-                employees.map((employee) => (
-                  <div key={employee.id} className="employee-item">
-                    <p><strong>Name:</strong> {employee.name}</p>
-                    <p><strong>Position:</strong> {employee.position}</p>
-                    <button onClick={() => handleApplyRulesClick(employee)} className="neon-button">
-                      Apply Rules
-                    </button>
-
-                    {selectedEmployee && selectedEmployee.id === employee.id && (
-                      <div className="leave-rules-form">
-                        <h3>Apply Leave Rules for {selectedEmployee.name}</h3>
-                        <div className="leave-rule">
-                          <h4>Sick Leave</h4>
-                          <input
-                            type="number"
-                            name="sickLeave"
-                            value={leaveDays.sickLeave}
-                            onChange={handleLeaveDaysChange}
-                            placeholder="Set no. of days"
-                          />
-                        </div>
-                        <div className="leave-rule">
-                          <h4>Casual Leave</h4>
-                          <input
-                            type="number"
-                            name="casualLeave"
-                            value={leaveDays.casualLeave}
-                            onChange={handleLeaveDaysChange}
-                            placeholder="Set no. of days"
-                          />
-                        </div>
-                        <div className="leave-rule">
-                          <h4>Leave Without Pay</h4>
-                          <input
-                            type="number"
-                            name="leaveWithoutPay"
-                            value={leaveDays.leaveWithoutPay}
-                            onChange={handleLeaveDaysChange}
-                            placeholder="Set no. of days"
-                          />
-                        </div>
-                        <button onClick={() => saveLeaveRules(employee.id)} className="neon-button save-settings">
-                          Save Leave Rules
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p>No employees found.</p>
               )}
             </div>
           )}

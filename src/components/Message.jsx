@@ -4,15 +4,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faTrashAlt } from '@fortawesome/free-solid-svg-icons'; // Add delete icon
 import { firestore } from '../firebaseConfig'; // Import Firestore instance from Firebase config
 import { collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { auth } from '../firebaseConfig'; // Ensure you import your Firebase auth instance
+import { onAuthStateChanged } from 'firebase/auth';
 
-const Message = ({ currentUser }) => {
+const Message = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [currentUser, setCurrentUser] = useState(null); // Track the current user
   const messagesEndRef = useRef(null);
 
   // Fetch and listen for new messages in real-time from Firestore
   useEffect(() => {
-    const q = query(collection(firestore, 'messages'), orderBy('timestamp', 'asc')); // Use firestore instead of getFirestore
+    const q = query(collection(firestore, 'messages'), orderBy('timestamp', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       let msgs = [];
       snapshot.forEach((doc) => {
@@ -23,13 +26,26 @@ const Message = ({ currentUser }) => {
     return () => unsubscribe();
   }, []);
 
+  // Listen for authentication state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user); // User is signed in
+      } else {
+        setCurrentUser(null); // User is signed out
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   // Send message
   const handleSend = async () => {
-    if (newMessage.trim()) {
+    if (newMessage.trim() && currentUser) {
       await addDoc(collection(firestore, 'messages'), {
         text: newMessage,
         sender: currentUser.uid,
-        profileImage: currentUser.profileImage || '/default-profile.png', // Default profile image
+        username: currentUser.displayName || 'Anonymous', // Store the username
         timestamp: new Date(),
         status: 'sent'
       });
@@ -44,13 +60,19 @@ const Message = ({ currentUser }) => {
     }
   };
 
-  // Delete message (implement permissions for 'delete for everyone' or 'for me')
+  // Delete message
   const handleDelete = async (id, deleteForEveryone = false) => {
-    if (deleteForEveryone) {
-      await deleteDoc(doc(firestore, 'messages', id)); // Delete for everyone
-    } else {
-      // Handle 'delete for me' (implement by hiding it locally)
-      setMessages(messages.filter((message) => message.id !== id));
+    try {
+      if (deleteForEveryone) {
+        const messageRef = doc(firestore, 'messages', id);
+        await deleteDoc(messageRef); // Delete for everyone
+      } else {
+        // Update the local state to remove the message
+        setMessages((prevMessages) => prevMessages.filter((message) => message.id !== id));
+      }
+    } catch (error) {
+      console.error("Error deleting message: ", error);
+      // Optionally display an error message to the user
     }
   };
 
@@ -58,6 +80,11 @@ const Message = ({ currentUser }) => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Handle error gracefully
+  if (!currentUser) {
+    return <div>Error: User not authenticated.</div>; // Display error message
+  }
 
   return (
     <div className="message-container">
@@ -67,20 +94,18 @@ const Message = ({ currentUser }) => {
             <div
               key={message.id}
               className={`message ${message.sender === currentUser.uid ? 'user' : 'admin'}`}
-              onClick={() => handleRead(message)} // Mark as read when clicked
+              onClick={() => handleRead(message)}
             >
-              <img src={message.profileImage} alt="profile" className="profile-img" />
-              <p>{message.text}</p>
-              <div className="message-status">
-                {message.status === 'sent'
-                  ? '✓' // Sent (single tick)
-                  : message.status === 'read'
-                  ? '✓✓ (read)' // Read (blue double tick)
-                  : '✓✓'} {/* Delivered (double tick) */}
+              <div className="message-info">
+                <span className="username">{message.username}</span> {/* Display the sender's name */}
+                <p>{message.text}</p>
+                <div className="message-status">
+                  {message.status === 'sent' ? '✓' : message.status === 'read' ? '✓✓ (read)' : '✓✓'}
+                </div>
+                <button onClick={() => handleDelete(message.id, true)}>
+                  <FontAwesomeIcon icon={faTrashAlt} />
+                </button>
               </div>
-              <button onClick={() => handleDelete(message.id, true)}> {/* 'true' for delete for everyone */}
-                <FontAwesomeIcon icon={faTrashAlt} />
-              </button>
             </div>
           ))}
           <div ref={messagesEndRef} />

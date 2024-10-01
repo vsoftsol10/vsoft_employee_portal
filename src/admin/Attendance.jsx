@@ -1,20 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
-import DatePicker from 'react-datepicker';
 import 'react-calendar/dist/Calendar.css';
-import 'react-datepicker/dist/react-datepicker.css';
 import './Attendance.css';
 import { getFirestore, collection, getDocs, setDoc, doc } from 'firebase/firestore';
+import { getStorage, ref, listAll, getDownloadURL } from 'firebase/storage';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Attendance = () => {
   const [date, setDate] = useState(new Date());
   const [events, setEvents] = useState([]);
-  const [eventTitle, setEventTitle] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [isToastOpen, setToastOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [employeeList, setEmployeeList] = useState([]);
-  const [holidays, setHolidays] = useState([]);
+  const [attendanceType, setAttendanceType] = useState('');
+  const [leaveType, setLeaveType] = useState('');
+  const [images, setImages] = useState([]);
+  const [loadingImages, setLoadingImages] = useState(false);
+  const [checkInStart, setCheckInStart] = useState('');
+  const [checkInEnd, setCheckInEnd] = useState('');
+  const [checkOutStart, setCheckOutStart] = useState('');
+  const [checkOutEnd, setCheckOutEnd] = useState('');
+  const [yourCheckIn, setYourCheckIn] = useState('');
+  const [yourCheckOut, setYourCheckOut] = useState('');
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchEmployeeList = async () => {
@@ -24,95 +35,127 @@ const Attendance = () => {
       setEmployeeList(employees);
     };
     fetchEmployeeList();
-  }, []);
+
+    // Check if employee is already selected from URL
+    const queryParams = new URLSearchParams(location.search);
+    const employeeId = queryParams.get('employeeId');
+    if (employeeId) {
+      const selected = employeeList.find(emp => emp.id === employeeId);
+      if (selected) {
+        setSelectedEmployee(selected);
+      }
+    }
+  }, [location.search, employeeList]);
 
   useEffect(() => {
     if (selectedEmployee) {
-      const fetchEvents = async () => {
-        const db = getFirestore();
-        const querySnapshot = await getDocs(collection(db, `employees/${selectedEmployee.id}/attendance`));
-        const eventList = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          if (data.checkInTime && data.checkOutTime) {
-            const checkInTime = new Date(data.checkInTime.seconds * 1000);
-            const checkOutTime = new Date(data.checkOutTime.seconds * 1000);
-            const localDate = checkInTime.toLocaleDateString('en-GB');
-            const totalDuration = (checkOutTime - checkInTime) / (1000 * 60 * 60);
-            return { id: doc.id, date: localDate, duration: totalDuration, checkInTime, checkOutTime };
-          }
-          return null;
-        }).filter(Boolean);
-        setEvents(eventList);
-      };
       fetchEvents();
     }
-  }, [selectedEmployee]);
+  }, [selectedEmployee, date]);
 
-  useEffect(() => {
-    const fetchHolidays = async () => {
-      const db = getFirestore();
-      const querySnapshot = await getDocs(collection(db, 'holidays'));
-      const holidayList = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return new Date(data.date.seconds * 1000).toLocaleDateString('en-GB');
-      });
-      setHolidays(holidayList);
-    };
-    fetchHolidays();
-  }, []);
+  const fetchEvents = async () => {
+    const db = getFirestore();
+    const attendanceRef = collection(db, `adminattendance/${selectedEmployee.id}/attendance`);
+    const querySnapshot = await getDocs(attendanceRef);
+
+    const eventList = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return { id: doc.id, type: data.type, date: data.date };
+    });
+
+    setEvents(eventList);
+  };
+
+  const fetchImages = async () => {
+    setLoadingImages(true);
+    const storage = getStorage();
+    const imagesRef = ref(storage, `employeeImages/${selectedEmployee.id}`);
+
+    try {
+      const result = await listAll(imagesRef);
+      const urls = await Promise.all(result.items.map(item => getDownloadURL(item)));
+      setImages(urls);
+    } catch (error) {
+      console.error('Error fetching images:', error);
+    } finally {
+      setLoadingImages(false);
+    }
+  };
 
   const handleDateChange = (newDate) => {
     setDate(newDate);
   };
 
-  const handleAddEvent = async () => {
-    if (!selectedEmployee || !eventTitle) return;
+  const handleAttendanceSubmit = async () => {
+    if (!selectedEmployee || !attendanceType) return;
 
     const db = getFirestore();
     const formattedDate = date.toLocaleDateString('en-GB');
-    const checkInTime = new Date();
-    const checkOutTime = new Date(checkInTime.getTime() + 8 * 60 * 60 * 1000); // 8 hours later
 
     try {
-      await setDoc(doc(db, `employees/${selectedEmployee.id}/attendance`, eventTitle), {
-        title: eventTitle,
-        checkInTime: { seconds: Math.floor(checkInTime.getTime() / 1000) },
-        checkOutTime: { seconds: Math.floor(checkOutTime.getTime() / 1000) },
+      await setDoc(doc(db, `adminattendance/${selectedEmployee.id}/attendance`, formattedDate), {
+        type: attendanceType,
         date: formattedDate,
+        checkInStart,
+        checkInEnd,
+        checkOutStart,
+        checkOutEnd,
+        yourCheckIn,
+        yourCheckOut,
       });
-      setToastMessage('Event added successfully');
+      setToastMessage('Attendance marked successfully');
       setToastOpen(true);
-      setEvents(prevEvents => [...prevEvents, { id: eventTitle, date: formattedDate, duration: 8 }]);
+      setEvents(prevEvents => [...prevEvents, { date: formattedDate, type: attendanceType }]);
     } catch (error) {
-      setToastMessage('Error adding event: ' + error.message);
+      setToastMessage('Error marking attendance: ' + error.message);
       setToastOpen(true);
     }
-    setEventTitle('');
+    setAttendanceType('');
+    setCheckInStart('');
+    setCheckInEnd('');
+    setCheckOutStart('');
+    setCheckOutEnd('');
+    setYourCheckIn('');
+    setYourCheckOut('');
   };
 
-  const handleToastClose = () => setToastOpen(false);
+  const handleLeaveSubmit = async () => {
+    if (!selectedEmployee || !leaveType) return;
 
-  const handleCalculatePayroll = () => {
-    if (!selectedEmployee) return;
-    window.location.href = `/admin/payroll?employeeId=${selectedEmployee.id}`;
+    const db = getFirestore();
+    const formattedDate = date.toLocaleDateString('en-GB');
+
+    try {
+      await setDoc(doc(db, `adminattendance/${selectedEmployee.id}/leaves`, formattedDate), {
+        type: leaveType,
+        date: formattedDate,
+      });
+      setToastMessage('Leave marked successfully');
+      setToastOpen(true);
+    } catch (error) {
+      setToastMessage('Error marking leave: ' + error.message);
+      setToastOpen(true);
+    }
+    setLeaveType('');
   };
 
   const renderDayContent = ({ date }) => {
     const formattedDate = date.toLocaleDateString('en-GB');
     const event = events.find(e => e.date === formattedDate);
-    const isHoliday = holidays.includes(formattedDate);
-    
+
     if (event) {
-      const isOverTime = event.duration >= 8.5;
-      return (
-        <div className={`day-content ${isOverTime ? 'green-day' : 'red-day'}`} title={`Duration: ${event.duration.toFixed(2)} hours`}>
-          {isOverTime ? '✅' : '❌'}
-        </div>
-      );
-    } else if (isHoliday) {
-      return <div className="day-content red-day" title="Holiday">🏆</div>;
+      if (event.type === 'Present') return <div className="day-content green-day" title="Present">✅</div>;
+      if (event.type === 'Absent') return <div className="day-content red-day" title="Absent">❌</div>;
+      if (event.type === 'Sick Leave') return <div className="day-content blue-day" title="Sick Leave">🏥</div>;
+      if (event.type === 'Casual Leave') return <div className="day-content orange-day" title="Casual Leave">🎉</div>;
+      if (event.type === 'LOP') return <div className="day-content grey-day" title="LOP">🚫</div>;
     }
-    return null; // Return null if there's no event or holiday
+    return null;
+  };
+
+  const handleEmployeeClick = (employee) => {
+    setSelectedEmployee(employee);
+    navigate(`/attendance?employeeId=${employee.id}`);
   };
 
   return (
@@ -126,33 +169,106 @@ const Attendance = () => {
             tileContent={renderDayContent}
             className="calendar"
           />
+
           <div className="event-manager">
-            <h2>Add Event</h2>
-            <DatePicker selected={date} onChange={handleDateChange} className="datepicker" />
-            <input
-              type="text"
-              value={eventTitle}
-              onChange={(e) => setEventTitle(e.target.value)}
-              placeholder="Event Title"
+            <h2>Mark Attendance</h2>
+            <select
+              value={attendanceType}
+              onChange={(e) => setAttendanceType(e.target.value)}
+            >
+              <option value="">Select Attendance</option>
+              <option value="Present">Present</option>
+              <option value="Absent">Absent</option>
+            </select>
+            <input 
+              type="time" 
+              value={checkInStart} 
+              onChange={(e) => setCheckInStart(e.target.value)} 
+              placeholder="Check-In Start" 
             />
-            <button onClick={handleAddEvent}>Add Event</button>
-            <button onClick={handleCalculatePayroll}>Calculate Payroll</button>
+            <input 
+              type="time" 
+              value={checkInEnd} 
+              onChange={(e) => setCheckInEnd(e.target.value)} 
+              placeholder="Check-In End" 
+            />
+            <input 
+              type="time" 
+              value={checkOutStart} 
+              onChange={(e) => setCheckOutStart(e.target.value)} 
+              placeholder="Check-Out Start" 
+            />
+            <input 
+              type="time" 
+              value={checkOutEnd} 
+              onChange={(e) => setCheckOutEnd(e.target.value)} 
+              placeholder="Check-Out End" 
+            />
+            <input 
+              type="text" 
+              value={yourCheckIn} 
+              onChange={(e) => setYourCheckIn(e.target.value)} 
+              placeholder="Your Check-In" 
+            />
+            <input 
+              type="text" 
+              value={yourCheckOut} 
+              onChange={(e) => setYourCheckOut(e.target.value)} 
+              placeholder="Your Check-Out" 
+            />
+            <button onClick={handleAttendanceSubmit}>Submit Attendance</button>
+          </div>
+
+          <div className="event-manager">
+            <h2>Mark Leave</h2>
+            <select
+              value={leaveType}
+              onChange={(e) => setLeaveType(e.target.value)}
+            >
+              <option value="">Select Leave</option>
+              <option value="Sick Leave">Sick Leave</option>
+              <option value="Casual Leave">Casual Leave</option>
+              <option value="LOP">Leave Without Pay</option>
+            </select>
+            <button onClick={handleLeaveSubmit}>Submit Leave</button>
+          </div>
+
+          {/* Image viewing section */}
+          <div className="employee-images">
+            <h2>Employee Images</h2>
+            <button onClick={fetchImages}>View Images</button>
+            {loadingImages ? (
+              <p>Loading images...</p>
+            ) : images.length > 0 ? (
+              <div className="image-grid">
+                {images.map((url, index) => (
+                  <img key={index} src={url} alt={`Employee ${index + 1}`} />
+                ))}
+              </div>
+            ) : (
+              <p>No images found.</p>
+            )}
+         
+
           </div>
         </>
       ) : (
-        <div className="employee-list">
-          {employeeList.map((employee) => (
-            <div key={employee.id} className="employee-item">
-              <span>{employee.name}</span>
-              <button onClick={() => setSelectedEmployee(employee)}>View Attendance</button>
-            </div>
-          ))}
+        <div className="employee-selection">
+          <h2>Select an Employee</h2>
+          <ul>
+            {employeeList.map(employee => (
+              <li key={employee.id} onClick={() => handleEmployeeClick(employee)}>
+                {employee.name}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
+
       {isToastOpen && (
-        <div className="toast">
+        <div className="toast-message">
           {toastMessage}
-          <button onClick={handleToastClose}>Close</button>
+          <button onClick={() => setToastOpen(false)}>Close</button>
         </div>
       )}
     </div>

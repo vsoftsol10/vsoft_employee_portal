@@ -3,8 +3,7 @@ import './Header.css';
 import { FiBell } from 'react-icons/fi';
 import { FaUserCircle } from 'react-icons/fa';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth } from '../firebaseConfig';
-import { firestore } from '../firebaseConfig';
+import { auth, firestore } from '../firebaseConfig';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {

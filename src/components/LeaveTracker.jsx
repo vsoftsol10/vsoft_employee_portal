@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './LeaveTracker.css';
 import { firestore, auth } from '../firebaseConfig';
-import { collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const LeaveTracker = () => {
@@ -12,9 +12,9 @@ const LeaveTracker = () => {
   const [reason, setReason] = useState('');
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [leaveBalance, setLeaveBalance] = useState({
-    casualLeave: 2,
-    sickLeave: 2,
-    leaveWithoutPay: 2,
+    casualLeave: 0,
+    sickLeave: 0,
+    leaveWithoutPay: 0,
   });
   const [uid, setUid] = useState(null);
   const [activeTab, setActiveTab] = useState('leaveForm'); // State for active tab
@@ -23,16 +23,29 @@ const LeaveTracker = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUid(user.uid);
-
         const userDoc = doc(firestore, 'employees', user.uid);
         const userSnapshot = await getDoc(userDoc);
         if (userSnapshot.exists()) {
           setName(userSnapshot.data().name);
         }
 
-        const leaveCollection = collection(firestore, 'oftenusers', user.uid, 'leaveformrequests');
+        // Fetch leave balance for the user
+        const leaveBalanceRef = doc(firestore, 'leaverules', user.uid);
+        const leaveBalanceSnapshot = await getDoc(leaveBalanceRef);
+        if (leaveBalanceSnapshot.exists()) {
+          const currentBalances = leaveBalanceSnapshot.data();
+          // Convert balances from strings to numbers
+          setLeaveBalance({
+            casualLeave: Number(currentBalances.casualLeave || 0),
+            sickLeave: Number(currentBalances.sickLeave || 0),
+            leaveWithoutPay: Number(currentBalances.leaveWithoutPay || 0),
+          });
+        }
+
+        // Fetch leave requests for the user from Firestore
+        const leaveCollection = collection(firestore, `leaverules/${user.uid}/leaveformrequests`);
         const leaveSnapshot = await getDocs(leaveCollection);
-        setLeaveRequests(leaveSnapshot.docs.map((doc) => doc.data()));
+        setLeaveRequests(leaveSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } else {
         setUid(null);
         setName('');
@@ -47,9 +60,28 @@ const LeaveTracker = () => {
 
     try {
       const leaveDays = calculateLeaveDays(startDate, endDate);
-      if (leaveDays > leaveBalance[leaveType]) {
-        alert('You do not have enough leave balance for this type.');
-        return;
+      const leaveBalanceRef = doc(firestore, 'leaverules', uid);
+
+      // Check if enough balance is available and calculate new balance
+      let newBalance;
+      if (leaveType === "Casual Leave") {
+        if (leaveDays > leaveBalance.casualLeave) {
+          alert('You do not have enough casual leave balance.');
+          return;
+        }
+        newBalance = leaveBalance.casualLeave - leaveDays;
+      } else if (leaveType === "Sick Leave") {
+        if (leaveDays > leaveBalance.sickLeave) {
+          alert('You do not have enough sick leave balance.');
+          return;
+        }
+        newBalance = leaveBalance.sickLeave - leaveDays;
+      } else if (leaveType === "Leave Without Pay") {
+        if (leaveDays > leaveBalance.leaveWithoutPay) {
+          alert('You do not have enough leave without pay balance.');
+          return;
+        }
+        newBalance = leaveBalance.leaveWithoutPay - leaveDays;
       }
 
       if (new Date(startDate) > new Date(endDate)) {
@@ -62,42 +94,36 @@ const LeaveTracker = () => {
         return;
       }
 
-      const leaveRequestDocRef = doc(firestore, 'leaverequests', uid);
-      const leaveRequestsSnapshot = await getDoc(leaveRequestDocRef);
-
-      if (!leaveRequestsSnapshot.exists()) {
-        await setDoc(leaveRequestDocRef, {
-          Request: {
-            'Sick Leave': { no: 0 },
-            'Casual Leave': { no: 0 },
-            'Leave Without Pay': { no: 0 }
-          }
-        });
-      }
-
-      await updateDoc(leaveRequestDocRef, {
-        [`Request.${leaveType}.no`]: increment(1)
+      // Update the leave balance directly with the new value
+      await updateDoc(leaveBalanceRef, {
+        [leaveType]: newBalance.toString() // Store as string
       });
 
-      await addDoc(collection(firestore, 'oftenusers', uid, 'leaveformrequests'), {
+      // Store the leave request in the corrected path
+      await addDoc(collection(firestore, `leaverules/${uid}/leaveformrequests`), {
         name,
         type: leaveType,
+        reason,
         start: startDate,
         end: endDate,
-        reason,
         status: 'pending',
-        createdAt: new Date()
+        createdAt: new Date(),
       });
 
-      setLeaveRequests([...leaveRequests, {
-        name,
-        type: leaveType,
-        start: startDate,
-        end: endDate,
-        reason,
-        status: 'pending'
-      }]);
+      // Update the local state to include the new leave request
+      setLeaveRequests(prevRequests => [
+        ...prevRequests,
+        {
+          name,
+          type: leaveType,
+          reason,
+          start: startDate,
+          end: endDate,
+          status: 'pending'
+        }
+      ]);
 
+      // Reset form fields
       setLeaveType('');
       setStartDate('');
       setEndDate('');
