@@ -1,38 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { auth, firestore } from '../firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { setDoc, doc, Timestamp, getDocs, collection } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import { setDoc, doc, Timestamp, getDocs, collection, deleteDoc } from 'firebase/firestore';
+import { read, utils, writeFile } from 'xlsx'; // Import writeFile for exporting
 import './Directory.css';
-
+import { useNavigate } from 'react-router-dom';
 const Directory = () => {
   const [activeTab, setActiveTab] = useState('addEmployee');
   const [employees, setEmployees] = useState([]);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    role: '',
-    department: '',
-    password: '',
-    aadhar: '',
-    fatherName: '',
-    motherName: '',
-    dob: '',
-    address: '',
-    emergencyContact: '',
-    mobile: '', // Added mobile number field
-    checkInStarts: '',
-    checkInEnds: '',
-    checkOutStarts: '',
-    checkOutEnds: '',
-    sickLeave: '', // Sick leave
-    casualLeave: '', // Casual leave
-    leaveWithoutPay: '', // Leave without pay
-  });
+  const [excelData, setExcelData] = useState([]); // State for excel data
+  const [message, setMessage] = useState(''); // For feedback messages
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+const navigate = useNavigate();
 
+const handleViewDetails = (id) => {
+  navigate(`/admin/directory/employee/${id}`); // Update to navigate correctly
+}
   useEffect(() => {
     const fetchEmployees = async () => {
       const employeeSnapshot = await getDocs(collection(firestore, 'employees'));
@@ -42,88 +26,120 @@ const Directory = () => {
     fetchEmployees();
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const binaryStr = event.target.result;
+      const workbook = read(binaryStr, { type: "binary" });
+      const sheetName = workbook.SheetNames[0]; // Assume data is in the first sheet
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = utils.sheet_to_json(worksheet);
+
+      setExcelData(jsonData); // Store the parsed data
+    };
+
+    reader.readAsBinaryString(file);
   };
 
-  const handleSubmit = async (e) => {
+  const handleBulkSubmit = async (e) => {
     e.preventDefault();
-    const {
-      name, email, password, role, department, aadhar, fatherName, motherName, dob, address, emergencyContact, mobile, checkInStarts, checkInEnds, checkOutStarts, checkOutEnds,
-      sickLeave, casualLeave, leaveWithoutPay
-    } = formData;
-  
-    // Ensure all fields are filled
-    if (!name || !email || !password || !role || !department || !aadhar || !fatherName || !motherName || !dob || !address || !emergencyContact || !mobile || !checkInStarts || !checkInEnds || !checkOutStarts || !checkOutEnds || !sickLeave || !casualLeave || !leaveWithoutPay) {
-      setError('All fields are required.');
+
+    if (excelData.length === 0) {
+      setError("Please upload an Excel file.");
       return;
     }
-  
+
     setLoading(true);
-    setError('');
-  
+    setError("");
+    setMessage(""); // Reset message
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      for (const row of excelData) {
+        const {
+          name, email, password, role, department, aadhar, fatherName, motherName, dob, address, emergencyContact, mobile, checkInStarts, checkInEnds, checkOutStarts, checkOutEnds,
+          sickLeave, casualLeave, leaveWithoutPay
+        } = row;
 
-      // Save employee details to Firestore
-      await setDoc(doc(firestore, `employees/${user.uid}`), {
-        name,
-        email,
-        role,
-        department,
-        aadhar,
-        fatherName,
-        motherName,
-        dob,
-        address,
-        emergencyContact,
-        mobile, // Include mobile number in Firestore
-        checkInStarts,
-        checkInEnds,
-        checkOutStarts,
-        checkOutEnds,
-        employmentStatus: 'Active',
-        sickLeave, // Include sick leave count
-        casualLeave, // Include casual leave count
-        leaveWithoutPay, // Include leave without pay count
-        dateJoined: Timestamp.fromDate(new Date()),
-      });
+        // Basic validation for each row
+        if (!name || !email || !password || !role || !department || !aadhar || !fatherName || !motherName || !dob || !address || !emergencyContact || !mobile || !checkInStarts || !checkInEnds || !checkOutStarts || !checkOutEnds || !sickLeave || !casualLeave || !leaveWithoutPay) {
+          setError(`All fields are required for ${name || "some users"}`);
+          continue;
+        }
 
-      // Reset form after successful submission
-      setFormData({
-        name: '',
-        email: '',
-        role: '',
-        department: '',
-        password: '',
-        aadhar: '',
-        fatherName: '',
-        motherName: '',
-        dob: '',
-        address: '',
-        emergencyContact: '',
-        mobile: '',
-        checkInStarts: '',
-        checkInEnds: '',
-        checkOutStarts: '',
-        checkOutEnds: '',
-        sickLeave: '',
-        casualLeave: '',
-        leaveWithoutPay: '',
-      });
-    } catch (error) {
-      if (error.code === 'auth/email-already-in-use') {
-        setError('This email address is already in use. Please use a different email.');
-      } else {
-        console.error('Error adding employee:', error.message);
-        setError('Error adding employee: ' + error.message);
+        if (!/\S+@\S+\.\S+/.test(email)) {
+          setError(`Invalid email format for ${email}`);
+          continue;
+        }
+
+        // Create user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Store user details in Firestore
+        await setDoc(doc(firestore, "employees", user.uid), {
+          name,
+          email,
+          role,
+          department,
+          aadhar,
+          fatherName,
+          motherName,
+          dob,
+          address,
+          emergencyContact,
+          mobile,
+          checkInStarts,
+          checkInEnds,
+          checkOutStarts,
+          checkOutEnds,
+          employmentStatus: 'Active',
+          sickLeave,
+          casualLeave,
+          leaveWithoutPay,
+          dateJoined: Timestamp.fromDate(new Date()),
+        });
       }
+
+      setMessage("Employees added successfully");
+      setExcelData([]); // Reset the data
+    } catch (error) {
+      console.error("Error adding employees: ", error);
+      setError("Failed to add employees. Please check the data and try again.");
     } finally {
       setLoading(false);
     }
   };
-  
+
+  const handleDeleteEmployee = async (id) => {
+    try {
+      await deleteDoc(doc(firestore, "employees", id));
+      setEmployees(employees.filter(employee => employee.id !== id)); // Remove employee from state
+      setMessage("Employee removed successfully");
+    } catch (error) {
+      console.error("Error removing employee:", error);
+      setError("Failed to remove employee.");
+    }
+  };
+
+  const handleExport = async () => {
+    const exportData = employees.map(employee => ({
+      Name: employee.name,
+      Email: employee.email,
+      Role: employee.role,
+      Department: employee.department,
+      Mobile: employee.mobile,
+      // Add other fields you want to export
+    }));
+
+    const worksheet = utils.json_to_sheet(exportData);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Employees');
+    
+    writeFile(workbook, 'employees.xlsx');
+  };
+
   return (
     <div className="directory-container">
       <div className="tabs">
@@ -137,56 +153,31 @@ const Directory = () => {
 
       <div className="content">
         {activeTab === 'addEmployee' && (
-          <form onSubmit={handleSubmit} className="employee-form">
-            <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
-            <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-            <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
-            <input name="role" placeholder="Role" value={formData.role} onChange={handleChange} required />
-            <input name="department" placeholder="Department" value={formData.department} onChange={handleChange} required />
-            <input name="aadhar" placeholder="Aadhar Number" value={formData.aadhar} onChange={handleChange} required />
-            <input name="fatherName" placeholder="Father's Name" value={formData.fatherName} onChange={handleChange} required />
-            <input name="motherName" placeholder="Mother's Name" value={formData.motherName} onChange={handleChange} required />
-            <input name="dob" type="date" placeholder="Date of Birth" value={formData.dob} onChange={handleChange} required />
-            <input name="address" placeholder="Address" value={formData.address} onChange={handleChange} required />
-            <input name="emergencyContact" placeholder="Emergency Contact" value={formData.emergencyContact} onChange={handleChange} required />
-            <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} required /> {/* Added mobile number input */}
-            <label htmlFor="checkInStarts">Check-In Starts</label>
-            <input name="checkInStarts" type="time" placeholder="Check-In Starts" value={formData.checkInStarts} onChange={handleChange} required />
-            <label htmlFor="checkInEnds">Check-In Ends</label>
-            <input name="checkInEnds" type="time" placeholder="Check-In Ends" value={formData.checkInEnds} onChange={handleChange} required />
-            
-            <label htmlFor="checkOutStarts">Check-Out Starts</label>
-            <input name="checkOutStarts" type="time" placeholder="Check-Out Starts" value={formData.checkOutStarts} onChange={handleChange} required />
-            <label htmlFor="checkOutEnds">Check-Out Ends</label>
-            <input name="checkOutEnds" type="time" placeholder="Check-Out Ends" value={formData.checkOutEnds} onChange={handleChange} required />
-            
-            <label htmlFor="sickLeave">Sick Leave (Days)</label>
-            <input name="sickLeave" type="number" placeholder="Sick Leave Days" value={formData.sickLeave} onChange={handleChange} required />
-            
-            <label htmlFor="casualLeave">Casual Leave (Days)</label>
-            <input name="casualLeave" type="number" placeholder="Casual Leave Days" value={formData.casualLeave} onChange={handleChange} required />
-            
-            <label htmlFor="leaveWithoutPay">Leave Without Pay (Days)</label>
-            <input name="leaveWithoutPay" type="number" placeholder="Leave Without Pay Days" value={formData.leaveWithoutPay} onChange={handleChange} required />
-
-            <button type="submit" disabled={loading}>{loading ? 'Adding...' : 'Add Employee'}</button>
-            {error && <p className="error">{error}</p>}
-          </form>
+          <div className="add-employee-section">
+            <h2>Add Employees</h2>
+            <form onSubmit={handleBulkSubmit} className="excel-upload-form">
+              <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} required />
+              <button type="submit" disabled={loading}>{loading ? 'Uploading...' : 'Upload Employees'}</button>
+              {error && <p className="error">{error}</p>}
+              {message && <p className="success">{message}</p>}
+            </form>
+          </div>
         )}
 
         {activeTab === 'workingEmployee' && (
           <div className="employee-list">
-            {employees.map(employee => (
-              <div className="employee-card" key={employee.id}>
-                <span>{employee.name}</span>
-                <button onClick={() => navigate(`/admin/employee-details/${employee.id}`)} className="view-details">
-                  View Details
-                </button>
-                <span className={`status ${employee.employmentStatus === 'Active' ? 'present' : 'absent'}`}>
-                  {employee.employmentStatus === 'Active' ? 'Present' : 'Absent'}
-                </span>
-              </div>
-            ))}
+            <h3>Employees:</h3>
+            <button onClick={handleExport}>Export All Employees</button>
+            <ul>
+     
+  {employees.map((employee) => (
+  <div key={employee.id}>
+    <h3>{employee.name}</h3>
+    <button onClick={() => handleViewDetails(employee.id)}>View Details</button>
+    {/* Other employee details or actions */}
+  </div>
+))}
+            </ul>
           </div>
         )}
       </div>

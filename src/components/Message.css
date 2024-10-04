@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap'); 
 
 .message-container {
     display: flex;
@@ -7,7 +7,8 @@
     max-width: 800px;
     margin: auto;
     font-family: 'Roboto', sans-serif;
-    background-color: #e5e5e5;
+    background-color: #f0f0f5;
+    padding: 20px;
 }
 
 .chat-box {
@@ -27,34 +28,46 @@
     background-color: #f9f9f9;
 }
 
-.message-date-separator {
-    text-align: center;
-    margin: 20px 0;
-    font-weight: bold;
-    color: #666;
+.message-wrapper {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 100px; /* Increased spacing between messages */
+}
+
+.profile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    margin-right: 10px;
 }
 
 .message {
-    margin-bottom: 15px;
-    padding: 15px;
-    border-radius: 15px;
-    max-width: 75%;
-    line-height: 1.5;
+    padding: 10px; /* Adjust padding for height */
+    border-radius: 20px; /* Rounded edges for better shape */
+    max-width: 70%; /* Adjust max width for messages */
+    line-height: 1.4; /* Adjust line-height for better spacing */
     position: relative;
+    word-wrap: normal; /* Disable wrapping */
+    display: inline-block;
+    height: 40px; /* Fixed height for consistent message size */
 }
 
 .message.user {
     background-color: #872d8fd5;
-    color: #ffffff;
+    color: white;
     align-self: flex-end;
     text-align: right;
+    border-radius: 20px 20px 0px 20px; /* Custom rounded shape for user messages */
+    margin-left: auto;
 }
 
 .message.admin {
     background-color: #306781c5;
-    color: #333;
+    color: #ffffff;
     align-self: flex-start;
     text-align: left;
+    border-radius: 20px 20px 20px 0px; /* Admin message with a different bubble shape */
 }
 
 .message::before {
@@ -75,7 +88,7 @@
 
 .message.admin::before {
     left: -15px;
-    border-right-color: #e0e0e0;
+    border-right-color: #306781c5;
     border-width: 10px 0 10px 15px;
 }
 
@@ -116,19 +129,29 @@
     transform: scale(0.95);
 }
 
+/* Meta text color */
+.message-meta {
+    color: black; /* Set meta text color to black */
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-    .message-container {
-        margin: 10px;
-        margin-top: 100px;
+    .message.user {
+        max-width: 90%;
+        font-size: 0.9rem;
+        padding: 8px; /* Further reduced padding for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .message.user {
+        max-width: 95%;
+        font-size: 0.85rem;
+        padding: 6px; /* Further reduced padding for extra small screens */
     }
 
-    .chat-input input {
-        padding: 8px;
-    }
-
-    .chat-input button {
-        width: 36px;
-        height: 36px;
+    .profile-icon {
+        width: 30px;
+        height: 30px;
     }
 }

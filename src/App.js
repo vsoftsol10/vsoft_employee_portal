@@ -1,42 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebaseConfig'; // Import Firebase config
+import React, { useEffect, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebaseConfig"; // Import Firebase config
 
 // User components
-import UserSidebar from './components/Sidebar'; // User Sidebar
-import Login from './components/Login';
-import Register from './components/Register';
-import UserDashboard from './components/Dashboard';
-import UserAttendance from './components/Attendance'; // Renamed to UserAttendance
-import LeaveTracker from './components/LeaveTracker';
-import UserPayroll from './components/Payroll';
-import Tasks from './components/Tasks';
-import PerformanceReviews from './components/PerformanceReviews';
-import Files from './components/Files';
-import Message from './components/Message';
-import FAQs from './components/FAQs';
-import Notification from './components/Notification';
-import Profile from './components/Profile';
-import ChangePassword from './components/ChangePassword';
+import UserSidebar from "./components/Sidebar"; // User Sidebar
+import Login from "./components/Login";
+import Register from "./components/Register";
+import UserDashboard from "./components/Dashboard";
+import UserAttendance from "./components/Attendance"; // Renamed to UserAttendance
+import LeaveTracker from "./components/LeaveTracker";
+import UserPayroll from "./components/Payroll";
+import Tasks from "./components/Tasks";
+import PerformanceReviews from "./components/PerformanceReviews";
+import Files from "./components/Files";
+import Message from "./components/Message";
+import FAQs from "./components/FAQs";
+import Notification from "./components/Notification";
+import Profile from "./components/Profile";
+import ChangePassword from "./components/ChangePassword";
 
 // Admin components
-import AdminSidebar from './admin/AdminSidebar'; // Admin Sidebar
-import AdminDashboard from './admin/Dashboard';
-import AdminTasksAndGroups from './admin/TasksAndGroups';
-import AdminFiles from './admin/Files'; // Import AdminFiles component
-import AdminReviews from './admin/Reviews';
-import AdminPayroll from './admin/Payroll';
-import CheckInOuts from './admin/CheckInOuts';
-import AdminLeaveTracker from './admin/Leavetracker'; // Renamed to AdminLeaveTracker
-import Directory from './admin/Directory';
-import AdminAttendance from './admin/Attendance'; // Renamed to AdminAttendance
+import AdminSidebar from "./admin/AdminSidebar"; // Admin Sidebar
+import AdminDashboard from "./admin/Dashboard";
+import AdminTasksAndGroups from "./admin/TasksAndGroups";
+import AdminFiles from "./admin/Files"; // Import AdminFiles component
+import AdminReviews from "./admin/Reviews";
+import AdminPayroll from "./admin/Payroll";
+import CheckInOuts from "./admin/CheckInOuts";
+import AdminLeaveTracker from "./admin/Leavetracker"; // Renamed to AdminLeaveTracker
+import Directory from "./admin/Directory";
+import AdminAttendance from "./admin/Attendance"; // Renamed to AdminAttendance
 
-import AddEmployee from './admin/AddEmployee'; // Import AddEmployee component
-import EmployeeDetails from './admin/EmployeeDetails'; // Import EmployeeDetails component
-import EmployeeDocs from './admin/EmployeeDocs';
-import PayrollUpload from './admin/PayrollUpload';
-import './App.css';
+import AddEmployee from "./admin/AddEmployee"; // Import AddEmployee component
+import EmployeeDetails from "./admin/EmployeeDetails"; // Import EmployeeDetails component
+import EmployeeDocs from "./admin/EmployeeDocs";
+import PayrollUpload from "./admin/PayrollUpload";
+import "./App.css";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -49,7 +54,7 @@ const App = () => {
         setIsAuthenticated(true);
         // Example: Fetch and set the user role
         // Replace this with your actual role-checking logic
-        setUserRole('admin'); // Replace with actual role-fetching logic
+        setUserRole("admin"); // Replace with actual role-fetching logic
       } else {
         setIsAuthenticated(false);
         setUserRole(null);
@@ -182,7 +187,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-       
 
           {/* Protected Admin Routes */}
           <Route
@@ -194,24 +198,25 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-         <Route
-  path="/admin/checkinouts/:uid"
-  element={
-    <ProtectedRoute requiredRole="admin">
-      <AdminSidebar />
-      <CheckInOuts />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/admin/faqs"
-  element={
-    <ProtectedRoute requiredRole="admin">
-      <AdminSidebar />
-      <AdminDashboard /> {/* Or another component handling the FAQ section */}
-    </ProtectedRoute>
-  }
-/>
+          <Route
+            path="/admin/checkinouts/:uid"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
+                <CheckInOuts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/faqs"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminSidebar />
+                <AdminDashboard />{" "}
+                {/* Or another component handling the FAQ section */}
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/admin/tasks"
@@ -257,7 +262,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-     
+
           <Route
             path="/admin/leavetracker"
             element={
@@ -267,15 +272,24 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/admin/directory"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminSidebar />
-                <Directory />
-              </ProtectedRoute>
-            }
-          />
+     <Route
+          path="/admin/directory"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminSidebar />
+              <Directory />
+            </ProtectedRoute>
+          }
+        />
+       <Route
+  path="/admin/directory/employee/:employeeId"
+  element={
+    <ProtectedRoute requiredRole="admin">
+      <AdminSidebar />
+      <EmployeeDetails /> {/* Pass the employeeId to this component */}
+    </ProtectedRoute>
+  }
+/>
           <Route
             path="/admin/attendance"
             element={
@@ -303,7 +317,6 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-         
 
           <Route
             path="/admin/payrollupload"
