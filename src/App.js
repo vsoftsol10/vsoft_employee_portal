@@ -36,12 +36,13 @@ import CheckInOuts from "./admin/CheckInOuts";
 import AdminLeaveTracker from "./admin/Leavetracker"; // Renamed to AdminLeaveTracker
 import Directory from "./admin/Directory";
 import AdminAttendance from "./admin/Attendance"; // Renamed to AdminAttendance
-
+import TraineeDetails from "./admin/TraineeDetails";
 import AddEmployee from "./admin/AddEmployee"; // Import AddEmployee component
 import EmployeeDetails from "./admin/EmployeeDetails"; // Import EmployeeDetails component
 import EmployeeDocs from "./admin/EmployeeDocs";
 import PayrollUpload from "./admin/PayrollUpload";
 import "./App.css";
+import InternDetails from "./admin/InternDetails";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -282,11 +283,30 @@ const App = () => {
           }
         />
        <Route
-  path="/admin/directory/employee/:employeeId"
+  path="/admin/directory/:collectionName/:employeeId"
   element={
     <ProtectedRoute requiredRole="admin">
       <AdminSidebar />
       <EmployeeDetails /> {/* Pass the employeeId to this component */}
+    </ProtectedRoute>
+  }
+/>
+
+ <Route path="/admin/directory/trainees/:traineeId" 
+  element={
+    <ProtectedRoute requiredRole="admin">
+      <AdminSidebar />
+      <TraineeDetails />
+     
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/admin/directory/interns/:employeeId"
+  element={
+    <ProtectedRoute requiredRole="admin">
+      <AdminSidebar />
+      <InternDetails /> {/* Pass the employeeId to this component */}
     </ProtectedRoute>
   }
 />
@@ -317,6 +337,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          
 
           <Route
             path="/admin/payrollupload"

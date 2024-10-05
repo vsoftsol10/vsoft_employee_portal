@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { firestore } from '../firebaseConfig'; // Ensure you have Firebase configured
-import { doc, getDoc, setDoc, Timestamp, collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { useParams } from 'react-router-dom'; // Import useParams
 import './EmployeeDetails.css'; // Import the CSS file
 
@@ -35,6 +35,10 @@ const EmployeeDetails = () => {
     casualLeave: '',
     leaveWithoutPay: '',
   });
+
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingCheckIn, setLoadingCheckIn] = useState(false);
+  const [loadingLeave, setLoadingLeave] = useState(false);
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
@@ -94,6 +98,7 @@ const EmployeeDetails = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoadingSubmit(true); // Start loading state
     try {
       const docRef = doc(firestore, 'employees', employeeId);
       await setDoc(docRef, {
@@ -104,36 +109,43 @@ const EmployeeDetails = () => {
     } catch (err) {
       console.error('Error updating employee details:', err);
       alert('Could not update employee details. Please try again later.');
+    } finally {
+      setLoadingSubmit(false); // End loading state
     }
   };
 
   const handleCheckInSubmit = async (e) => {
     e.preventDefault();
+    setLoadingCheckIn(true); // Start loading state
     try {
       const checkInRef = doc(firestore, `employeetimings/${employeeId}`); // Directly refer to the document
       await setDoc(checkInRef, checkInData, { merge: true }); // Use setDoc instead of addDoc
       alert('Check-in times set successfully.');
-      setCheckInData({ checkInStarts: '', checkInEnds: '', checkOutStarts: '', checkOutEnds: '' });
+      setCheckInData({ checkInStarts: '', checkInEnds: '', checkOutStarts: '', checkOutEnds: '' }); // Reset check-in data
     } catch (err) {
       console.error('Error setting check-in times:', err);
       alert('Could not set check-in times. Please try again later.');
+    } finally {
+      setLoadingCheckIn(false); // End loading state
     }
   };
   
   const handleLeaveSubmit = async (e) => {
     e.preventDefault();
+    setLoadingLeave(true); // Start loading state
     try {
       const leaveRef = doc(firestore, `leaverules/${employeeId}`); // Directly refer to the document
       await setDoc(leaveRef, leaveData, { merge: true }); // Use setDoc instead of addDoc
       alert('Leave rules set successfully.');
-      setLeaveData({ sickLeave: '', casualLeave: '', leaveWithoutPay: '' });
+      setLeaveData({ sickLeave: '', casualLeave: '', leaveWithoutPay: '' }); // Reset leave data
     } catch (err) {
       console.error('Error setting leave rules:', err);
       alert('Could not set leave rules. Please try again later.');
+    } finally {
+      setLoadingLeave(false); // End loading state
     }
   };
   
-
   return (
     <div className="employee-details-container">
       <h2>Edit Employee Details</h2>
@@ -154,7 +166,9 @@ const EmployeeDetails = () => {
             <input name="mobile" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} required />
             <input name="emergencyContact" placeholder="Emergency Contact No." value={formData.emergencyContact} onChange={handleChange} required />
 
-            <button type="submit">Edit and Save</button>
+            <button type="submit" disabled={loadingSubmit}>
+              {loadingSubmit ? 'Saving...' : 'Edit and Save'}
+            </button>
           </form>
 
           {/* Tabs for Check-in and Leave Rules */}
@@ -170,17 +184,21 @@ const EmployeeDetails = () => {
               <input name="checkInEnds" type="time" value={checkInData.checkInEnds} onChange={handleCheckInChange} required placeholder="Check-In Ends" />
               <input name="checkOutStarts" type="time" value={checkInData.checkOutStarts} onChange={handleCheckInChange} required placeholder="Check-Out Starts" />
               <input name="checkOutEnds" type="time" value={checkInData.checkOutEnds} onChange={handleCheckInChange} required placeholder="Check-Out Ends" />
-              <button type="submit">Save Check-in Times</button>
+              <button type="submit" disabled={loadingCheckIn}>
+                {loadingCheckIn ? 'Saving...' : 'Save Check-in Times'}
+              </button>
             </form>
           )}
 
           {activeTab === 'leaveRules' && (
-            <form onSubmit={handleLeaveSubmit} className="leave-rules-form">
+            <form onSubmit={handleLeaveSubmit} className="leave-form">
               <h3>Set Leave Rules</h3>
-              <input name="sickLeave" type="number" value={leaveData.sickLeave} onChange={handleLeaveChange} placeholder="Sick Leave (Days)" required />
-              <input name="casualLeave" type="number" value={leaveData.casualLeave} onChange={handleLeaveChange} placeholder="Casual Leave (Days)" required />
-              <input name="leaveWithoutPay" type="number" value={leaveData.leaveWithoutPay} onChange={handleLeaveChange} placeholder="Leave Without Pay (Days)" required />
-              <button type="submit">Save Leave Rules</button>
+              <input name="sickLeave" type="number" value={leaveData.sickLeave} onChange={handleLeaveChange} required placeholder="Sick Leave" />
+              <input name="casualLeave" type="number" value={leaveData.casualLeave} onChange={handleLeaveChange} required placeholder="Casual Leave" />
+              <input name="leaveWithoutPay" type="number" value={leaveData.leaveWithoutPay} onChange={handleLeaveChange} required placeholder="Leave Without Pay" />
+              <button type="submit" disabled={loadingLeave}>
+                {loadingLeave ? 'Saving...' : 'Save Leave Rules'}
+              </button>
             </form>
           )}
         </div>

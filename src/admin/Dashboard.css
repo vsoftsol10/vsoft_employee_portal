@@ -1,81 +1,108 @@
 .dashboard {
   padding: 20px;
   margin-left: 200px;
+  background: #f0f2f5; /* Light background for contrast */
 }
 
 .tabs {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   margin-bottom: 20px;
 }
 
 .tab {
-  padding: 10px;
-  cursor: pointer;
+  padding: 15px 20px;
+  margin: 0 10px;
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.tab:hover {
+  background: rgba(0, 123, 255, 0.1); /* Light blue on hover */
 }
 
 .active-tab {
   background-color: #007bff;
   color: white;
-  border-radius: 5px;
 }
 
 /* Cards for Employee Stats */
 .cards-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
   margin-bottom: 20px;
 }
 
 .card {
-  background: #f8f9fa;
+  background: #ffffff; /* White background for cards */
   padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
-  flex: 1;
+  flex: 1 1 30%; /* Responsive card width */
   margin: 10px;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px); /* Lift effect on hover */
 }
 
 .card h3 {
   margin-bottom: 10px;
+  font-size: 1.5rem; /* Larger font for headings */
 }
 
 .chart-row {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 20px;
 }
 
-.bar-chart {
-  flex: 1;
-  margin-right: 20px;
-}
-
-.doughnut-chart {
-  flex: 1;
+.bar-chart, .doughnut-chart {
+  width: 90%; /* Full width on smaller screens */
+  max-width: 600px; /* Limit max width */
+  margin: 20px 0;
 }
 
 .user-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
   margin-top: 20px;
 }
 
 .user-card {
+  background: #ffffff; /* White background for user cards */
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 15px;
+  border-radius: 8px;
   text-align: center;
-  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.user-card:hover {
+  transform: scale(1.05); /* Slight scaling on hover */
 }
 
 .details-btn {
   background-color: #007bff;
   color: white;
-  padding: 5px 10px;
+  padding: 10px 15px;
   border: none;
-  border-radius: 3px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.details-btn:hover {
+  background-color: #0056b3; /* Darker blue on hover */
 }
 
 .edit-faq-modal {
@@ -83,11 +110,25 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
+  background: #ffffff;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   z-index: 1000;
+  max-width: 90%;
+  width: 400px; /* Set max width for modal */
+}
+
+.edit-faq-modal h3 {
+  margin-bottom: 15px;
+}
+
+textarea {
+  width: 100%; /* Full width textarea */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  resize: none; /* Disable resizing */
 }
 
 .update-btn {
@@ -97,80 +138,33 @@
   padding: 10px 15px;
   border-radius: 5px;
   cursor: pointer;
-}
-.dashboard {
-  padding: 20px;
+  transition: background 0.3s ease;
 }
 
-.tabs {
-  display: flex;
-  gap: 20px;
+.update-btn:hover {
+  background-color: #218838; /* Darker green on hover */
 }
 
-.tab {
-  text-decoration: none;
-  color: #007bff;
-  font-weight: bold;
-}
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+  .tabs {
+    flex-direction: column;
+  }
 
-.active-tab {
-  border-bottom: 2px solid #007bff;
-}
+  .cards-row {
+    flex-direction: column; /* Stack cards vertically on small screens */
+  }
 
-.cards-row {
-  display: flex;
-  justify-content: space-around;
-  margin: 20px 0;
-}
+  .card {
+    flex: 1 1 100%; /* Full width on smaller screens */
+    margin: 10px 0; /* Margin between stacked cards */
+  }
 
-.card {
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  text-align: center;
-  width: 30%;
-}
+  .chart-row {
+    flex-direction: column; /* Stack charts vertically on small screens */
+  }
 
-.chart-row {
-  display: flex;
-  justify-content: space-between;
-}
-
-.bar-chart, .doughnut-chart {
-  width: 48%;
-}
-
-.user-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.user-card {
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 200px;
-  text-align: center;
-}
-
-.edit-faq-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  z-index: 1000;
-}
-
-.update-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
+  .bar-chart, .doughnut-chart {
+    width: 100%; /* Full width on small screens */
+  }
 }

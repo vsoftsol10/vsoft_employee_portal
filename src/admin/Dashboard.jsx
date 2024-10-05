@@ -2,20 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { firestore } from '../firebaseConfig';
 import { getDocs, collection, updateDoc, doc } from 'firebase/firestore';
 import { Link, useLocation } from 'react-router-dom';
-import { Doughnut, Bar } from 'react-chartjs-2'; // Import Doughnut and Bar
+import { Doughnut, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  ArcElement, // For Doughnut chart
-  BarElement, // For Bar chart
-  CategoryScale, // For x-axis scaling
-  LinearScale, // For y-axis scaling
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
   Tooltip,
   Legend,
-} from 'chart.js'; // Import necessary components for both Doughnut and Bar charts
+} from 'chart.js';
 
 import './Dashboard.css';
 
-// Register the required Chart.js components
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const Dashboard = () => {
@@ -25,10 +24,9 @@ const Dashboard = () => {
   const [editAnswer, setEditAnswer] = useState('');
   const [present, setPresent] = useState(0);
   const [absent, setAbsent] = useState(0);
+  const [totalTrainees, setTotalTrainees] = useState(0); // State for total trainees
+  const [totalInterns, setTotalInterns] = useState(0); // State for total interns
   
-  const totalTrainees = 20; // Sample data for total trainees
-  const totalInterns = 5; // Sample data for total interns
-
   const location = useLocation();
 
   useEffect(() => {
@@ -58,7 +56,27 @@ const Dashboard = () => {
       }
     };
 
+    const fetchTotalTrainees = async () => {
+      try {
+        const traineeSnapshot = await getDocs(collection(firestore, 'trainees'));
+        setTotalTrainees(traineeSnapshot.docs.length); // Count the number of trainee documents
+      } catch (error) {
+        console.error("Error fetching trainees: ", error);
+      }
+    };
+
+    const fetchTotalInterns = async () => {
+      try {
+        const internSnapshot = await getDocs(collection(firestore, 'interns'));
+        setTotalInterns(internSnapshot.docs.length); // Count the number of intern documents
+      } catch (error) {
+        console.error("Error fetching interns: ", error);
+      }
+    };
+
     fetchEmployees();
+    fetchTotalTrainees(); // Fetch total trainees
+    fetchTotalInterns(); // Fetch total interns
 
     if (location.pathname === '/admin/faqs') {
       fetchFaqs();
@@ -84,31 +102,29 @@ const Dashboard = () => {
     }
   };
 
-  // Data for the doughnut charts
   const doughnutData = {
     labels: ['Present Employees', 'Absent Employees'],
     datasets: [
       {
         data: [present, absent],
-        backgroundColor: ['#28a745', '#dc3545'], // Green for present, Red for absent
+        backgroundColor: ['#28a745', '#dc3545'],
         hoverBackgroundColor: ['#218838', '#c82333'],
       },
     ],
   };
 
-  // Bar chart data
   const barData = {
     labels: ['6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM'],
     datasets: [
       {
         label: 'Check-in Accuracy',
-        data: [95, 90, 85, 80, 78, 76, 75, 80, 85, 90, 92, 95, 100, 98, 97, 95, 96], // Sample accuracy data
-        backgroundColor: '#007bff', // Blue for Check-in accuracy
+        data: [95, 90, 85, 80, 78, 76, 75, 80, 85, 90, 92, 95, 100, 98, 97, 95, 96],
+        backgroundColor: '#007bff',
       },
       {
         label: 'Check-out Accuracy',
-        data: [90, 88, 84, 80, 78, 76, 74, 78, 83, 89, 92, 94, 97, 96, 94, 93, 92], // Sample accuracy data
-        backgroundColor: '#6c757d', // Gray for Check-out accuracy
+        data: [90, 88, 84, 80, 78, 76, 74, 78, 83, 89, 92, 94, 97, 96, 94, 93, 92],
+        backgroundColor: '#6c757d',
       },
     ],
   };
@@ -152,8 +168,6 @@ const Dashboard = () => {
 
       {location.pathname === '/admin/dashboard' && (
         <div>
-          <h2>Total Employees: {employees.length}</h2>
-
           {/* Cards for Employee Stats */}
           <div className="cards-row">
             <div className="card">

@@ -1,0 +1,196 @@
+[debug] [2024-10-05T08:48:54.362Z] ----------------------------------------------------------------------
+[debug] [2024-10-05T08:48:54.368Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Admin\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-10-05T08:48:54.369Z] CLI Version:   13.20.2
+[debug] [2024-10-05T08:48:54.370Z] Platform:      win32
+[debug] [2024-10-05T08:48:54.370Z] Node Version:  v20.17.0
+[debug] [2024-10-05T08:48:54.370Z] Time:          Sat Oct 05 2024 14:18:54 GMT+0530 (India Standard Time)
+[debug] [2024-10-05T08:48:54.370Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-10-05T08:48:54.507Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-10-05T08:48:54.509Z] > authorizing via signed-in user (vijay690in.com@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\Admin\OneDrive\Documents\react_project\my-app
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-10-05T08:49:35.062Z] Using project from CLI flag: check-d47d2
+[debug] [2024-10-05T08:49:35.065Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:35.065Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:35.068Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/check-d47d2 [none]
+[debug] [2024-10-05T08:49:35.842Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/check-d47d2 200
+[debug] [2024-10-05T08:49:35.843Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/check-d47d2 {"projectId":"check-d47d2","projectNumber":"297017719503","displayName":"Check","name":"projects/check-d47d2","resources":{"hostingSite":"check-d47d2","storageBucket":"check-d47d2.appspot.com","locationId":"asia-south1"},"state":"ACTIVE","etag":"1_bb4e0ed1-dd5d-4a7b-8c55-e85f419d0bf8"}
+[info] i  Using project check-d47d2 (Check) 
+[info] 
+=== Dataconnect Setup
+[debug] [2024-10-05T08:49:35.856Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:35.856Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:35.857Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/check-d47d2/billingInfo [none]
+[debug] [2024-10-05T08:49:37.340Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/check-d47d2/billingInfo 200
+[debug] [2024-10-05T08:49:37.340Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/check-d47d2/billingInfo {"name":"projects/check-d47d2/billingInfo","projectId":"check-d47d2","billingAccountName":"","billingEnabled":false}
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2024-10-05T08:49:37.342Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:37.342Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:37.342Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com [none]
+[debug] [2024-10-05T08:49:37.343Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com x-goog-quota-user=projects/check-d47d2
+[debug] [2024-10-05T08:49:39.092Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com 200
+[debug] [2024-10-05T08:49:39.092Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com [omitted]
+[warn] !  dataconnect: missing required API sqladmin.googleapis.com. Enabling now... 
+[debug] [2024-10-05T08:49:39.094Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:39.094Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:39.094Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com:enable [none]
+[debug] [2024-10-05T08:49:39.094Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com:enable x-goog-quota-user=projects/check-d47d2
+[debug] [2024-10-05T08:49:39.605Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com:enable 200
+[debug] [2024-10-05T08:49:39.605Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com:enable [omitted]
+[debug] [2024-10-05T08:49:49.610Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:49.610Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:49:49.611Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com [none]
+[debug] [2024-10-05T08:49:49.611Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com x-goog-quota-user=projects/check-d47d2
+[debug] [2024-10-05T08:49:51.233Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com 200
+[debug] [2024-10-05T08:49:51.233Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/sqladmin.googleapis.com [omitted]
+[info] +  dataconnect: required API sqladmin.googleapis.com is enabled 
+[info] i  Setting placeholder values in dataconnect.yaml. You can edit these before you deploy to specify different IDs or regions. 
+[info] +  Wrote dataconnect\dataconnect.yaml 
+[info] +  Wrote dataconnect\schema\schema.gql 
+[info] +  Wrote dataconnect\connector\connector.yaml 
+[info] +  Wrote dataconnect\connector\queries.gql 
+[info] +  Wrote dataconnect\connector\mutations.gql 
+[info] +  Detected WEB app in directory C:\Users\Admin\OneDrive\Documents\react_project\my-app 
+[info] i  Wrote new config to C:\Users\Admin\OneDrive\Documents\react_project\my-app\dataconnect\connector/connector.yaml 
+[info] i  dataconnect: downloading dataconnect-emulator-1.4.4.exe... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-1.4.4.exe..."}}
+[debug] [2024-10-05T08:50:18.538Z] >>> [apiv2][query] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-v1.4.4 
+[debug] [2024-10-05T08:50:19.116Z] <<< [apiv2][status] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-v1.4.4 200
+[debug] [2024-10-05T08:50:19.116Z] <<< [apiv2][body] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-v1.4.4 [stream]
+[info] I1005 14:20:25.897099    3412 codegen.go:82] [connector "default" javascriptSdk] Generating sources into "C:\\Users\\Admin\\OneDrive\\Documents\\react_project\\my-app\\generated\\javascript\\default"
+I1005 14:20:25.899268    3412 generate.go:40] Generated all sources. Writing them to disk...
+I1005 14:20:25.906499    3412 collector.go:107] connector "default" javascriptSdk wrote into "C:\\Users\\Admin\\OneDrive\\Documents\\react_project\\my-app\\generated\\javascript\\default"
+Generated sources: index.d.ts [264B] esm\index.esm.js [179B] esm\package.json [17B] index.cjs.js [220B] package.json [613B] 
+I1005 14:20:26.011345    3412 installsdk.go:79] Running command: C:\Program Files\nodejs\npm.cmd install file:generated\javascript\default
+
+[info] i  Generated SDK code for default 
+[info] +  If you'd like to generate additional SDKs later, run firebase init dataconnect:sdk 
+[info] 
+[info] 
+=== Firestore Setup
+[debug] [2024-10-05T08:52:41.146Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:41.146Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:41.146Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/firestore.googleapis.com [none]
+[debug] [2024-10-05T08:52:41.146Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/firestore.googleapis.com x-goog-quota-user=projects/check-d47d2
+[debug] [2024-10-05T08:52:42.845Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/firestore.googleapis.com 200
+[debug] [2024-10-05T08:52:42.846Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/firestore.googleapis.com [omitted]
+[debug] [2024-10-05T08:52:42.847Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:42.847Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:42.847Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default) [none]
+[debug] [2024-10-05T08:52:43.240Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default) 200
+[debug] [2024-10-05T08:52:43.240Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default) {"name":"projects/check-d47d2/databases/(default)","uid":"2e5683d9-3763-4a27-9225-6510b8b9db40","createTime":"2024-09-12T07:14:07.275244Z","updateTime":"2024-09-12T07:14:07.275244Z","locationId":"asia-south1","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2024-10-05T07:53:40.689731Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"j","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","etag":"IMKf4eTu9ogDMMv91diA8IgD"}
+[debug] [2024-10-05T08:52:43.240Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-10-05T08:52:43.240Z] database_type: FIRESTORE_NATIVE
+[debug] [2024-10-05T08:52:43.241Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-10-05T08:52:43.241Z] > authorizing via signed-in user (vijay690in.com@gmail.com)
+[debug] [2024-10-05T08:52:43.242Z] [iam] checking project check-d47d2 for permissions ["firebase.projects.get"]
+[debug] [2024-10-05T08:52:43.242Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:43.243Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:43.243Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions [none]
+[debug] [2024-10-05T08:52:43.243Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions x-goog-quota-user=projects/check-d47d2
+[debug] [2024-10-05T08:52:43.243Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-10-05T08:52:44.872Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions 200
+[debug] [2024-10-05T08:52:44.873Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions {"permissions":["firebase.projects.get"]}
+[info] 
+[info] Firestore Security Rules allow you to define how and when to allow
+[info] requests. You can keep these rules in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-10-05T08:52:44.904Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:44.904Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:44.905Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/check-d47d2/releases pageSize=10&pageToken=
+[debug] [2024-10-05T08:52:46.416Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/check-d47d2/releases 200
+[debug] [2024-10-05T08:52:46.416Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/check-d47d2/releases {"releases":[{"name":"projects/check-d47d2/releases/cloud.firestore","rulesetName":"projects/check-d47d2/rulesets/ea906dfe-0e86-4490-9520-0711f5722091","createTime":"2024-09-12T07:14:15.402576Z","updateTime":"2024-10-01T09:40:07.680550Z"},{"name":"projects/check-d47d2/releases/firebase.storage/check-d47d2.appspot.com","rulesetName":"projects/check-d47d2/rulesets/088aaf92-c1ac-4bc9-a659-b5ba1271ec83","createTime":"2024-09-18T12:19:05.481165Z","updateTime":"2024-10-01T07:37:03.915526Z"}]}
+[debug] [2024-10-05T08:52:46.460Z] Found ruleset: projects/check-d47d2/rulesets/ea906dfe-0e86-4490-9520-0711f5722091
+[debug] [2024-10-05T08:52:46.461Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:46.461Z] Checked if tokens are valid: true, expires at: 1728119818204
+[debug] [2024-10-05T08:52:46.461Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/check-d47d2/rulesets/ea906dfe-0e86-4490-9520-0711f5722091 [none]
+[debug] [2024-10-05T08:52:47.831Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/check-d47d2/rulesets/ea906dfe-0e86-4490-9520-0711f5722091 200
+[debug] [2024-10-05T08:52:47.832Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/check-d47d2/rulesets/ea906dfe-0e86-4490-9520-0711f5722091 [omitted]
+[info] 
+[info] Firestore indexes allow you to perform complex queries while
+[info] maintaining performance that scales with the size of the result
+[info] set. You can keep index definitions in your project directory
+[info] and publish them with firebase deploy.
+[info] 
+[debug] [2024-10-05T10:04:03.396Z] Checked if tokens are valid: false, expires at: 1728119818204
+[debug] [2024-10-05T10:04:03.396Z] Checked if tokens are valid: false, expires at: 1728119818204
+[debug] [2024-10-05T10:04:03.397Z] > refreshing access token with scopes: []
+[debug] [2024-10-05T10:04:03.399Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2024-10-05T10:04:03.399Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-10-05T10:04:03.403Z] Checked if tokens are valid: false, expires at: 1728119818204
+[debug] [2024-10-05T10:04:03.403Z] Checked if tokens are valid: false, expires at: 1728119818204
+[debug] [2024-10-05T10:04:03.403Z] > refreshing access token with scopes: []
+[debug] [2024-10-05T10:04:03.403Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2024-10-05T10:04:03.403Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-10-05T10:04:03.595Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2024-10-05T10:04:03.595Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-10-05T10:04:03.625Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-10-05T10:04:03.632Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2024-10-05T10:04:03.632Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-10-05T10:04:03.656Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* [none]
+[debug] [2024-10-05T10:04:04.067Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* 200
+[debug] [2024-10-05T10:04:04.067Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false OR ttlConfig:* {"fields":[{"name":"projects/check-d47d2/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[debug] [2024-10-05T10:04:04.080Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-10-05T10:04:04.080Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/check-d47d2/databases/(default)/collectionGroups/-/indexes {}
+[info] 
+=== Functions Setup
+[debug] [2024-10-05T10:04:04.084Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-10-05T10:04:04.084Z] > authorizing via signed-in user (vijay690in.com@gmail.com)
+[debug] [2024-10-05T10:04:04.085Z] [iam] checking project check-d47d2 for permissions ["firebase.projects.get"]
+[debug] [2024-10-05T10:04:04.085Z] Checked if tokens are valid: true, expires at: 1728126242632
+[debug] [2024-10-05T10:04:04.085Z] Checked if tokens are valid: true, expires at: 1728126242632
+[debug] [2024-10-05T10:04:04.086Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions [none]
+[debug] [2024-10-05T10:04:04.086Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions x-goog-quota-user=projects/check-d47d2
+[debug] [2024-10-05T10:04:04.086Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-10-05T10:04:05.481Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions 200
+[debug] [2024-10-05T10:04:05.481Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/check-d47d2:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2024-10-05T10:04:05.482Z] Checked if tokens are valid: true, expires at: 1728126242632
+[debug] [2024-10-05T10:04:05.482Z] Checked if tokens are valid: true, expires at: 1728126242632
+[debug] [2024-10-05T10:04:05.483Z] Checked if tokens are valid: true, expires at: 1728126242632
+[debug] [2024-10-05T10:04:05.483Z] Checked if tokens are valid: true, expires at: 1728126242632
+[debug] [2024-10-05T10:04:05.483Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/cloudfunctions.googleapis.com [none]
+[debug] [2024-10-05T10:04:05.484Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/check-d47d2
+[debug] [2024-10-05T10:04:05.489Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/runtimeconfig.googleapis.com [none]
+[debug] [2024-10-05T10:04:05.489Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/check-d47d2
+[debug] [2024-10-05T10:04:07.216Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/cloudfunctions.googleapis.com 200
+[debug] [2024-10-05T10:04:07.216Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/cloudfunctions.googleapis.com [omitted]
+[debug] [2024-10-05T10:04:07.463Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/runtimeconfig.googleapis.com 200
+[debug] [2024-10-05T10:04:07.463Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/check-d47d2/services/runtimeconfig.googleapis.com [omitted]
+[info] 
+Detected existing codebase(s): default
+
+[info] 
+Overwriting codebase default...
+
+[info] +  Wrote functions/requirements.txt 
+[info] +  Wrote functions/.gitignore 
+[info] +  Wrote functions/main.py 
+[debug] [2024-10-05T10:04:30.328Z] Running command with virtualenv: command="C:\Users\Admin\OneDrive\Documents\react_project\my-app\functions\venv\Scripts\activate.bat", args=["","&&","pip3","install","--upgrade","pip"]
+[debug] [2024-10-05T10:04:30.580Z] Error: spawn "C:\Users\Admin\OneDrive\Documents\react_project\my-app\functions\venv\Scripts\activate.bat" ENOENT
+    at notFoundError (C:\Users\Admin\AppData\Roaming\npm\node_modules\firebase-tools\node_modules\cross-spawn\lib\enoent.js:6:26)
+    at verifyENOENT (C:\Users\Admin\AppData\Roaming\npm\node_modules\firebase-tools\node_modules\cross-spawn\lib\enoent.js:40:16)
+    at cp.emit (C:\Users\Admin\AppData\Roaming\npm\node_modules\firebase-tools\node_modules\cross-spawn\lib\enoent.js:27:25)
+    at ChildProcess._handle.onexit (node:internal/child_process:294:12)
+[error] 
+[error] Error: An unexpected error has occurred.
