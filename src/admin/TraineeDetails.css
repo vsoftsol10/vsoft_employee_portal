@@ -1,86 +1,173 @@
+/* Container Styling */
 .trainee-details-container {
-    width: 100%;
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
- 
+  width: 90%;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  transition: box-shadow 0.3s ease;
+}
+
+.trainee-details-container:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Heading Styling */
+h2 {
+  text-align: center;
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Form Styling */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin: 10px 0 5px;
+  font-weight: 600;
+  color: #555;
+}
+
+input, textarea {
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input:focus, textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Button Styling */
+button {
+  padding: 12px;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Tabs Styling */
+.tabs {
+  margin: 20px 0;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+}
+
+.tabs button:hover {
+  background-color: #d6d8db;
+}
+
+.tabs .active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Form Section Styling */
+.checkin-form, .leave-rules-form {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Error Message Styling */
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 20px;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trainee-details-container {
+    padding: 15px;
   }
 
   h2 {
-    text-align: center;
-    color: #333;
+    font-size: 1.5rem;
   }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    
+
+  input, textarea {
+    padding: 10px;
+    font-size: 0.95rem;
   }
-  
-  label {
-    margin: 10px 0 5px;
+
+  button {
+    font-size: 0.95rem;
   }
-  
+
+  .tabs button {
+    padding: 8px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .trainee-details-container {
+    padding: 10px;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
   input, textarea {
     padding: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    font-size: 0.85rem;
   }
-  
+
   button {
-    padding: 10px;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    font-size: 0.85rem;
   }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
+
   .tabs {
-    margin: 20px 0;
-    display: flex;
-    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
   }
-  
+
   .tabs button {
-    padding: 10px 20px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #e9ecef;
-    transition: background-color 0.3s;
+    width: 100%;
+    margin-bottom: 10px;
   }
-  
-  .tabs button:hover {
-    background-color: #d6d8db;
-  }
-  
-  .tabs .active {
-    background-color: #007bff;
-    color: white;
-  }
-  
+
   .checkin-form, .leave-rules-form {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f1f1f1;
+    padding: 10px;
   }
-  
-  .error {
-    color: red;
-    text-align: center;
-    margin-top: 20px;
-  }
-  
+}

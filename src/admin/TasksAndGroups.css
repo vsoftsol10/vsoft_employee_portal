@@ -1,95 +1,123 @@
-/* TasksAndGroups.css */
 .tasks-groups-container {
   margin-left: 250px;
   padding: 20px;
+  background-color: #f7f9fc;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: margin-left 0.3s;
 }
 
-.create-group-btn, .create-task-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
+.tasks-groups-container h2 {
+  font-size: 2rem;
   margin-bottom: 20px;
+  color: #333;
 }
 
-.create-group-btn:hover, .create-task-btn:hover {
-  background-color: #0056b3;
+/* Employee Item Styles */
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between items */
 }
 
-.group-form, .task-form {
-  background-color: #f8f9fa;
+.employee-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc; /* Optional border for visibility */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #f9f9f9; /* Light background color */
+}
+
+.employee-item button {
+  margin-left: 10px; /* Space between name and button */
+}
+
+/* Task Form Styles */
+.task-form {
+  background-color: #ffffff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
 }
 
-.group-form h2, .task-form h4 {
-  margin-top: 0;
+.task-form h3 {
+  margin-bottom: 20px;
+  color: #333;
 }
 
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.form-group input[type="text"], .form-group input[type="date"], .form-group textarea, .form-group select {
+.task-form input[type="text"],
+.task-form input[type="datetime-local"],
+.task-form textarea,
+.task-form input[type="file"] {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border-radius: 4px;
   border: 1px solid #ced4da;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
 }
 
-.form-group textarea {
+.task-form input[type="text"]:focus,
+.task-form input[type="datetime-local"]:focus,
+.task-form textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.task-form textarea {
   height: 80px;
   resize: vertical;
 }
 
-.reviews {
-  display: flex;
-  align-items: center;
+.task-form button {
+  width: 48%;
+  margin-right: 2%;
 }
 
-.star {
-  font-size: 20px;
-  color: gold;
+.task-form button:last-child {
+  margin-right: 0;
 }
 
-.star.filled {
-  color: orange;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-}
-
-table, th, td {
-  border: 1px solid #dee2e6;
-}
-
-th, td {
-  padding: 10px;
-  text-align: left;
-}
-
-th {
-  background-color: #e9ecef;
-}
-
+/* Responsive Styles */
 @media (max-width: 768px) {
   .tasks-groups-container {
     margin-left: 0;
+    padding: 10px;
   }
 
-  .form-group input[type="text"], .form-group input[type="date"], .form-group textarea, .form-group select {
-    width: calc(100% - 20px);
+  .task-form button {
+    width: 100%;
+    margin: 5px 0;
   }
+
+  .employee-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+.review-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Ensure it's on top */
+}
+
+.review-modal textarea,
+.review-modal input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.review-modal button {
+  margin-right: 10px;
 }

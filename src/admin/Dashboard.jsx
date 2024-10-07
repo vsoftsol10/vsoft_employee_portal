@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { firestore } from '../firebaseConfig';
-import { getDocs, collection, updateDoc, doc } from 'firebase/firestore';
+import { getDocs, collection, updateDoc, doc, query, where } from 'firebase/firestore';
 import { Link, useLocation } from 'react-router-dom';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import {
@@ -24,9 +24,10 @@ const Dashboard = () => {
   const [editAnswer, setEditAnswer] = useState('');
   const [present, setPresent] = useState(0);
   const [absent, setAbsent] = useState(0);
-  const [totalTrainees, setTotalTrainees] = useState(0); // State for total trainees
-  const [totalInterns, setTotalInterns] = useState(0); // State for total interns
-  
+  const [totalTrainees, setTotalTrainees] = useState(0);
+  const [totalInterns, setTotalInterns] = useState(0);
+  const [checkInOutData, setCheckInOutData] = useState([]);
+
   const location = useLocation();
 
   useEffect(() => {
@@ -46,20 +47,10 @@ const Dashboard = () => {
       }
     };
 
-    const fetchFaqs = async () => {
-      try {
-        const faqSnapshot = await getDocs(collection(firestore, 'faqs'));
-        const faqList = faqSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setFaqs(faqList);
-      } catch (error) {
-        console.error("Error fetching FAQs: ", error);
-      }
-    };
-
     const fetchTotalTrainees = async () => {
       try {
         const traineeSnapshot = await getDocs(collection(firestore, 'trainees'));
-        setTotalTrainees(traineeSnapshot.docs.length); // Count the number of trainee documents
+        setTotalTrainees(traineeSnapshot.docs.length);
       } catch (error) {
         console.error("Error fetching trainees: ", error);
       }
@@ -68,17 +59,43 @@ const Dashboard = () => {
     const fetchTotalInterns = async () => {
       try {
         const internSnapshot = await getDocs(collection(firestore, 'interns'));
-        setTotalInterns(internSnapshot.docs.length); // Count the number of intern documents
+        setTotalInterns(internSnapshot.docs.length);
       } catch (error) {
         console.error("Error fetching interns: ", error);
       }
     };
 
+    const fetchCheckInOutData = async () => {
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+      try {
+        const checkInOutRef = collection(firestore, 'checkinouts');
+        const q = query(checkInOutRef, where("timestamp", ">=", startOfDay), where("timestamp", "<", endOfDay));
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setCheckInOutData(data);
+      } catch (error) {
+        console.error("Error fetching check-in/out data: ", error);
+      }
+    };
+
     fetchEmployees();
-    fetchTotalTrainees(); // Fetch total trainees
-    fetchTotalInterns(); // Fetch total interns
+    fetchTotalTrainees();
+    fetchTotalInterns();
+    fetchCheckInOutData();
 
     if (location.pathname === '/admin/faqs') {
+      const fetchFaqs = async () => {
+        try {
+          const faqSnapshot = await getDocs(collection(firestore, 'faqs'));
+          const faqList = faqSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setFaqs(faqList);
+        } catch (error) {
+          console.error("Error fetching FAQs: ", error);
+        }
+      };
       fetchFaqs();
     }
   }, [location.pathname]);
@@ -102,33 +119,52 @@ const Dashboard = () => {
     }
   };
 
-  const doughnutData = {
-    labels: ['Present Employees', 'Absent Employees'],
-    datasets: [
-      {
-        data: [present, absent],
-        backgroundColor: ['#28a745', '#dc3545'],
-        hoverBackgroundColor: ['#218838', '#c82333'],
-      },
-    ],
-  };
+  // Prepare doughnut chart data
+ // Prepare doughnut chart data for total employees, interns, and trainees
+const doughnutData = {
+  labels: ['Employees', 'Interns', 'Trainees'],
+  datasets: [
+    {
+      data: [employees.length, totalInterns, totalTrainees],
+      backgroundColor: ['#007bff', '#ffc107', '#28a745'],
+      hoverBackgroundColor: ['#0056b3', '#e0a800', '#218838'],
+    },
+  ],
+};
 
-  const barData = {
-    labels: ['6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM'],
+  // Calculate check-in/out accuracy based on data
+  const totalCheckIns = checkInOutData.filter(record => record.type === 'check-in').length;
+  const totalCheckOuts = checkInOutData.filter(record => record.type === 'check-out').length;
+  const totalEmployees = employees.length;
+
+  const checkInAccuracy = totalEmployees > 0 ? (totalCheckIns / totalEmployees) * 100 : 0;
+  const checkOutAccuracy = totalEmployees > 0 ? (totalCheckOuts / totalEmployees) * 100 : 0;
+
+  // Prepare bar chart data for check-ins
+  const checkInData = {
+    labels: ['Check-ins'],
     datasets: [
       {
         label: 'Check-in Accuracy',
-        data: [95, 90, 85, 80, 78, 76, 75, 80, 85, 90, 92, 95, 100, 98, 97, 95, 96],
-        backgroundColor: '#007bff',
-      },
-      {
-        label: 'Check-out Accuracy',
-        data: [90, 88, 84, 80, 78, 76, 74, 78, 83, 89, 92, 94, 97, 96, 94, 93, 92],
-        backgroundColor: '#6c757d',
+        data: [checkInAccuracy],
+        backgroundColor: ['#007bff'],
       },
     ],
   };
 
+  // Prepare bar chart data for check-outs
+  const checkOutData = {
+    labels: ['Check-outs'],
+    datasets: [
+      {
+        label: 'Check-out Accuracy',
+        data: [checkOutAccuracy],
+        backgroundColor: ['#6c757d'],
+      },
+    ],
+  };
+
+  // Options for both bar charts
   const barOptions = {
     scales: {
       y: {
@@ -143,7 +179,7 @@ const Dashboard = () => {
       x: {
         title: {
           display: true,
-          text: 'Time',
+          text: 'Type',
         },
       },
     },
@@ -186,7 +222,12 @@ const Dashboard = () => {
 
           <div className="chart-row">
             <div className="bar-chart">
-              <Bar data={barData} options={barOptions} />
+              <h3>Check-in Accuracy</h3>
+              <Bar data={checkInData} options={barOptions} />
+            </div>
+            <div className="bar-chart">
+              <h3>Check-out Accuracy</h3>
+              <Bar data={checkOutData} options={barOptions} />
             </div>
             <div className="doughnut-chart">
               <Doughnut data={doughnutData} />
@@ -214,28 +255,23 @@ const Dashboard = () => {
               {faqs.map((faq) => (
                 <li key={faq.id}>
                   <p><strong>Question:</strong> {faq.question}</p>
-                  <p><strong>Answer:</strong> {faq.answer || "This question is pending response."}</p>
-                  <button className="edit-btn" onClick={() => handleFaqClick(faq)}>Edit Answer</button>
+                  <p><strong>Answer:</strong> {faq.answer || "This FAQ doesn't have an answer yet."}</p>
+                  <button onClick={() => handleFaqClick(faq)}>Edit Answer</button>
                 </li>
               ))}
             </ul>
           ) : (
             <p>No FAQs available.</p>
           )}
-        </div>
-      )}
 
-      {selectedFaq && (
-        <div className="edit-faq-modal">
-          <h3>Edit FAQ Answer</h3>
-          <p><strong>Question:</strong> {selectedFaq.question}</p>
-          <textarea
-            value={editAnswer}
-            onChange={(e) => setEditAnswer(e.target.value)}
-            rows="4"
-            cols="50"
-          />
-          <button className="update-btn" onClick={handleAnswerUpdate}>Update Answer</button>
+          {selectedFaq && (
+            <div className="edit-faq">
+              <h3>Edit Answer for: {selectedFaq.question}</h3>
+              <textarea value={editAnswer} onChange={(e) => setEditAnswer(e.target.value)} />
+              <button onClick={handleAnswerUpdate}>Update Answer</button>
+              <button onClick={() => setSelectedFaq(null)}>Cancel</button>
+            </div>
+          )}
         </div>
       )}
     </div>

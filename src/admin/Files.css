@@ -1,86 +1,151 @@
-/* Files.css */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
 .files-page {
-  font-family: Arial, sans-serif;
+    padding: 30px;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 100px);
+    margin-left: 250px;
+    margin-top: 50px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Tabs Section */
 .tabs {
-  display: flex;
-  margin-bottom: 20px;
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 2px solid transparent; /* Base border */
+    justify-content: space-around;
 }
 
 .tab, .tab-active {
-  padding: 10px 20px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  background-color: #f5f5f5;
-  margin-right: 5px;
+    background: linear-gradient(45deg, #872d8f, #ff4081);
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    margin: 0 10px; /* Space between buttons */
+    text-transform: uppercase; /* Makes text uppercase */
 }
 
 .tab-active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
+    background: linear-gradient(45deg, #ff4081, #872d8f); /* Inverted gradient for active state */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow for active state */
+    transform: translateY(-3px); /* Slight lift when active */
 }
 
-.official-docs, .employee-docs, .employee-files {
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+/* Button hover effects */
+.tabs button:hover,
+.upload-section button:hover,
+.download-btn:hover {
+    transform: scale(1.05); /* Slight scale on hover */
 }
 
+/* Upload Section */
 .add-docs {
-  margin-bottom: 20px;
+    margin-bottom: 30px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.add-docs-btn {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.add-doc-form {
-  display: none;
-  margin-top: 10px;
-}
-
-.add-doc-form input {
-  margin-right: 10px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
+.add-docs-btn,
 .upload-btn {
-  padding: 8px 16px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.add-docs-btn:hover,
+.upload-btn:hover {
+    background-color: #0056b3; /* Darker shade for hover */
+}
+
+/* File List Section */
 .doc-list, .file-list {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 .doc-item, .file-item {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.3s, transform 0.3s; /* Smooth transition */
+}
+
+.doc-item:hover, .file-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Shadow on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
 }
 
 .download-btn {
-  padding: 8px 16px;
-  background-color: #17a2b8;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.download-btn:hover {
+    background-color: #138496; /* Darker shade for hover */
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .files-page {
+        margin-left: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .files-page {
+        margin-left: 10px;
+        margin-top: 20px;
+    }
+
+    .tabs {
+        flex-direction: column; /* Stack tabs vertically */
+    }
+
+    .tabs button {
+        padding: 10px 18px;
+        font-size: 0.875rem;
+        margin-bottom: 10px; /* Space between stacked buttons */
+    }
+
+    .add-docs-btn, .upload-btn {
+        padding: 10px 18px;
+        font-size: 0.875rem;
+    }
+
+    .doc-item, .file-item {
+        padding: 8px;
+        flex-direction: column; /* Stack content vertically */
+    }
+
+    .download-btn {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
 }

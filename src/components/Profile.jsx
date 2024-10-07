@@ -16,7 +16,7 @@ const Profile = () => {
     dob: '',
     fatherName: '',
     motherName: '',
-    address: '', // New field for address
+    address: '',
     role: '',
     checkInTime: '',
     checkOutTime: '',
@@ -28,37 +28,50 @@ const Profile = () => {
     checkOutEnds: '',
     sickLeave: '',
     casualLeave: '',
-    leaveWithoutPay: ''
+    leaveWithoutPay: '',
+    aadharNumber: ''
   });
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isFetching, setIsFetching] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfileData = async () => {
       if (auth.currentUser) {
-        const userRef = doc(firestore, `employees/${auth.currentUser.uid}`);
+        const uid = auth.currentUser.uid; // Fetch the current user's UID
+        const collections = ['interns', 'trainees', 'employees'];
+
         try {
-          const userDoc = await getDoc(userRef);
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            const formatDate = (timestamp) => {
-              return timestamp && timestamp.toDate ? timestamp.toDate().toLocaleDateString() : 'N/A';
-            };
-            setProfile({
-              ...data,
-              dateJoined: formatDate(data.dateJoined),
-              dob: formatDate(data.dob)
-            });
-            setProfileImage(data.profileImage || "https://via.placeholder.com/150");
-          } else {
-            console.error("No document found for this user.");
+          for (const collection of collections) {
+            const userRef = doc(firestore, `${collection}/${uid}`); // Get reference to the user document in each collection
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+              const data = userDoc.data();
+              const formatDate = (timestamp) => {
+                return timestamp && timestamp.toDate ? timestamp.toDate().toLocaleDateString() : 'N/A';
+              };
+
+              // Merge data from the collection into the profile state
+              setProfile((prevProfile) => ({
+                ...prevProfile,
+                ...data,
+                dateJoined: formatDate(data.dateJoined || prevProfile.dateJoined),
+                dob: formatDate(data.dob || prevProfile.dob)
+              }));
+              setProfileImage(data.profileImage || profileImage);
+              break; // Exit loop once we find data in one collection
+            }
           }
         } catch (error) {
-          console.error("Error fetching profile data:", error.message);
+          setErrorMessage("Error fetching profile data: " + error.message);
+        } finally {
+          setIsFetching(false);
         }
       } else {
-        console.error("User is not authenticated.");
+        setErrorMessage("User is not authenticated.");
+        setIsFetching(false);
       }
     };
 
@@ -94,18 +107,17 @@ const Profile = () => {
           const storageRef = ref(storage, `users/${auth.currentUser.uid}/profile.jpg`);
           await uploadBytes(storageRef, file);
           const imageUrl = await getDownloadURL(storageRef);
-          profile.profileImage = imageUrl;
+          profile.profileImage = imageUrl; // Set profileImage URL
         }
-        await updateDoc(userRef, profile);
+        await updateDoc(userRef, profile); // Update user document in Firestore
         setIsEditing(false);
-        console.log("Profile saved:", profile);
       } catch (error) {
-        console.error("Error saving profile:", error.message);
+        setErrorMessage("Error saving profile: " + error.message);
       } finally {
         setIsLoading(false);
       }
     } else {
-      console.error("User is not authenticated.");
+      setErrorMessage("User is not authenticated.");
     }
   };
 
@@ -118,94 +130,36 @@ const Profile = () => {
       <div className="profile-header">
         <h1>Profile Management</h1>
       </div>
-      <div className="profile-content">
-        <div className="profile-picture">
-          <img src={profileImage} alt="Profile" className="profile-img" />
-          {isEditing && (
-            <>
-              <input type="file" id="profile-pic-upload" onChange={handleImageChange} />
-              <label htmlFor="profile-pic-upload" className="upload-btn">
-                Upload New Picture
-              </label>
-            </>
-          )}
-        </div>
-        <div className="profile-details">
-          <div className="profile-detail">
-            <label>Name:</label>
-            {isEditing ? (
-              <input type="text" name="name" value={profile.name} onChange={handleChange} />
-            ) : (
-              <p>{profile.name}</p>
+      {isFetching ? (
+        <p>Loading profile...</p>
+      ) : (
+        <div className="profile-content">
+          <div className="profile-picture">
+            <img src={profileImage} alt="Profile" className="profile-img" />
+            {isEditing && (
+              <>
+                <input type="file" id="profile-pic-upload" onChange={handleImageChange} />
+                <label htmlFor="profile-pic-upload" className="upload-btn">
+                  Upload New Picture
+                </label>
+              </>
             )}
           </div>
-          <div className="profile-detail">
-            <label>Email:</label>
-            <p>{profile.email}</p>
-          </div>
-          <div className="profile-detail">
-            <label>Emergency Contact:</label>
-            {isEditing ? (
-              <input type="text" name="emergencyContact" value={profile.emergencyContact} onChange={handleChange} />
-            ) : (
-              <p>{profile.emergencyContact}</p>
-            )}
-          </div>
-          <div className="profile-detail">
-            <label>Father's Name:</label>
-            {isEditing ? (
-              <input type="text" name="fatherName" value={profile.fatherName} onChange={handleChange} />
-            ) : (
-              <p>{profile.fatherName}</p>
-            )}
-          </div>
-          <div className="profile-detail">
-            <label>Mother's Name:</label>
-            {isEditing ? (
-              <input type="text" name="motherName" value={profile.motherName} onChange={handleChange} />
-            ) : (
-              <p>{profile.motherName}</p>
-            )}
-          </div>
-          <div className="profile-detail">
-            <label>Address:</label>
-            {isEditing ? (
-              <input type="text" name="address" value={profile.address} onChange={handleChange} />
-            ) : (
-              <p>{profile.address}</p>
-            )}
-          </div>
-          {/* Disabled Check-In/Out and Leave Fields */}
-          <div className="profile-detail">
-            <label>Check-In Starts:</label>
-            <p>{profile.checkInStarts}</p>
-          </div>
-          <div className="profile-detail">
-            <label>Check-In Ends:</label>
-            <p>{profile.checkInEnds}</p>
-          </div>
-          <div className="profile-detail">
-            <label>Check-Out Starts:</label>
-            <p>{profile.checkOutStarts}</p>
-          </div>
-          <div className="profile-detail">
-            <label>Check-Out Ends:</label>
-            <p>{profile.checkOutEnds}</p>
-          </div>
-          <div className="profile-detail">
-            <label>Sick Leave:</label>
-            <p>{profile.sickLeave}</p>
-          </div>
-          <div className="profile-detail">
-            <label>Casual Leave:</label>
-            <p>{profile.casualLeave}</p>
-          </div>
-          <div className="profile-detail">
-            <label>Leave Without Pay:</label>
-            <p>{profile.leaveWithoutPay}</p>
+          <div className="profile-details">
+            {Object.entries(profile).map(([key, value]) => (
+              <div className="profile-detail" key={key}>
+                <label>{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}: </label>
+                {isEditing && ['name', 'emergencyContact', 'fatherName', 'motherName', 'address', 'aadharNumber'].includes(key) ? (
+                  <input type="text" name={key} value={value} onChange={handleChange} />
+                ) : (
+                  <p>{value}</p>
+                )}
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
       <button className="edit-btn" onClick={handleEdit}>
         Edit Profile
       </button>

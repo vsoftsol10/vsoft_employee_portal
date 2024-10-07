@@ -1,86 +1,208 @@
+/* Container for the intern details page */
 .intern-details-container {
-    width: 100%;
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
- 
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #ffffff;
+  min-height: 100vh;
+  margin-left: 250px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* Adjust container margin for smaller screens */
+@media (max-width: 768px) {
+  .intern-details-container {
+    margin-left: 0;
+    padding: 15px;
+  }
+}
+
+/* Header section */
+.intern-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.intern-header h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+/* Intern info box */
+.intern-info {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.intern-info:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.intern-info h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #555;
+}
+
+/* Info row */
+.intern-info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.intern-info-row p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.intern-info-row p span {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Tabs Styling */
+.tabs {
+  margin: 20px 0;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #451d79;
+  transition: background-color 0.3s ease;
+}
+
+.tabs button:hover {
+  background-color: #d6d8db;
+}
+
+.tabs .active {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Form Section Styling */
+.checkin-form, .leave-rules-form {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+input, textarea {
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input:focus, textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Button Styling */
+button {
+  padding: 12px;
+  color: white;
+  background-color: #3c0f75c2;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Error message styling */
+.error {
+  color: red;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .intern-header h2 {
+    font-size: 1.6rem;
   }
 
-  h2 {
-    text-align: center;
-    color: #333;
+  .intern-info h3 {
+    font-size: 1.3rem;
   }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    
+
+  .intern-info-row p {
+    font-size: 0.95rem;
   }
-  
-  label {
-    margin: 10px 0 5px;
-  }
-  
-  input, textarea {
-    padding: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
+
   button {
-    padding: 10px;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    font-size: 0.95rem;
   }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  .tabs {
-    margin: 20px 0;
-    display: flex;
-    justify-content: space-around;
-  }
-  
+
   .tabs button {
-    padding: 10px 20px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #e9ecef;
-    transition: background-color 0.3s;
+    padding: 8px 15px;
   }
-  
-  .tabs button:hover {
-    background-color: #d6d8db;
+}
+
+@media (max-width: 480px) {
+  .intern-header h2 {
+    font-size: 1.4rem;
   }
-  
-  .tabs .active {
-    background-color: #007bff;
-    color: white;
+
+  .intern-info h3 {
+    font-size: 1.2rem;
   }
-  
+
+  .intern-info-row {
+    flex-direction: column;
+  }
+
+  .intern-info-row p {
+    font-size: 0.9rem;
+  }
+
+  button {
+    padding: 10px 15px;
+    font-size: 0.85rem;
+  }
+
+  .tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tabs button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
   .checkin-form, .leave-rules-form {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f1f1f1;
+    padding: 10px;
   }
-  
-  .error {
-    color: red;
-    text-align: center;
-    margin-top: 20px;
-  }
-  
+}

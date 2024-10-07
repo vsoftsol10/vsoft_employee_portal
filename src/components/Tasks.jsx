@@ -10,8 +10,6 @@ const Tasks = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedTaskId, setSelectedTaskId] = useState(null);
-  const [review, setReview] = useState('');
-  const [rating, setRating] = useState(0);
   const [pastTasks, setPastTasks] = useState([]);
 
   const auth = getAuth();
@@ -60,26 +58,31 @@ const Tasks = () => {
     if (!confirmUpdate) return; // Exit if the user cancels
 
     try {
-      const taskRef = doc(firestore, 'tasks', uid, 'taskDetails', taskId);
-      await updateDoc(taskRef, { status: newStatus });
-      setTasks(tasks.map(task => (task.id === taskId ? { ...task, status: newStatus } : task)));
-      alert('Task status updated successfully!');
+      // Prompt for description based on status
+      const description = prompt(`Please provide a description for the ${newStatus === 'initial submitted' ? 'initial submission' : 'final submission'}:`);
 
-      if (newStatus === 'final submitted') {
-        const reviewRating = prompt('Please provide your review and rating (out of 100):');
-        if (reviewRating) {
-          const [rev, rate] = reviewRating.split(',');
-          const taskRef = doc(firestore, 'tasks', uid, 'taskDetails', taskId);
-          await updateDoc(taskRef, { review: rev, rating: parseInt(rate) });
-          alert('Review and rating submitted successfully!');
-        }
+      // Check if a description is provided
+      if (description) {
+        const taskRef = doc(firestore, 'tasks', uid, 'taskDetails', taskId);
+        
+        // Update Firestore with status and description
+        await updateDoc(taskRef, { 
+          status: newStatus, 
+          description: description // Add the description to the Firestore document
+        });
+        
+        // Update local state
+        setTasks(tasks.map(task => (task.id === taskId ? { ...task, status: newStatus, description } : task)));
+        alert('Task status updated successfully!');
+      } else {
+        alert('Description is required to update the status.');
       }
     } catch (error) {
       console.error('Error updating status:', error);
       alert('Failed to update status. Please try again.');
     }
   };
-
+  
   const handleViewDetails = (taskId) => {
     setSelectedTaskId(taskId === selectedTaskId ? null : taskId);
   };
@@ -112,12 +115,6 @@ const Tasks = () => {
                   {task.fileUrl && (
                     <a href={task.fileUrl} target="_blank" rel="noopener noreferrer">View File</a>
                   )}
-                  {task.review && (
-                    <div>
-                      <p>Review: {task.review}</p>
-                      <p>Rating: {task.rating}%</p>
-                    </div>
-                  )}
                 </div>
               )}
             </li>
@@ -132,15 +129,13 @@ const Tasks = () => {
           {pastTasks.map(task => (
             <li key={task.id}>
               <h3>{task.taskName}</h3>
-              <p>Review: {task.review}</p>
-              <p>Rating: {task.rating}%</p>
+              {/* Removed review and rating display */}
             </li>
           ))}
         </ul>
       )}
     </div>
   );
-
 };
 
 export default Tasks;

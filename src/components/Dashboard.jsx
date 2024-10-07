@@ -3,7 +3,7 @@ import Header from './Header';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 import { firestore, auth } from '../firebaseConfig';
-import { doc, setDoc, Timestamp, getDoc } from 'firebase/firestore';
+import { doc, setDoc, Timestamp, getDoc, collection } from 'firebase/firestore';
 
 const Dashboard = () => {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [leaveWithoutPay, setLeaveWithoutPay] = useState(0);
   const [pendingTasks, setPendingTasks] = useState(3);
   const [upcomingDeadline, setUpcomingDeadline] = useState(null);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const fetchLeaveData = useCallback(async () => {
@@ -29,9 +29,9 @@ const Dashboard = () => {
       setLeaveWithoutPay(leaveData.leaveWithoutPay || 0);
     } else {
       console.error('Leave data not found');
-      // You can show an error message here
+      // Optionally notify the user about missing leave data
     }
-    setLoading(false); // Set loading to false after fetching
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -71,10 +71,10 @@ const Dashboard = () => {
       const userDoc = await getDoc(userRef);
       const currentTimestamp = Timestamp.now();
       const formattedDuration = type === 'check-out' ? formatTime(timer) : null;
-
+  
       let updatedDashboard = {};
       let updatedAttendance = [];
-
+  
       if (userDoc.exists()) {
         const userData = userDoc.data();
         updatedDashboard = { ...userData.dashboard };
@@ -82,7 +82,7 @@ const Dashboard = () => {
       } else {
         updatedDashboard = { checkIn: null, checkOut: null, duration: null };
       }
-
+  
       if (type === 'check-in') {
         updatedDashboard.checkIn = currentTimestamp;
         setIsCheckedIn(true);
@@ -93,19 +93,23 @@ const Dashboard = () => {
         updatedAttendance.push({ date: currentTimestamp, status: 'Present' });
         setIsCheckedIn(false);
       }
-
+  
+      // Save the updated dashboard and attendance to rareusers
       await setDoc(userRef, { dashboard: updatedDashboard, attendance: { events: updatedAttendance } }, { merge: true });
-
-      const checkInOutRef = doc(firestore, `checkinouts/${userId}/records/${type}-${currentTimestamp.toMillis()}`);
-      await setDoc(checkInOutRef, { type, timestamp: currentTimestamp, duration: formattedDuration });
-      console.log(`${type} recorded in rareusers and checkinouts collections`);
+  
+      // Create a separate collection for checkin or checkout timestamps
+      const collectionRef = collection(firestore, `${type}s`);
+      await setDoc(doc(collectionRef), { timestamp: currentTimestamp }); // Store only the timestamp value
+  
+      console.log(`${type} recorded in rareusers and ${type}s collection`);
     } catch (error) {
       console.error(`Error logging ${type}: `, error.message);
     }
   }, [timer]);
+  
 
   if (loading) {
-    return <div>Loading...</div>; // You can create a loading spinner or skeleton here
+    return <div>Loading...</div>; // Optionally, you can use a spinner component here
   }
 
   return (
@@ -148,7 +152,12 @@ const Dashboard = () => {
           <figcaption>
             <h3 className="card-no">04</h3>
             <h4 className="card-main-title">Deadlines</h4>
-            <p className="card-content">{upcomingDeadline ? `Upcoming Deadline: ${upcomingDeadline.name} (${upcomingDeadline.deadline.toDate().toLocaleDateString()})` : 'No upcoming deadlines.'}</p>
+            <p className="card-content">
+              {upcomingDeadline 
+                ? `Upcoming Deadline: ${upcomingDeadline.name} (${upcomingDeadline.deadline.toDate().toLocaleDateString()})` 
+                : 'No upcoming deadlines.'
+              }
+            </p>
           </figcaption>
         </figure>
       </div>

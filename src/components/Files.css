@@ -3,61 +3,54 @@
 .files {
     padding: 30px;
     font-family: 'Roboto', sans-serif;
-    margin-left: 250px; /* Margin left for alignment */
-    margin-top: 50px; /* Margin top for spacing */
-    background-color: #f5f5f5; /* Light grey background for the entire page */
-    min-height: calc(100vh - 100px); /* Ensure it takes full viewport height minus the header/footer */
+    margin-left: 250px;
+    margin-top: 50px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 100px);
 }
 
+/* Tabs Section */
 .tabs {
     display: flex;
     margin-bottom: 30px;
-    border-bottom: 2px solid #872d8fd5;; /* Bottom border to indicate active tab */
+    border-bottom: 2px solid transparent; /* Base border */
+    justify-content: space-around;
 }
 
 .tabs button {
-    background-color: #ffffff;
-    color: #872d8fd5;;
-    border: 2px solid #8400ff3a;
+    background: linear-gradient(45deg, #872d8f, #ff4081);
+    color: #fff;
+    border: none;
     padding: 12px 24px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     flex: 1;
-    font-size: 1.1rem; /* Slightly larger font size */
+    font-size: 1.1rem;
     font-weight: 500;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    margin: 0 10px; /* Space between buttons */
+    text-transform: uppercase; /* Makes text uppercase */
 }
 
 .tabs button.active {
-    background-color: #872d8fd5;;
-    color: #ffffff;
+    background: linear-gradient(45deg, #ff4081, #872d8f); /* Invert gradient for active state */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow for active state */
+    transform: translateY(-3px); /* Slight lift when active */
 }
 
+.tabs button:hover {
+    background: linear-gradient(45deg, #ff6181, #a43dbf); /* Slight color change on hover */
+    transform: scale(1.05); /* Slight scale on hover */
+}
+
+/* Upload Section */
 .upload-section {
     margin-bottom: 30px;
     background-color: #ffffff;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.category-selection {
-    margin-bottom: 15px;
-}
-
-.category-selection select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-.upload-section input[type="file"] {
-    margin-right: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 8px;
 }
 
 .upload-section button {
@@ -65,40 +58,21 @@
     color: #ffffff;
     border: none;
     padding: 12px 24px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 1.1rem;
     font-weight: 500;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow to the button */
 }
 
 .upload-section button:hover {
     background-color: #218838;
     transform: scale(1.05);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
 }
 
-.file-list {
-    display: flex;
-    flex-direction: column;
-}
-
-.file-item {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    background-color: #ffffff;
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.file-item span {
-    font-size: 1rem;
-    color: #333;
-}
-
+/* File List Section */
 .file-item button,
 .file-item a {
     background-color: #007bff;
@@ -109,41 +83,48 @@
     cursor: pointer;
     text-decoration: none;
     font-size: 0.875rem;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Button shadow */
 }
 
 .file-item button:hover,
 .file-item a:hover {
     background-color: #0056b3;
     transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Deeper shadow on hover */
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
     .files {
-        margin-left: 20px; /* Reduced margin left for smaller screens */
+        margin-left: 20px;
     }
 }
 
 @media (max-width: 768px) {
     .files {
-        margin-left: 10px; /* Further reduced margin left */
-        margin-top: 20px; /* Reduced margin top */
+        margin-left: 10px;
+        margin-top: 20px;
+    }
+
+    .tabs {
+        flex-direction: column; /* Stack tabs vertically */
     }
 
     .tabs button {
-        padding: 10px 18px; /* Adjust button size for smaller screens */
-        font-size: 0.875rem; /* Smaller font size for buttons */
+        padding: 10px 18px;
+        font-size: 0.875rem;
+        margin-bottom: 10px; /* Space between stacked buttons */
     }
 
     .upload-section button {
-        padding: 10px 18px; /* Adjust button size for smaller screens */
-        font-size: 0.875rem; /* Smaller font size for buttons */
+        padding: 10px 18px;
+        font-size: 0.875rem;
     }
 
     .file-item button,
     .file-item a {
-        padding: 8px 12px; /* Adjust button size */
-        font-size: 0.75rem; /* Smaller font size for buttons */
+        padding: 8px 12px;
+        font-size: 0.75rem;
     }
 }

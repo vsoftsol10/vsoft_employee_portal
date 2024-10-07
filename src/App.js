@@ -302,7 +302,7 @@ const App = () => {
   }
 />
 <Route
-  path="/admin/directory/interns/:employeeId"
+  path="/admin/directory/interns/:uid"
   element={
     <ProtectedRoute requiredRole="admin">
       <AdminSidebar />

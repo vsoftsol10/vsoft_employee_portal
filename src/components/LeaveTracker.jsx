@@ -169,9 +169,8 @@ const LeaveTracker = () => {
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)} // Change handler added here
                 placeholder="Enter your name"
-                disabled
               />
             </label>
             <label>
