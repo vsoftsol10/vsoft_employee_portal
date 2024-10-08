@@ -47,7 +47,7 @@
     color: white;
     border: none;
     border-radius: 5px;
-    padding: 10px 15px;
+    
     cursor: pointer;
     transition: background-color 0.3s, transform 0.3s;
 }
@@ -57,12 +57,20 @@
     transform: translateY(-1px);
 }
 
-/* Upload Section Styles */
 .upload-section {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-top: 15px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.5s ease, opacity 0.5s ease;
+}
+
+.upload-section.active {
+    max-height: 300px; /* Adjust this height based on the form content */
+    opacity: 1;
 }
 
 /* Label and Input Styles */
@@ -111,7 +119,7 @@
     background-color: #ffffff;
     padding: 10px;
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .payroll-item a {

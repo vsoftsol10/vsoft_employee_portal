@@ -24,7 +24,7 @@ import FAQs from "./components/FAQs";
 import Notification from "./components/Notification";
 import Profile from "./components/Profile";
 import ChangePassword from "./components/ChangePassword";
-
+import DurationPage from "./components/DurationPage";
 // Admin components
 import AdminSidebar from "./admin/AdminSidebar"; // Admin Sidebar
 import AdminDashboard from "./admin/Dashboard";
@@ -116,6 +116,16 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+            <Route
+            path="/DurationPage"
+            element={
+              <ProtectedRoute>
+                <DurationPage />
+                
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="/payroll"
             element={

@@ -3,7 +3,8 @@ import Header from './Header';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 import { firestore, auth } from '../firebaseConfig';
-import { doc, setDoc, Timestamp, getDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, Timestamp, getDoc } from 'firebase/firestore';
+
 
 const Dashboard = () => {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
@@ -16,8 +17,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const user = auth.currentUser; // Get the current user
+
   const fetchLeaveData = useCallback(async () => {
-    const user = auth.currentUser;
     if (!user) return;
 
     const leaveRef = doc(firestore, `leaverules/${user.uid}`);
@@ -29,10 +31,9 @@ const Dashboard = () => {
       setLeaveWithoutPay(leaveData.leaveWithoutPay || 0);
     } else {
       console.error('Leave data not found');
-      // Optionally notify the user about missing leave data
     }
     setLoading(false);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchLeaveData();
@@ -57,24 +58,28 @@ const Dashboard = () => {
 
   const handleCheckInOut = useCallback(async () => {
     const type = isCheckedIn ? 'check-out' : 'check-in';
-    const user = auth.currentUser;
     if (!user) {
       console.error('No user authenticated');
       return;
     }
-    await logAttendanceToFirestore(user.uid, type);
-  }, [isCheckedIn]);
+    await logAttendanceToFirestore(type, user.uid); // Pass uid to the function
+  }, [isCheckedIn, user]);
 
-  const logAttendanceToFirestore = useCallback(async (userId, type) => {
+  const logAttendanceToFirestore = useCallback(async (type, uid) => {
+    if (!uid) {
+      console.error('User not authenticated');
+      return;
+    }
+
     try {
-      const userRef = doc(firestore, `rareusers/${userId}`);
+      const userRef = doc(firestore, `rareusers/${uid}`);
       const userDoc = await getDoc(userRef);
       const currentTimestamp = Timestamp.now();
       const formattedDuration = type === 'check-out' ? formatTime(timer) : null;
-  
+
       let updatedDashboard = {};
       let updatedAttendance = [];
-  
+
       if (userDoc.exists()) {
         const userData = userDoc.data();
         updatedDashboard = { ...userData.dashboard };
@@ -82,7 +87,7 @@ const Dashboard = () => {
       } else {
         updatedDashboard = { checkIn: null, checkOut: null, duration: null };
       }
-  
+
       if (type === 'check-in') {
         updatedDashboard.checkIn = currentTimestamp;
         setIsCheckedIn(true);
@@ -93,23 +98,29 @@ const Dashboard = () => {
         updatedAttendance.push({ date: currentTimestamp, status: 'Present' });
         setIsCheckedIn(false);
       }
-  
-      // Save the updated dashboard and attendance to rareusers
+
       await setDoc(userRef, { dashboard: updatedDashboard, attendance: { events: updatedAttendance } }, { merge: true });
-  
-      // Create a separate collection for checkin or checkout timestamps
-      const collectionRef = collection(firestore, `${type}s`);
-      await setDoc(doc(collectionRef), { timestamp: currentTimestamp }); // Store only the timestamp value
-  
-      console.log(`${type} recorded in rareusers and ${type}s collection`);
+
+      const attendanceTypeRef = doc(firestore, `employeetimings/${uid}`);
+      const checkInCheckOutData = {
+        yourCheckIn: type === 'check-in' ? currentTimestamp : updatedDashboard.checkIn,
+        yourCheckOut: type === 'check-out' ? currentTimestamp : updatedDashboard.checkOut,
+        checkInStarts: "09:23",
+        checkInEnds: "09:30",
+        checkOutStarts: "18:31",
+        checkOutEnds: "19:38"
+      };
+
+      await setDoc(attendanceTypeRef, checkInCheckOutData, { merge: true });
+
+      console.log(`${type} recorded.`);
     } catch (error) {
-      console.error(`Error logging ${type}: `, error.message);
+      console.error(`Error logging ${type}: `, error);
     }
   }, [timer]);
-  
 
   if (loading) {
-    return <div>Loading...</div>; // Optionally, you can use a spinner component here
+    return <div>Loading...</div>;
   }
 
   return (
