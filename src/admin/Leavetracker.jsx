@@ -11,6 +11,7 @@ const Leavetracker = () => {
   const [userUid, setUserUid] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rejectionDescription, setRejectionDescription] = useState(''); // State for rejection description
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -18,7 +19,8 @@ const Leavetracker = () => {
         setUserUid(user.uid);
         setLoading(true);
         try {
-          await fetchLeaveRequests(user.uid);
+          // Fetch leave requests specifically for the user
+          await fetchLeaveRequests();
         } catch (e) {
           setError('Failed to load data.');
         } finally {
@@ -30,15 +32,15 @@ const Leavetracker = () => {
     return () => unsubscribe();
   }, []);
 
-  const fetchLeaveRequests = async (uid) => {
+  const fetchLeaveRequests = async () => {
     try {
-      const leaveRequestsCollection = collection(firestore, 'leaverules', uid, 'leaveformrequests');
+      const leaveRequestsCollection = collection(firestore, 'leaverules', 'XZdb5au5FjabGTE9U7DAKpZQM902', 'leaveformrequests');
       const leaveSnapshot = await getDocs(leaveRequestsCollection);
       const requests = leaveSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setLeaveRequests(requests);
+      setLeaveRequests(requests); // Store all leave requests
     } catch (error) {
       setError('Failed to fetch leave requests.');
     }
@@ -56,7 +58,7 @@ const Leavetracker = () => {
     if (!confirmDecision) return;
 
     try {
-      const requestDocRef = doc(firestore, 'leaverules', userUid, 'leaveformrequests', requestId);
+      const requestDocRef = doc(firestore, 'leaverules', 'XZdb5au5FjabGTE9U7DAKpZQM902', 'leaveformrequests', requestId);
       const requestSnapshot = await getDoc(requestDocRef);
 
       if (!requestSnapshot.exists()) {
@@ -72,10 +74,10 @@ const Leavetracker = () => {
 
       const leaveBalanceRef = doc(firestore, 'leaverules', userUid);
 
-      // Convert current leave balances to numbers
-      let sickLeave = Number(requestData.sickLeave) || 0;
-      let casualLeave = Number(requestData.casualLeave) || 0;
-      let leaveWithoutPay = Number(requestData.leaveWithoutPay) || 0;
+      // Retrieve the current leave balances
+      const leaveBalanceSnapshot = await getDoc(leaveBalanceRef);
+      let sickLeave = Number(leaveBalanceSnapshot.data().sickLeave || 0);
+      let casualLeave = Number(leaveBalanceSnapshot.data().casualLeave || 0);
 
       if (decision === 'rejected') {
         // Add leave days back if rejected
@@ -83,48 +85,77 @@ const Leavetracker = () => {
           sickLeave += leaveDaysCount;
         } else if (requestData.type === 'Casual Leave') {
           casualLeave += leaveDaysCount;
-        } else if (requestData.type === 'Leave Without Pay') {
-          leaveWithoutPay += leaveDaysCount;
         }
+
         await updateDoc(leaveBalanceRef, {
           sickLeave: sickLeave.toString(),
-          casualLeave: casualLeave.toString(),
-          leaveWithoutPay: leaveWithoutPay.toString()
+          casualLeave: casualLeave.toString()
         });
-        alert(`Request has been rejected and ${leaveDaysCount} days added back to ${requestData.type}!`);
+
+        // Alert with the leave days count and rejection description
+        alert(`Request has been rejected! ${leaveDaysCount} days added back to ${requestData.type}. Reason: ${rejectionDescription}`);
+        setRejectionDescription(''); // Clear the description after rejection
       } else if (decision === 'accepted') {
-        // Subtract leave days if accepted
-        if (requestData.type === 'Sick Leave') {
-          sickLeave -= leaveDaysCount;
-        } else if (requestData.type === 'Casual Leave') {
-          casualLeave -= leaveDaysCount;
-        } else if (requestData.type === 'Leave Without Pay') {
-          leaveWithoutPay -= leaveDaysCount;
-        }
-        await updateDoc(leaveBalanceRef, {
-          sickLeave: sickLeave.toString(),
-          casualLeave: casualLeave.toString(),
-          leaveWithoutPay: leaveWithoutPay.toString()
-        });
-        alert(`Request has been accepted and ${leaveDaysCount} days deducted from ${requestData.type}!`);
+        alert('Request has been accepted!');
       }
 
-      fetchLeaveRequests(userUid); // Refresh the leave requests
+      fetchLeaveRequests(); // Refresh the leave requests
     } catch (error) {
       alert('Failed to update request: ' + error.message);
     }
   };
 
-  const latestRequests = leaveRequests.filter(request => request.status === 'pending');
-  const pastRequests = leaveRequests.filter(request => ['accepted', 'rejected'].includes(request.status));
+  const handleMarkAsPermission = async (requestId) => {
+    const confirmDecision = window.confirm(`Are you sure you want to mark this request as Permission?`);
+    if (!confirmDecision) return;
+
+    try {
+      const requestDocRef = doc(firestore, 'leaverules', 'XZdb5au5FjabGTE9U7DAKpZQM902', 'leaveformrequests', requestId);
+      await updateDoc(requestDocRef, { status: 'Permission' });
+      alert('Request has been marked as Permission!');
+      fetchLeaveRequests(); // Refresh the leave requests
+    } catch (error) {
+      alert('Failed to mark request as Permission: ' + error.message);
+    }
+  };
+
+  const handleMarkAsLOP = async (requestId) => {
+    const confirmDecision = window.confirm(`Are you sure you want to mark this request as LOP?`);
+    if (!confirmDecision) return;
+
+    try {
+      const requestDocRef = doc(firestore, 'leaverules', 'XZdb5au5FjabGTE9U7DAKpZQM902', 'leaveformrequests', requestId);
+      await updateDoc(requestDocRef, { status: 'LOP' });
+      alert('Request has been marked as LOP!');
+      fetchLeaveRequests(); // Refresh the leave requests
+    } catch (error) {
+      alert('Failed to mark request as LOP: ' + error.message);
+    }
+  };
+
+  // Filter latest and past requests
+  const latestRequests = leaveRequests.filter(request => request.status.toLowerCase() === 'pending'); // Only include "pending" requests
+  const pastRequests = leaveRequests.filter(request => request.status.toLowerCase() !== 'pending'); // All non-pending requests
 
   return (
     <div className="leavetracker-container">
       <div className="tabs">
-        <button onClick={() => setActiveTab('latestRequests')} className={activeTab === 'latestRequests' ? 'active' : ''}>
+        <button
+          onClick={() => {
+            setActiveTab('latestRequests');
+            setSelectedRequest(null); // Clear selected request when switching tabs
+          }}
+          className={activeTab === 'latestRequests' ? 'active' : ''}
+        >
           Latest Requests
         </button>
-        <button onClick={() => setActiveTab('pastRequests')} className={activeTab === 'pastRequests' ? 'active' : ''}>
+        <button
+          onClick={() => {
+            setActiveTab('pastRequests');
+            setSelectedRequest(null); // Clear selected request when switching tabs
+          }}
+          className={activeTab === 'pastRequests' ? 'active' : ''}
+        >
           Past Requests
         </button>
       </div>
@@ -151,8 +182,21 @@ const Leavetracker = () => {
                   <button onClick={() => handleRequestDecision(selectedRequest.id, 'accepted')} className="neon-button">
                     Accept
                   </button>
-                  <button onClick={() => handleRequestDecision(selectedRequest.id, 'rejected')} className="neon-button">
+                  <button onClick={() => {
+                    setRejectionDescription(''); // Clear any previous input
+                    const rejection = prompt('Please provide a reason for rejection:');
+                    if (rejection) {
+                      setRejectionDescription(rejection);
+                      handleRequestDecision(selectedRequest.id, 'rejected');
+                    }
+                  }} className="neon-button">
                     Reject
+                  </button>
+                  <button onClick={() => handleMarkAsPermission(selectedRequest.id)} className="neon-button">
+                    Mark as Permission
+                  </button>
+                  <button onClick={() => handleMarkAsLOP(selectedRequest.id)} className="neon-button">
+                    Mark as LOP
                   </button>
                 </div>
               ) : (
@@ -180,7 +224,7 @@ const Leavetracker = () => {
                 pastRequests.map((request) => (
                   <div key={request.id} className="request-item">
                     <span>{request.name}</span>
-                    <p><strong>Status:</strong> {request.status}</p>
+                    <span>Status: {request.status}</span>
                   </div>
                 ))
               ) : (
