@@ -18,17 +18,17 @@ const InternDetails = () => {
     emergencyContact: '',
     fatherName: '',
     motherName: '',
+    motherName: '',
     department: '',
     employmentStatus: '',
     sickLeave: '',
     casualLeave: '',
-    leaveWithoutPay: '',
-    dateJoined: '',
+    dateJoined: '', // Removed leaveWithoutPay
   });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   const [checkInData, setCheckInData] = useState({
     checkInStarts: '',
     checkInEnds: '',
@@ -85,7 +85,6 @@ const InternDetails = () => {
             employmentStatus: data.employmentStatus || '',
             sickLeave: data.sickLeave || 0,
             casualLeave: data.casualLeave || 0,
-            leaveWithoutPay: data.leaveWithoutPay || 0,
             dateJoined: data.dateJoined ? (data.dateJoined instanceof Timestamp ? data.dateJoined.toDate().toISOString().split('T')[0] : data.dateJoined) : '',
           });
 
@@ -180,7 +179,6 @@ const InternDetails = () => {
             <input name="employmentStatus" placeholder="Employment Status" value={formData.employmentStatus} onChange={handleChange} required />
             <input name="sickLeave" type="number" placeholder="Sick Leave" value={formData.sickLeave} onChange={handleChange} required />
             <input name="casualLeave" type="number" placeholder="Casual Leave" value={formData.casualLeave} onChange={handleChange} required />
-            <input name="leaveWithoutPay" type="number" placeholder="Leave Without Pay" value={formData.leaveWithoutPay} onChange={handleChange} required />
             <input name="dateJoined" type="date" value={formData.dateJoined} onChange={handleChange} required />
 
             <button type="submit" disabled={loadingSubmit}>
@@ -206,3 +204,4 @@ const InternDetails = () => {
 };
 
 export default InternDetails;
+

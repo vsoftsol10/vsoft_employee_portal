@@ -33,7 +33,6 @@ const EmployeeDetails = () => {
   const [leaveData, setLeaveData] = useState({
     sickLeave: '',
     casualLeave: '',
-    leaveWithoutPay: '',
   });
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -137,7 +136,7 @@ const EmployeeDetails = () => {
       const leaveRef = doc(firestore, `leaverules/${employeeId}`); // Directly refer to the document
       await setDoc(leaveRef, leaveData, { merge: true }); // Use setDoc instead of addDoc
       alert('Leave rules set successfully.');
-      setLeaveData({ sickLeave: '', casualLeave: '', leaveWithoutPay: '' }); // Reset leave data
+      setLeaveData({ sickLeave: '', casualLeave: '' }); // Reset leave data
     } catch (err) {
       console.error('Error setting leave rules:', err);
       alert('Could not set leave rules. Please try again later.');
@@ -193,9 +192,8 @@ const EmployeeDetails = () => {
           {activeTab === 'leaveRules' && (
             <form onSubmit={handleLeaveSubmit} className="leave-form">
               <h3>Set Leave Rules</h3>
-              <input name="sickLeave" type="number" value={leaveData.sickLeave} onChange={handleLeaveChange} required placeholder="Sick Leave" />
-              <input name="casualLeave" type="number" value={leaveData.casualLeave} onChange={handleLeaveChange} required placeholder="Casual Leave" />
-              <input name="leaveWithoutPay" type="number" value={leaveData.leaveWithoutPay} onChange={handleLeaveChange} required placeholder="Leave Without Pay" />
+              <input name="sickLeave" placeholder="Sick Leave" value={leaveData.sickLeave} onChange={handleLeaveChange} required />
+              <input name="casualLeave" placeholder="Casual Leave" value={leaveData.casualLeave} onChange={handleLeaveChange} required />
               <button type="submit" disabled={loadingLeave}>
                 {loadingLeave ? 'Saving...' : 'Save Leave Rules'}
               </button>

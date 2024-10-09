@@ -33,8 +33,7 @@ const TraineeDetails = () => {
   const [leaveData, setLeaveData] = useState({
     sickLeave: '',
     casualLeave: '',
-    leaveWithoutPay: '',
-  });
+  }); // Removed leaveWithoutPay
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [loadingCheckIn, setLoadingCheckIn] = useState(false);
@@ -123,7 +122,7 @@ const TraineeDetails = () => {
       const leaveRef = doc(firestore, `leaveRules/${traineeId}`);
       await setDoc(leaveRef, leaveData, { merge: true });
       alert('Leave rules set successfully.');
-      setLeaveData({ sickLeave: '', casualLeave: '', leaveWithoutPay: '' }); // Reset leave data
+      setLeaveData({ sickLeave: '', casualLeave: '' }); // Reset leave data
     } catch (err) {
       console.error('Error setting leave rules:', err);
       alert('Could not set leave rules. Please try again later.');
@@ -225,10 +224,6 @@ const TraineeDetails = () => {
           <div>
             <label>Casual Leave:</label>
             <input type="number" name="casualLeave" value={leaveData.casualLeave} onChange={handleLeaveChange} required />
-          </div>
-          <div>
-            <label>Leave Without Pay:</label>
-            <input type="number" name="leaveWithoutPay" value={leaveData.leaveWithoutPay} onChange={handleLeaveChange} required />
           </div>
           <button type="submit" disabled={loadingLeave}>
             {loadingLeave ? 'Setting...' : 'Set Leave Rules'}
