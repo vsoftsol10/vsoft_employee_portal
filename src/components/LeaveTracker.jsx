@@ -3,6 +3,7 @@ import './LeaveTracker.css';
 import { firestore, auth } from '../firebaseConfig';
 import { collection, addDoc, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import emailjs from 'emailjs-com';  // Import EmailJS
 
 const LeaveTracker = () => {
   const [name, setName] = useState('');
@@ -53,7 +54,6 @@ const LeaveTracker = () => {
 
     return () => unsubscribe();
   }, []);
-
   const handleApplyLeave = async () => {
     if (!uid) return;
   
@@ -80,31 +80,26 @@ const LeaveTracker = () => {
         return;
       }
   
-      let newBalance = null; // Initialize newBalance
+      let newBalance = null;
       const leaveRequestsRef = collection(firestore, `leaverules/${uid}/leaveformrequests`);
   
+      // Handle leave balance based on leave type
       if (leaveType === 'Casual Leave') {
         if (leaveDays > leaveBalance.casualLeave) {
           alert('You do not have enough casual leave balance.');
           return;
         }
         newBalance = leaveBalance.casualLeave - leaveDays;
-        // Update the leave balance in Firestore
         const leaveBalanceRef = doc(firestore, 'leaverules', uid);
-        await updateDoc(leaveBalanceRef, {
-          casualLeave: newBalance // Keep it as a number
-        });
+        await updateDoc(leaveBalanceRef, { casualLeave: newBalance });
       } else if (leaveType === 'Sick Leave') {
         if (leaveDays > leaveBalance.sickLeave) {
           alert('You do not have enough sick leave balance.');
           return;
         }
         newBalance = leaveBalance.sickLeave - leaveDays;
-        // Update the leave balance in Firestore
         const leaveBalanceRef = doc(firestore, 'leaverules', uid);
-        await updateDoc(leaveBalanceRef, {
-          sickLeave: newBalance // Keep it as a number
-        });
+        await updateDoc(leaveBalanceRef, { sickLeave: newBalance });
       }
   
       // Add leave request to Firestore
@@ -115,7 +110,39 @@ const LeaveTracker = () => {
         start: leaveType === 'Permission' ? todayDate : startDate,
         end: leaveType === 'Permission' ? todayDate : endDate,
         hours: leaveType === 'Permission' ? permissionHours : null,
-        status: 'pending'
+        status: 'pending',
+      });
+  
+      // Update the document in employeetimings with the leave details
+      const employeeTimingsRef = doc(firestore, `employeetimings/XZdb5au5FjabGTE9U7DAKpZQM902`);
+      await updateDoc(employeeTimingsRef, {
+        startDate: leaveType === 'Permission' ? todayDate : startDate,
+        endDate: leaveType === 'Permission' ? todayDate : endDate,
+      });
+  
+      // Send email to admin using EmailJS
+      const emailParams = {
+        to_name: 'Admin',  // The recipient's name (admin)
+        from_name: name,   // The employee's name that you want to send
+        leaveType: leaveType,
+        reason: reason,
+        startDate: leaveType === 'Permission' ? todayDate : startDate,
+        endDate: leaveType === 'Permission' ? todayDate : endDate,
+        permissionHours: leaveType === 'Permission' ? permissionHours : 'N/A',
+        employee_name: name  // Add this line if your template expects {{name}} to work
+      };
+  
+      emailjs.send(
+        'vijay',  // Replace with your EmailJS service ID
+        'leave',  // Replace with your EmailJS template ID
+        emailParams,
+        'XH1tJlK2k5wqCp5Qo'  // Replace with your EmailJS user ID (or public key)
+      )
+      .then((response) => {
+        console.log('Email successfully sent:', response.status, response.text);
+      })
+      .catch((err) => {
+        console.error('Error sending email:', err);
       });
   
       // Update local leave requests
@@ -218,50 +245,57 @@ const LeaveTracker = () => {
               </>
             )}
 
-            {/* Show today's date and permission hours input if leave type is 'Permission' */}
+            {/* Show hours input only if leave type is 'Permission' */}
             {leaveType === 'Permission' && (
               <>
-                <label>
-                  Today's Date:
-                  <input type="date" value={todayDate} disabled />
-                </label>
                 <label>
                   Hours of Permission:
                   <input
                     type="number"
                     value={permissionHours}
                     onChange={(e) => setPermissionHours(e.target.value)}
-                    placeholder="Enter hours"
+                    min="1"
+                    max="8"
                   />
+                </label>
+                <label>
+                  Date:
+                  <input type="date" value={todayDate} disabled />
                 </label>
               </>
             )}
 
             <label>
-              Reason:
+              Reason for Leave:
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-              />
+              ></textarea>
             </label>
-            <button type="button" onClick={handleApplyLeave}>
-              Apply Leave
-            </button>
+
+            <button onClick={handleApplyLeave}>Apply</button>
           </form>
         )}
 
         {activeTab === 'pastSubmits' && (
-          <>
-            <h3>Leave Requests</h3>
-            <ul>
-              {leaveRequests.map((request, index) => (
-                <li key={index}>
-                  {request.name} | {request.type} | {request.start} to {request.end} | {request.reason} |
-                  {request.status === 'pending' ? ' Pending' : request.status === 'accepted' ? ' Accepted' : ' Rejected'}
-                </li>
-              ))}
-            </ul>
-          </>
+          <div>
+            <h3>Past Leave Requests</h3>
+            {leaveRequests.length === 0 ? (
+              <p>No leave requests found.</p>
+            ) : (
+              <ul>
+                {leaveRequests.map((request, index) => (
+                  <li key={index}>
+                    <p>Leave Type: {request.type}</p>
+                    <p>Start Date: {request.start}</p>
+                    <p>End Date: {request.end}</p>
+                    <p>Reason: {request.reason}</p>
+                    <p>Status: {request.status}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
       </div>
     </div>

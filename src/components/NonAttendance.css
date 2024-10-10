@@ -8,7 +8,7 @@
   height: auto;
   box-sizing: border-box;
   margin: 20px auto; /* Centers the component */
-  background-color: #dfd3e259;
+  background-color: #fdf7ff;
   border-radius: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   margin-top: 50px;
@@ -22,6 +22,20 @@
   background-color: #57525217; 
   border-radius: 10px;
   box-shadow: 0 4px 10px rgb(217, 214, 218);
+}
+.mark-attendance {
+  color: green; /* Color for present */
+  font-size: 1.5rem; /* Adjust size if necessary */
+}
+
+.mark-late {
+  color: orange; /* Color for late */
+  font-size: 1.5rem; /* Adjust size if necessary */
+}
+
+.mark-leave {
+  color: red; /* Color for leave */
+  font-size: 1.5rem; /* Adjust size if necessary */
 }
 
 /* Form styling */

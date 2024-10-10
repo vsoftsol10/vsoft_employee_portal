@@ -8,10 +8,11 @@
   height: auto;
   box-sizing: border-box;
   margin: 20px auto; /* Centers the component */
-  background-color: #dfd3e259;
+  background-color: #fdf7ff;
   border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0);
-  margin-top:50px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-top: 50px;
+  margin-left: 150px;
 }
 
 /* Calendar styles */
@@ -19,71 +20,91 @@
   width: 100%;
   max-width: 900px;
   padding: 10px;
-  background-color: #57525217; /* White background for the calendar */
+  background-color: #0e0c0c59; 
   border-radius: 10px;
-  margin-left: 150px;
-  box-shadow: 0 4px 10px rgb(217, 214, 218);
+  box-shadow: 0 4px 10px rgb(255, 254, 255);
+}
+.mark-attendance {
+  color: green; /* Color for present */
+  font-size: 1.5rem; /* Adjust size if necessary */
 }
 
-/* Calendar header styling */
-.react-calendar__navigation button {
-  background-color: #000000; /* Black background for month navigation */
-  color: #ffffff;
-  font-weight: bold;
-  border-radius: 5px;
-  padding: 10px;
-  margin: 5px;
+.mark-late {
+  color: orange; /* Color for late */
+  font-size: 1.5rem; /* Adjust size if necessary */
 }
 
-/* Sundays styled with a violet background */
-.react-calendar__month-view__days__day--weekend {
-  background-color: #4f227a; /* Violet background for Sundays */
-  color: white;
-}
-/* Sundays styled with a violet background */
-.react-calendar__month-view__days__day--sunday {
-background-color: #8a2be2; /* Violet background for Sundays */
-color: white;
+.mark-leave {
+  color: red; /* Color for leave */
+  font-size: 1.5rem; /* Adjust size if necessary */
 }
 
-/* Remove color for Saturdays (no background color for Saturdays) */
-.react-calendar__month-view__days__day--saturday {
-background-color: transparent; /* Remove background for Saturdays */
-}
-
-/* Stylish hover effect for the calendar's navigation buttons */
-.react-calendar__navigation button:hover {
-  background-color: #333333;
-  color: #61dafb; /* Light blue on hover */
-}
-
-/* Days with events styled with a yellow background */
-.yellow-day {
-  background-color: #ffeb3b;
-  color: black;
-  border-radius: 50%;
-}
-
-/* Styling for days with attendance status */
-.green-day {
-  background-color: #4caf50; /* Green for present */
-  color: white;
-  border-radius: 50%;
-}
-
-.red-day {
-  background-color: #f44336; /* Red for absent */
-  color: white;
-  border-radius: 50%;
-}
-
-/* Default day content styling */
-.day-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Form styling */
+.attendance-form, .leave-form {
   width: 100%;
-  height: 100%;
+  max-width: 600px;
+  padding: 20px; /* Increased padding for a better look */
+  background-color: #ffffff6e; /* White background */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+  transition: transform 0.2s; /* Add transition for hover effect */
+}
+
+.attendance-form:hover, .leave-form:hover {
+  transform: translateY(-5px); /* Lift effect on hover */
+}
+
+/* Styling for form inputs and labels */
+.label {
+  font-weight: bold; /* Make labels bold */
+  margin-bottom: 8px;
+  display: block; /* Ensure labels are block elements */
+}
+
+.form-input, .leave-textarea {
+  width: 100%;
+  padding: 12px; /* Increased padding for better usability */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem; /* Font size for inputs */
+  transition: border-color 0.3s; /* Transition for border color */
+}
+
+.form-input:focus, .leave-textarea:focus {
+  border-color: #4caf50; /* Change border color on focus */
+  outline: none; /* Remove outline */
+}
+
+/* Button styling */
+.submit-btn, .enter-attendance-btn, .enter-leave-btn {
+  width: 100%; /* Make buttons full width */
+  background-color: #4caf50; /* Green */
+  color: white;
+  padding: 12px; /* Increased padding */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem; /* Font size for buttons */
+  transition: background-color 0.3s, transform 0.2s; /* Added transform transition */
+}
+
+.submit-btn:hover, .enter-attendance-btn:hover, .enter-leave-btn:hover {
+  background-color: #45a049; /* Darker green */
+  transform: translateY(-2px); /* Lift effect on hover */
+}
+
+/* Toast message styling */
+.toast {
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
 }
 
 /* Responsive Design */
@@ -96,6 +117,10 @@ background-color: transparent; /* Remove background for Saturdays */
   .calendar {
     max-width: 100%;
   }
+
+  .attendance-form, .leave-form {
+    padding: 15px; /* Adjust padding for medium screens */
+  }
 }
 
 @media (max-width: 768px) {
@@ -105,6 +130,10 @@ background-color: transparent; /* Remove background for Saturdays */
 
   .calendar {
     padding: 5px;
+  }
+
+  .attendance-form, .leave-form {
+    padding: 10px; /* Less padding for smaller screens */
   }
 }
 
@@ -123,26 +152,13 @@ background-color: transparent; /* Remove background for Saturdays */
   .react-calendar__navigation button {
     font-size: 14px;
   }
-    /* Sundays styled with a violet background */
-.react-calendar__month-view__days__day--weekend {
-  background-color: #4f227a; /* Violet background for Sundays */
-  color: white;
-}
-/* Sundays styled with a violet background */
-.react-calendar__month-view__days__day--sunday {
-background-color: #8a2be2; /* Violet background for Sundays */
-color: white;
-}
 
-/* Remove color for Saturdays (no background color for Saturdays) */
-.react-calendar__month-view__days__day--saturday {
-background-color: transparent; /* Remove background for Saturdays */
-}
+  .form-input, .leave-textarea {
+    font-size: 0.9rem; /* Smaller font size for mobile */
+  }
 
+  .submit-btn, .enter-attendance-btn, .enter-leave-btn {
+    padding: 10px 15px; /* Smaller button padding for mobile */
+    font-size: 0.9rem; /* Smaller font size for buttons */
+  }
 }
-
-/* Style Sundays with violet and add the yellow event background */
-.react-calendar__tile--event {
-  background-color: #ffeb3b; /* Yellow for event days */
-}
-
