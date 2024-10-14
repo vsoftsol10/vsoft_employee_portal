@@ -43,6 +43,7 @@ import EmployeeDocs from "./admin/EmployeeDocs";
 import PayrollUpload from "./admin/PayrollUpload";
 import "./App.css";
 import InternDetails from "./admin/InternDetails";
+import UploadHolidays from "./admin/uploadHolidays";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -320,15 +321,22 @@ const App = () => {
     </ProtectedRoute>
   }
 />
-          <Route
-            path="/admin/attendance"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminSidebar />
-                <AdminAttendance />
-              </ProtectedRoute>
-            }
-          />
+<Route
+  path="/admin/attendance"
+  element={
+    <ProtectedRoute requiredRole="admin">
+      <AdminSidebar />
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        {/* AdminAttendance component for managing attendance */}
+        <AdminAttendance />
+        
+        {/* UploadHolidays component for uploading holiday Excel files */}
+        <UploadHolidays />
+      </div>
+    </ProtectedRoute>
+  }
+/>
+
           <Route
             path="/admin/add-employee"
             element={

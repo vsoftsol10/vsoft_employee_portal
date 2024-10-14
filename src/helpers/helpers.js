@@ -32,11 +32,23 @@ export const formatTimestamp = (timestamp) => {
 };
 
 export const calculateFixedWorkingHours = (checkInEnds, checkOutEnds) => {
-  const checkInEndTime = getTimeFromHHMM(checkInEnds); // Convert check-in end time to Date
-  const checkOutEndTime = getTimeFromHHMM(checkOutEnds); // Convert check-out end time to Date
+  const checkInEndTime = checkInEnds; // Convert check-in end time to Date
+  const checkOutEndTime = checkOutEnds; // Convert check-out end time to Date
 
   // Calculate total hours worked between checkInEnds and checkOutEnds
   const totalHoursWorked =
     (checkOutEndTime - checkInEndTime) / (1000 * 60 * 60); // Convert milliseconds to hours
   return totalHoursWorked; // Return total hours
 };
+
+export const formatTime = (checkInTime) => {
+  if (!checkInTime) return "No check recorded";
+
+  // Convert Firestore Timestamp to JavaScript Date
+  const checkInDate = checkInTime.toDate();
+
+  // Format the date into a readable local format
+  return checkInDate.toLocaleString(); // You can customize the format as needed
+};
+
+// Example usage with currentAttendance data
