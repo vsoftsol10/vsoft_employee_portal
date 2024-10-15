@@ -10,7 +10,7 @@ import { auth } from "./firebaseConfig"; // Import Firebase config
 
 // User components
 import UserSidebar from "./components/Sidebar"; // User Sidebar
-import Login from "./components/Login";
+import UserLogin from "./components/UserLogin";
 import Register from "./components/Register";
 import UserDashboard from "./components/Dashboard";
 import UserAttendance from "./components/Attendance"; // Renamed to UserAttendance
@@ -26,6 +26,7 @@ import Profile from "./components/Profile";
 import ChangePassword from "./components/ChangePassword";
 import DurationPage from "./components/DurationPage";
 // Admin components
+import AdminLogin from "./admin/AdminLogin"
 import AdminSidebar from "./admin/AdminSidebar"; // Admin Sidebar
 import AdminDashboard from "./admin/Dashboard";
 import AdminTasksAndGroups from "./admin/TasksAndGroups";
@@ -86,8 +87,8 @@ const App = () => {
       <div className="app">
         <Routes>
           {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/userlogin" element={<UserLogin />} />
+          <Route path="/adminlogin" element={<AdminLogin />} />
 
           {/* Protected User Routes */}
           <Route
@@ -368,7 +369,7 @@ const App = () => {
           />
 
           {/* Redirect any unknown route to login */}
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/userlogin" />} />
         </Routes>
       </div>
     </Router>

@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* General styles */
+
+.profile-icon-container {
+  display: flex;
+  justify-content: center; /* Center the icon */
+  margin-top: 20px; /* Space between "Employee Login" and icon */
+}
+
+.profile-icon {
+  font-size: 40px; /* Adjust size as needed */
+  color: #7C3BD3; /* Change color to match your theme */
+  margin-left: 100px;
+}
+
+/* The central container holding both left and right content */
+.login-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch; /* Align items to stretch full height */
+  width: 100%; /* Full width */
+  height: 100vh; /* Set height for login content */
+  background-color: #fff;
+  border-radius: 0; /* No rounded corners */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Left-side content styles */
+.login-body-left {
+  flex: 1;
+  text-align: left; /* Align content to the left */
+  padding: 40px; /* Add padding for content spacing */
+  margin: 0; /* Ensure there's no margin */
+}
+
+.logoright {
+  width: 120px;
+  right: 0; /* Remove any margins to keep it at the top */
+  position: absolute; /* Position the logo absolutely */
+  top: 0px; /* Align to the top */
+}
+
+.employeeloginword {
+  font-size: 24px;
+  font-weight: bold;
+  margin-left: 250px; /* Adjust margin as needed */
+  margin-top: 100px;
+  border-bottom: 20px;
+}
+
+.loginform {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-container {
+  margin-bottom: 20px;
+  margin-left: 180px;
+  position: relative; /* Positioning context for the icon */
+}
+
+.input-container label {
+  display: block; /* Make the label a block element */
+  margin-bottom: 5px; /* Space between label and input */
+}
+
+.input-container input {
+  width: 75%; /* Full width for input */
+  padding: 12px 12px 12px 40px; /* Add left padding for the icon */
+  font-size: 16px;
+  border: 1px solid #7C3BD3; /* Change border color */
+  border-radius: 5px;
+  font-family: 'Poppins', sans-serif; /* Ensure input uses Poppins font */
+}
+
+/* Add styles for the icon */
+.input-icon {
+  position: absolute;
+  left: 10px; /* Positioning the icon */
+  top: 50%; /* Centering the icon vertically */
+  transform: translateY(-50%);
+  color: #7C3BD3; /* Color for the icon */
+  font-size: 20px; /* Adjust icon size as needed */
+}
+
+.login-submit {
+  width: 50%; /* Make the button full width */
+  margin-left: 190px;
+  padding: 12px; /* Adjust padding for a larger button */
+  background-color: #7C3BD3;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px; /* Increase font size for better visibility */
+}
+
+.login-submit:hover {
+  background-color: #0056b3;
+}
+
+/* Right-side content styles */
+.login-right-body {
+  flex: 1;
+  text-align: right; /* Align content to the right */
+  background: linear-gradient(154.61deg, #7C3BD3 0.64%, #7740E2 40.99%, #D05FEF 99.36%); /* Gradient background */
+  padding: 20px; /* Add padding for content spacing */
+  margin: 0; /* Ensure there's no margin */
+}
+
+/* Styles for the right login rectangle */
+.rightloginrectangle {
+  padding: 20px;
+  border-radius: 5px;
+  height: 100%; /* Full height */
+}
+
+/* Styles for the right login rectangle's inner section */
+.rightloginrectangletwo {
+  text-align: center;
+  background: rgba(255, 250, 250, 0.1); /* Semi-transparent background */
+  backdrop-filter: blur(215px); /* Blur effect */
+  padding: 10px; /* Adjusted padding */
+  border-radius: 5px; /* Rounded corners */
+  margin-top: 0; /* Remove large top margin to center the content vertically */
+  height: 100%; /* Full height to cover the right side */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centers the content vertically */
+}
+
+.rightloginimage img {
+  width: 300px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .login-content {
+    flex-direction: column;
+    width: 90%; /* Make it more flexible on smaller screens */
+    height: auto; /* Allow height to adjust for content */
+  }
+
+  .login-body-left,
+  .login-right-body {
+    text-align: center;
+    padding: 20px; /* Adjust padding for smaller screens */
+  }
+
+  .input-container {
+    margin-left: 0; /* Center the input fields on smaller screens */
+  }
+
+  .login-submit {
+    margin-left: 0; /* Center the button on smaller screens */
+  }
+}

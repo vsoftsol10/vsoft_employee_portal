@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore';
 import { auth, firestore } from '../firebaseConfig';
-import './Login.css'; // Reusing the same CSS for consistent design
+ 
 
 const Register = () => {
   const [name, setName] = useState('');
