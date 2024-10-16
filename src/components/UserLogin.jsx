@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
-import { CgProfile } from 'react-icons/cg'; // Import the profile icon
+import { CgProfile } from 'react-icons/cg'; // Profile icon
+import { FiKey } from 'react-icons/fi'; // Key icon
 import './UserLogin.css';
 
 const UserLogin = () => {
@@ -34,9 +35,9 @@ const UserLogin = () => {
        
         <div className="loginform">
           <div className="input-container">
-            <label htmlFor="email">Email</label> {/* Label for Email */}
+            <label htmlFor="email" className='emailinputmobile'>Email</label> {/* Label for Email */}
             <div className="input-wrapper">
-              <i className="icon fas fa-user"></i> {/* FontAwesome icon for user */}
+            <CgProfile className="input-icon" /> {/* FontAwesome icon for user */}
               <input
                 type="email"
                 id="email"
@@ -48,9 +49,10 @@ const UserLogin = () => {
             </div>
           </div>
           <div className="input-container">
-            <label htmlFor="password">Password</label> {/* Label for Password */}
+          
+            <label htmlFor="password" className="passwordinputmobile">Password</label> {/* Label for Password */}
             <div className="input-wrapper">
-              <i className="icon fas fa-lock"></i> {/* FontAwesome icon for lock */}
+            <FiKey className="input-icon" /> {/* FontAwesome icon for lock */}
               <input
                 type="password"
                 id="password"

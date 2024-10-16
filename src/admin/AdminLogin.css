@@ -138,10 +138,15 @@
 @media (max-width: 768px) {
   .login-content {
     flex-direction: column;
-    width: 90%; /* Make it more flexible on smaller screens */
+    width: 400px; /* Make it more flexible on smaller screens */
     height: auto; /* Allow height to adjust for content */
   }
-
+  .Vsoftlogo{
+    display: none;
+  }
+  .employeeloginword{
+    margin-left:10px ;
+  }
   .login-body-left,
   .login-right-body {
     text-align: center;
@@ -151,8 +156,17 @@
   .input-container {
     margin-left: 0; /* Center the input fields on smaller screens */
   }
+  .emailinputmobile{
+    margin-left:-180px;
+  }
+  .passwordinputmobile{
+    margin-left:-130px;
+  }
 
   .login-submit {
-    margin-left: 0; /* Center the button on smaller screens */
+    margin-left: 100px; /* Center the button on smaller screens */
+  }
+  .profile-icon-container{
+    margin-left:-60px;
   }
 }

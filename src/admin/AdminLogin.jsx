@@ -46,7 +46,7 @@ const AdminLogin = () => {
 
         <form className="loginform" onSubmit={handleLogin}>
           <div className="input-container">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" className='adminemailinputmobile'>Email</label>
             <input
               type="email"
               id="email"
@@ -58,7 +58,7 @@ const AdminLogin = () => {
             <div className="input-icon"></div> {/* Profile icon for email */}
           </div>
           <div className="input-container">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password" className='adminpasswordinputmobile'>Password</label>
             <input
               type="password"
               id="password"
