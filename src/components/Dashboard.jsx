@@ -1,91 +1,237 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../firebaseConfig';
-import { Doughnut } from 'react-chartjs-2';
-import 'chart.js/auto';
+import { useNavigate, Link } from 'react-router-dom';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import { auth, firestore } from '../firebaseConfig';
 import './Dashboard.css';
+import { FiBell } from 'react-icons/fi'; // Notification Bell Icon
 
 const Dashboard = () => {
-  const navigate = useNavigate(); // Hook to navigate programmatically
-  const [profileImage, setProfileImage] = useState(null); // State for profile image
-  const user = auth.currentUser; // Get the current user
+  const navigate = useNavigate(); // hook for navigation
+  const [profileImage, setProfileImage] = useState(null);
+  const [user, setUser] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [pastTasks, setPastTasks] = useState([]);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isDaytime, setIsDaytime] = useState(true);
+  const [weather, setWeather] = useState(null);
+  const [notifications, setNotifications] = useState(5); // Number of notifications
+
+  const authInstance = getAuth();
+  const uid = authInstance.currentUser ? authInstance.currentUser.uid : null;
+
+  // API Key for WeatherAPI
+  const API_KEY = '07fc7d3512204a3f9c895258240611';
+  const location = 'Tirunelveli'; // You can change this to any other location
+
   useEffect(() => {
-    if (user) {
-      const uid = user.uid;
-      const imageUrl = `https://firebasestorage.googleapis.com/v0/b/check-d47d2.appspot.com/o/users%2F${uid}%2Fprofile.jpg?alt=media`;
-      console.log(imageUrl); // Check the URL in the console
-      setProfileImage(imageUrl);
+    const currentUser = authInstance.currentUser;
+    if (currentUser) {
+      setUser(currentUser);
     } else {
       navigate('/login');
     }
-  }, [user, navigate]);
-  
+  }, [navigate]);
 
-  // Handle logout function
+  useEffect(() => {
+    if (user) {
+      const uid = user.uid;
+      const storage = getStorage();
+      const profileImageRef = ref(storage, `users/${uid}/profile.jpg`);
+
+      getDownloadURL(profileImageRef)
+        .then((url) => {
+          setProfileImage(url);
+        })
+        .catch((error) => {
+          console.error('Error fetching profile image:', error);
+          setProfileImage(null);
+        });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now);
+      setIsDaytime(now.getHours() >= 6 && now.getHours() < 18);
+    };
+    updateTime();
+    const intervalId = setInterval(updateTime, 60000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const response = await fetch(
+          `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${location}&aqi=no`
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setWeather(data);
+        } else {
+          console.error('Error fetching weather data:', data.error.message);
+        }
+      } catch (error) {
+        console.error('Error fetching weather data:', error);
+      }
+    };
+
+    fetchWeather();
+  }, [location, API_KEY]);
+
   const handleLogout = () => {
-    auth.signOut();
-    navigate('/login'); // Redirect to login page after logout
+    authInstance.signOut().then(() => {
+      navigate('/login');
+    });
   };
 
-  // Update doughnut chart data
-  const chartData = {
-    labels: ['Sick Leave', 'Casual Leave'],
-    datasets: [
-      {
-        label: 'Leave Types',
-        data: [2, 2], // Data for sick leave and casual leave
-        backgroundColor: ['#FF6384', '#36A2EB'], // Colors for the chart
-        hoverBackgroundColor: ['#FF6384', '#36A2EB'],
-      },
-    ],
+  const formatDate = (date) => {
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   };
+
+  // Fetch tasks from Firestore
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!uid) return;
+
+      try {
+        const tasksSnapshot = await getDocs(collection(firestore, 'tasks', uid, 'taskDetails'));
+        const taskList = await Promise.all(
+          tasksSnapshot.docs.map(async (doc) => {
+            const taskData = { id: doc.id, ...doc.data() };
+            const imageUrl = await fetchImageUrl(taskData.fileUrl);
+            return { ...taskData, imageUrl };
+          })
+        );
+
+        setTasks(taskList);
+        const pastTasksData = taskList.filter((task) => task.status === 'final submitted');
+        setPastTasks(pastTasksData);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        setError('Failed to load tasks.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchImageUrl = async (imagePath) => {
+      if (!imagePath) return '';
+      const storage = getStorage();
+      const fileRef = ref(storage, imagePath);
+      try {
+        return await getDownloadURL(fileRef);
+      } catch (error) {
+        console.error('Error fetching image URL:', error);
+        return '';
+      }
+    };
+
+    fetchTasks();
+  }, [uid]);
+
+  const handleViewDetails = (taskId) => {
+    setSelectedTaskId(taskId === selectedTaskId ? null : taskId);
+  };
+
+  // Handle notification icon click
+  const handleNotificationClick = () => {
+    navigate('/notification'); // Redirect to /notification route
+  };
+
+  if (loading) return <div>Loading tasks...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="dashboard-container">
-      {/* Profile Card Section */}
+      {/* Notification Icon */}
+      <div className="dashboard-notification-btn" onClick={handleNotificationClick}>
+        <FiBell size={24} color="#fff" /> {/* Bell Icon */}
+        {notifications > 0 && (
+          <div className="notification-bubble">
+            {notifications}
+          </div>
+        )}
+      </div>
+
       <div className="dashboard-profile-card">
         {profileImage ? (
-          <img
-            src={profileImage}
-            alt="Profile"
-            className="dashboard-profile-img"
-          />
+          <img src={profileImage} alt="Profile" className="dashboard-profile-img" />
         ) : (
-          <div className="dashboard-placeholder-img">No Image Available</div> // Placeholder if no image
+          <div className="dashboard-placeholder-img">No Image Available</div>
         )}
-
-        {/* View Profile Button */}
-        <Link to="/profile">
-          <button className="dashboard-btn dashboard-profile-btn">View Profile</button>
-        </Link>
-
-        {/* Logout Button */}
-        <button
-          className="dashboard-btn dashboard-logout-btn"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+        <div>
+          <h3>{user ? user.displayName : 'User'}</h3>
+          <Link to="/profile">
+            <button className="dashboard-btn dashboard-profile-btn">View Profile</button>
+          </Link>
+          <button onClick={handleLogout} className="dashboard-logout-btn">
+            Logout
+          </button>
+        </div>
       </div>
 
-      {/* Doughnut Chart Section */}
-      <div className="dashboard-chart-section">
-        <Doughnut data={chartData} />
+      <div className="dashboard-time-card">
+        <img
+          src={isDaytime ? '/assets/sunimage.png' : '/assets/moonimage.jpeg'}
+          alt={isDaytime ? 'Sun' : 'Moon'}
+          className="dashboard-time-icon"
+        />
+        <h4>Current Time & Date</h4>
+        <p>{formatDate(currentTime)}</p>
       </div>
 
-      {/* Notifications Section */}
-      <div className="dashboard-notification-section">
-        <h2 className="dashboard-notification-heading">Notifications</h2>
-        <marquee
-          direction="up"
-          scrollamount="3"
-          className="dashboard-notification-marquee"
-        >
-          <p>You have a new message from Vijay!</p>
-          <p>Your project deadline is tomorrow!</p>
-          <p>Update your profile picture!</p>
-          <p>Your report has been submitted successfully!</p>
-        </marquee>
+      <div className="dashboard-weather-card">
+        {weather ? (
+          <div>
+            <h4>Weather in {weather.location.name}</h4>
+            <p>{weather.current.condition.text}</p>
+            <p>{weather.current.temp_c}°C</p>
+            <img
+              src={weather.current.condition.icon}
+              alt={weather.current.condition.text}
+              className="dashboard-weather-icon"
+            />
+          </div>
+        ) : (
+          <p>Loading weather...</p>
+        )}
+      </div>
+
+      <div className="dashboard-tasks-card">
+        <h4>Tasks</h4>
+        {tasks.length === 0 ? (
+          <p>No tasks available.</p>
+        ) : (
+          <ul>
+            {tasks.map((task) => (
+              <li key={task.id} className="task-item">
+                <div className="task-details">
+                  <span className="task-name">{task.title}</span>
+                  <span className="task-status">{task.status}</span>
+                  <button 
+                    className="tasksdashboard" 
+                    onClick={() => handleViewDetails(task.id)}
+                  >
+                    {selectedTaskId === task.id ? 'Hide Details' : 'View Details'}
+                  </button>
+                </div>
+                {selectedTaskId === task.id && (
+                  <div className="task-description">
+                    <p>{task.description}</p>
+                    {task.imageUrl && <img src={task.imageUrl} alt="Task Attachment" className="task-image" />}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

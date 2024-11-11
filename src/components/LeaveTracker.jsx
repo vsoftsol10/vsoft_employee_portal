@@ -319,7 +319,7 @@ import {
   calculateFixedWorkingHours,
   getTimeFromHHMM,
 } from "../helpers/helpers";
-import emailjs from "emailjs-com";
+import emailjs from "emailjs-com"; // Ensure you have the emailjs-com package installed
 
 const LeaveTracker = () => {
   const [userData, setUserData] = useState({});
@@ -336,12 +336,12 @@ const LeaveTracker = () => {
     leaveWithoutPay: 0,
   });
   const [uid, setUid] = useState(null);
-  const [activeTab, setActiveTab] = useState("leaveForm"); // State for active tab
+  const [activeTab, setActiveTab] = useState("leaveForm");
   const [isToastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [fadeOut, setFadeOut] = useState(false);
   const [halfDayPeriod, setHalfDayPeriod] = useState("");
-  const [permissionHours, setPermissionHours] = useState(""); // New state for permission hours
+  const [permissionHours, setPermissionHours] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -352,11 +352,17 @@ const LeaveTracker = () => {
         if (userSnapshot.exists()) {
           setName(userSnapshot.data().name);
           setUserData(userSnapshot.data());
+        }
 
+        // Fetch leave balance for the user
+        const leaveBalanceRef = doc(firestore, "leaverules", user.uid);
+        const leaveBalanceSnapshot = await getDoc(leaveBalanceRef);
+        if (leaveBalanceSnapshot.exists()) {
+          const currentBalances = leaveBalanceSnapshot.data();
           setLeaveBalance({
-            casualLeave: Number(userSnapshot.data().casualLeave || 0),
-            sickLeave: Number(userSnapshot.data().sickLeave || 0),
-            leaveWithoutPay: Number(userSnapshot.data().leaveWithoutPay || 0),
+            casualLeave: Number(currentBalances.casualLeave || 0),
+            sickLeave: Number(currentBalances.sickLeave || 0),
+            leaveWithoutPay: Number(currentBalances.leaveWithoutPay || 0),
           });
         }
 
@@ -366,7 +372,6 @@ const LeaveTracker = () => {
           `leaverules/${user.uid}/leaveformrequests`
         );
         const leaveSnapshot = await getDocs(leaveCollection);
-
         setLeaveRequests(
           leaveSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
         );
@@ -395,18 +400,15 @@ const LeaveTracker = () => {
 
     try {
       let leaveDays = calculateLeaveDays(startDate, endDate);
+      const leaveBalanceRef = doc(firestore, "leaverules", uid);
 
       if (leaveDayType === "HALF_DAY_LEAVE") {
-        leaveDays *= 0.5;
+        leaveDays = leaveDays * 0.5;
       }
 
       const checkInEnds = getTimeFromHHMM(userData.checkInEnds);
       const checkOutEnds = getTimeFromHHMM(userData.checkOutEnds);
-      const totalFixedHours = calculateFixedWorkingHours(
-        checkInEnds,
-        checkOutEnds
-      );
-
+      const totalFixedHours = calculateFixedWorkingHours(checkInEnds, checkOutEnds);
       const casualLeaveCount = parseFloat(userData.casualLeave);
       const sickLeaveCount = parseFloat(userData.sickLeave);
       const currentDate = new Date();
@@ -432,50 +434,22 @@ const LeaveTracker = () => {
         showToastMessage("Please provide hours for permission.");
         return;
       }
-      if (leaveDayType === "PERMISSION" && permissionHours > 4) {
-        showToastMessage("Please provide hours below 4.");
+
+      if (leaveDayType === "PERMISSION" && permissionHours < 1) {
+        showToastMessage("Please provide a valid number of permission hours (1 to 4).");
         return;
       }
 
-      if (leaveDayType === "PERMISSION" && startDate !== endDate) {
-        showToastMessage(
-          "Start Date and End Date must be the same for permission."
-        );
-        return;
-      }
-
-      if (currentDate >= start && currentDate <= end) {
-        const todayString = currentDate.toDateString();
-        const attendanceRef = doc(firestore, `oftenusers/${uid}/checkins`, todayString);
-        const docSnap = await getDoc(attendanceRef);
-
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.workedCompleted) {
-            showToastMessage("You have already checked out today.");
-            return;
-          } else if (
-            data.attendanceStatus === "HALF_DAY_LEAVE" &&
-            leaveDayType === "LEAVE"
-          ) {
-            showToastMessage(
-              "Already checked out for half day, you can't apply for full day."
-            );
-            return;
-          }
-        }
-      }
-
-      let newBalance;
+      let newBalance = 0;
       if (leaveType === "CASUAL_LEAVE") {
         if (casualLeaveCount <= 0 || leaveDays > casualLeaveCount) {
-          showToastMessage("You do not have any casual leave left.");
+          showToastMessage("You do not have enough casual leave left.");
           return;
         }
         newBalance = casualLeaveCount - leaveDays;
       } else if (leaveType === "SICK_LEAVE") {
         if (sickLeaveCount <= 0 || leaveDays > sickLeaveCount) {
-          showToastMessage("You do not have any sick leave left.");
+          showToastMessage("You do not have enough sick leave left.");
           return;
         }
         newBalance = sickLeaveCount - leaveDays;
@@ -484,8 +458,14 @@ const LeaveTracker = () => {
           showToastMessage("You do not have enough leave without pay balance.");
           return;
         }
+        newBalance = leaveBalance.leaveWithoutPay - leaveDays;
       }
 
+      await updateDoc(leaveBalanceRef, {
+        [leaveType]: newBalance.toString(),
+      });
+
+      // Store the leave request in Firestore
       await addDoc(
         collection(firestore, `leaverules/${uid}/leaveformrequests`),
         {
@@ -493,27 +473,23 @@ const LeaveTracker = () => {
           type: leaveType,
           reason,
           leaveDayType: leaveDayType,
-          halfDayPeriod: halfDayPeriod, // Include half-day period
+          halfDayPeriod: halfDayPeriod,
           start: startDate,
           end: endDate,
           daysCount: leaveDays,
           status: "pending",
           createdAt: new Date(),
-          permissionHours: permissionHours,
         }
       );
 
+      // Send email notification via EmailJS
       const emailParams = {
-        to_name: "Admin",
-        from_name: name,
-        leaveType: leaveType,
-        leaveDayType: leaveDayType,
-        reason: reason,
-        startDate: startDate,
-        endDate: endDate,
-        permissionHours:
-          leaveDayType === "PERMISSION" ? permissionHours : "N/A",
-        employee_name: name,
+        name,
+        leaveType,
+        startDate,
+        endDate,
+        reason,
+        status: "pending",
       };
 
       emailjs
@@ -524,15 +500,13 @@ const LeaveTracker = () => {
           "XH1tJlK2k5wqCp5Qo" // Replace with your EmailJS user ID (or public key)
         )
         .then((response) => {
-          console.log(
-            "Email successfully sent:",
-            response.status,
-            response.text
-          );
+          console.log("Email successfully sent:", response.status, response.text);
         })
         .catch((err) => {
           console.error("Error sending email:", err);
         });
+
+      showToastMessage("Leave request applied successfully!");
 
       setLeaveRequests((prevRequests) => [
         ...prevRequests,
@@ -552,6 +526,7 @@ const LeaveTracker = () => {
       setReason("");
     } catch (error) {
       console.error("Error applying leave:", error.message);
+      showToastMessage("An error occurred while applying for leave.");
     }
   };
 
@@ -566,7 +541,6 @@ const LeaveTracker = () => {
     <div className="leave-tracker">
       <h2>Leave Tracker</h2>
 
-      {/* Tab navigation */}
       <div className="tab-buttons">
         <button
           className={activeTab === "leaveForm" ? "active" : ""}
@@ -582,17 +556,24 @@ const LeaveTracker = () => {
         </button>
       </div>
 
-      {/* Tab Content */}
       <div className="tab-content">
         {activeTab === "leaveForm" && (
-          <form>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <label>
+              Name:
+              <input
+                type="text"
+                value={name}
+                readOnly
+              />
+            </label>
             <label>
               Leave Type:
               <select
                 value={leaveType}
                 onChange={(e) => setLeaveType(e.target.value)}
               >
-                <option value="">Select Leave Type</option>
+                <option value="">Select</option>
                 <option value="CASUAL_LEAVE">Casual Leave</option>
                 <option value="SICK_LEAVE">Sick Leave</option>
                 <option value="LEAVE_WITHOUT_PAY">Leave Without Pay</option>
@@ -605,9 +586,9 @@ const LeaveTracker = () => {
                 value={leaveDayType}
                 onChange={(e) => setLeaveDayType(e.target.value)}
               >
-                <option value="">Select Day Type</option>
-                <option value="FULL_DAY_LEAVE">Full Day Leave</option>
-                <option value="HALF_DAY_LEAVE">Half Day Leave</option>
+                <option value="">Select</option>
+                <option value="FULL_DAY_LEAVE">Full Day</option>
+                <option value="HALF_DAY_LEAVE">Half Day</option>
                 <option value="PERMISSION">Permission</option>
               </select>
             </label>
@@ -619,7 +600,7 @@ const LeaveTracker = () => {
                   value={halfDayPeriod}
                   onChange={(e) => setHalfDayPeriod(e.target.value)}
                 >
-                  <option value="">Select Period</option>
+                  <option value="">Select</option>
                   <option value="MORNING">Morning</option>
                   <option value="AFTERNOON">Afternoon</option>
                 </select>
@@ -628,12 +609,11 @@ const LeaveTracker = () => {
 
             {leaveDayType === "PERMISSION" && (
               <label>
-                Permission Hours (max 4):
+                Permission Hours:
                 <input
                   type="number"
                   value={permissionHours}
                   onChange={(e) => setPermissionHours(e.target.value)}
-                  max="4"
                 />
               </label>
             )}
@@ -661,43 +641,49 @@ const LeaveTracker = () => {
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Enter your reason for leave"
               />
             </label>
 
-            <button type="submit" onClick={handleApplyLeave}>
+            <button type="button" onClick={handleApplyLeave}>
               Apply Leave
             </button>
           </form>
         )}
+{activeTab === "pastSubmits" && (
+  <div className="leave-history leave-tab-content">
+    <h3>Past Leave Requests</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Leave Type</th>
+          <th>Leave Day Type</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {leaveRequests.map((request) => (
+          <tr key={request.id}>
+            <td>{request.type}</td>
+            <td>{request.leaveDayType}</td>
+            <td>{request.start}</td>
+            <td>{request.end}</td>
+            <td className={`status ${request.status.toLowerCase()}`}>
+              {request.status}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
 
-        {activeTab === "pastSubmits" && (
-          <div className="past-leave-requests">
-            <h3>Past Leave Requests</h3>
-            {leaveRequests.length > 0 ? (
-              <ul>
-                {leaveRequests.map((request, index) => (
-                  <li key={index}>
-                    <strong>Leave Type:</strong> {request.type} <br />
-                    <strong>Leave Day Type:</strong> {request.leaveDayType} <br />
-                    <strong>Reason:</strong> {request.reason} <br />
-                    <strong>Start Date:</strong> {request.start} <br />
-                    <strong>End Date:</strong> {request.end} <br />
-                    <strong>Status:</strong> {request.status}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No leave requests submitted yet.</p>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Toast message */}
       {isToastOpen && (
-        <div className={`toast ${fadeOut ? "fade-out" : ""}`}>
-          <p>{toastMessage}</p>
+        <div className={`toast ${fadeOut ? "fadeOut" : ""}`}>
+          {toastMessage}
         </div>
       )}
     </div>
@@ -705,4 +691,3 @@ const LeaveTracker = () => {
 };
 
 export default LeaveTracker;
-

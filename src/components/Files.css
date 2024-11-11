@@ -1,24 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-.files {
-    padding: 30px;
+.files-user {
+    padding: 20px;
     font-family: 'Roboto', sans-serif;
-    margin-left: 250px;
+    margin: auto;
     margin-top: 50px;
-    background-color: #f5f5f5;
+    margin-left:300px;
+    background-color: white;
     min-height: calc(100vh - 100px);
+    max-width: 800px;
 }
 
 /* Tabs Section */
-.tabs {
+.tabs-files {
     display: flex;
-    margin-bottom: 30px;
-    border-bottom: 2px solid transparent; /* Base border */
     justify-content: space-around;
+    margin-bottom: 30px;
+    border-bottom: 2px solid transparent;
+    gap: 10px;
 }
 
-.tabs button {
-    background: linear-gradient(45deg, #872d8f, #ff4081);
+.tabs-files button {
+    background-color: #7A3DD8;
     color: #fff;
     border: none;
     padding: 12px 24px;
@@ -28,24 +31,23 @@
     font-size: 1.1rem;
     font-weight: 500;
     transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.3s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow effect */
-    margin: 0 10px; /* Space between buttons */
-    text-transform: uppercase; /* Makes text uppercase */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
 }
 
-.tabs button.active {
-    background: linear-gradient(45deg, #ff4081, #872d8f); /* Invert gradient for active state */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Deeper shadow for active state */
-    transform: translateY(-3px); /* Slight lift when active */
+.tabs-files button.active {
+    background-color: #7A3DD8;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
 }
 
-.tabs button:hover {
-    background: linear-gradient(45deg, #ff6181, #a43dbf); /* Slight color change on hover */
-    transform: scale(1.05); /* Slight scale on hover */
+.tabs-files button:hover {
+    background-color: #7A3DD8;
+    transform: scale(1.05);
 }
 
 /* Upload Section */
-.upload-section {
+.upload-section-files {
     margin-bottom: 30px;
     background-color: #ffffff;
     padding: 20px;
@@ -53,8 +55,8 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.upload-section button {
-    background-color: #28a745;
+.upload-section-files button {
+    background-color: #7A3DD8;
     color: #ffffff;
     border: none;
     padding: 12px 24px;
@@ -63,19 +65,19 @@
     font-size: 1.1rem;
     font-weight: 500;
     transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow to the button */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.upload-section button:hover {
-    background-color: #218838;
+.upload-section-files button:hover {
+    background-color: #7A3DD8;
     transform: scale(1.05);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Larger shadow on hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
 /* File List Section */
 .file-item button,
 .file-item a {
-    background-color: #007bff;
+    background-color: #7A3DD8;
     color: #ffffff;
     border: none;
     padding: 10px 15px;
@@ -84,47 +86,106 @@
     text-decoration: none;
     font-size: 0.875rem;
     transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Button shadow */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .file-item button:hover,
 .file-item a:hover {
-    background-color: #0056b3;
+    background-color: #7A3DD8;
     transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Deeper shadow on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+/* Category Selection Container */
+.files-category-selection {
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 15px; /* Add padding to prevent overflow */
+    box-sizing: border-box;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .files {
-        margin-left: 20px;
+/* Dropdown Select Style */
+.files-category-selection select {
+    width: 100%;
+    max-width: 400px; /* Limits the width on larger screens */
+    padding: 12px 16px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    color: #333;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Dropdown Hover and Focus Effects */
+.files-category-selection select:hover,
+.files-category-selection select:focus {
+    border-color: #7A3DD8; /* Add your primary color here */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .files-category-selection select {
+        font-size: 0.95rem;
+        padding: 10px 14px;
+        max-width: 100%; /* Ensures dropdown stays within the screen width */
     }
 }
 
+@media (max-width: 576px) {
+    .files-category-selection select {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        max-width: 100%; /* Ensures dropdown stays within the screen width */
+    }
+}
+
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .files {
-        margin-left: 10px;
+    .files-user {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .tabs-files {
+        flex-direction: column;
+    }
+
+    .tabs-files button {
+        padding: 10px 18px;
+        font-size: 1rem;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .upload-section-files button,
+    .file-item button,
+    .file-item a {
+        font-size: 0.875rem;
+        padding: 10px 18px;
+    }
+}
+
+@media (max-width: 576px) {
+    .files-user {
+        padding: 10px;
         margin-top: 20px;
     }
 
-    .tabs {
-        flex-direction: column; /* Stack tabs vertically */
+    .tabs-files button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
     }
 
-    .tabs button {
-        padding: 10px 18px;
-        font-size: 0.875rem;
-        margin-bottom: 10px; /* Space between stacked buttons */
-    }
-
-    .upload-section button {
-        padding: 10px 18px;
-        font-size: 0.875rem;
-    }
-
+    .upload-section-files button,
     .file-item button,
     .file-item a {
-        padding: 8px 12px;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+        padding: 8px 16px;
     }
 }

@@ -95,8 +95,8 @@ const Files = () => {
   }, [activeTab]);
 
   return (
-    <div className="files">
-      <div className="tabs">
+    <div className="files-user">
+      <div className="tabs-files">
         <button
           className={activeTab === 'personal' ? 'active' : ''}
           onClick={() => handleTabChange('personal')}
@@ -113,8 +113,8 @@ const Files = () => {
 
       {/* Personal Files Section */}
       {activeTab === 'personal' && (
-        <div className="personal-section">
-          <div className="category-selection">
+        <div className="files-personal-section">
+          <div className="files-category-selection">
             <select onChange={(e) => setSelectedCategory(e.target.value)} value={selectedCategory}>
               <option value="">Select Category</option>
               <option value="Aadhar">Aadhar</option>
@@ -130,7 +130,7 @@ const Files = () => {
           <button onClick={handleUpload}>Upload</button>
 
           {/* Uploaded Files List */}
-          <div className="file-list">
+          <div className="file-list-user">
             {uploadedFiles.map((file) => (
               <div key={file.id} className="file-item">
                 <span>{file.name}</span>
@@ -144,7 +144,7 @@ const Files = () => {
 
       {/* Organization Files Section */}
       {activeTab === 'organization' && (
-        <div className="organization-section">
+        <div className="files-organization-section">
           <h2>Organization Files</h2>
           <div className="file-list">
             {organizationFiles.map((file) => (
